@@ -15,6 +15,7 @@ class CustomButton extends StatelessWidget {
   final Color? iconColor;
   final double? iconSize;
   final bool isLoading;
+  final bool isEnabled;
 
   const CustomButton({
     super.key,
@@ -29,21 +30,31 @@ class CustomButton extends StatelessWidget {
     this.iconColor = Colors.white,
     this.iconSize,
     this.isLoading = false,
+    this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius ?? 30.r;
+    final bool canTap = isEnabled && !isLoading && onTap != null;
 
-    return Container(
+    final List<Color> activeGradient =
+        gradientColors ??
+        const [AppColors.buttonGradientStart, AppColors.primaryBlue];
+
+    final List<Color> disabledGradient = const [
+      Color(0xFFD1D5DB),
+      Color(0xFFD1D5DB),
+    ];
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
       width: width,
       height: height ?? 56.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         gradient: LinearGradient(
-          colors:
-              gradientColors ??
-              const [AppColors.primaryPurple, AppColors.primaryBlue],
+          colors: isEnabled ? activeGradient : disabledGradient,
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -52,7 +63,7 @@ class CustomButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(radius),
-          onTap: isLoading ? null : onTap,
+          onTap: canTap ? onTap : null,
           child: Center(
             child: isLoading
                 ? SizedBox(
@@ -73,13 +84,21 @@ class CustomButton extends StatelessWidget {
                             GoogleFonts.inter(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: isEnabled
+                                  ? Colors.white
+                                  : const Color(0xFF9CA3AF),
                               letterSpacing: 0.3,
                             ),
                       ),
                       if (icon != null) ...[
                         SizedBox(width: 8.w),
-                        Icon(icon, color: iconColor, size: iconSize ?? 20.sp),
+                        Icon(
+                          icon,
+                          color: isEnabled
+                              ? iconColor
+                              : const Color(0xFF9CA3AF),
+                          size: iconSize ?? 20.sp,
+                        ),
                       ],
                     ],
                   ),

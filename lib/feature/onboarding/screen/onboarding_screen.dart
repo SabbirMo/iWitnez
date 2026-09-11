@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/feature/onboarding/model/onboarding_screen_model.dart';
 import 'package:iwitnez/feature/onboarding/provider/onboarding_provider.dart';
 import 'package:iwitnez/feature/onboarding/widget/onboarding_widget.dart';
+import 'package:iwitnez/router/app_route_names.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -56,6 +58,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   itemCount: onboardingScreens.length,
                 ),
               ),
+              SizedBox(height: 16.h),
               Row(
                 mainAxisAlignment: .center,
                 spacing: 10,
@@ -80,6 +83,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ref
                       .read(onboardingProvider.notifier)
                       .nextPage(_pageController, onboardingScreens.length);
+                  if (mounted) {
+                    if (selectedIndex == onboardingScreens.length - 1) {
+                      context.pushReplacement(
+                        AppRouteNames.createAccountScreen,
+                      );
+                    }
+                  }
                 },
               ),
               SizedBox(height: 16.h),

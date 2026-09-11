@@ -9,12 +9,18 @@ class AppColors {
   static const Color textDark = Color(0xFF111827); //#111827
   static const Color textMuted = Color(0xFF505050); //505050
   static const Color white = Colors.white;
+  static const Color black = Colors.black;
   static const Color buttonPrimaryLight = Color(0xFF7C3AED); //#7C3AED
 
   static const Color onboardingDesc = Color(0xFF6B7280); //#6B7280
+  static const Color gray = Color(0xFF4C4C4C); //#4C4C4C
+  static const Color fieldColor = Color(0xffDADADA); //#DADADA
+  static const Color fieldText = Color(0xff4B4B4B); //#4B4B4B
+
+  static const Color buttonGradientStart = Color(0xFF9124FF); //#9124FF
 
   //Gradient Color
   static const Gradient onboardingGradient = LinearGradient(
-    colors: [Color(0xFF9124FF), primaryBlue],
+    colors: [buttonGradientStart, primaryBlue],
   );
 }

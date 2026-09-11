@@ -19,6 +19,22 @@ class CustomTextStyle {
     );
   }
 
+  static TextStyle regular14(Color color) {
+    return GoogleFonts.inter(
+      fontSize: 14.sp,
+      fontWeight: FontWeight.w400,
+      color: color,
+    );
+  }
+
+  static TextStyle bold30(Color color) {
+    return GoogleFonts.inter(
+      fontSize: 30.sp,
+      fontWeight: FontWeight.bold,
+      color: color,
+    );
+  }
+
   static TextStyle bold32(Object colorOrGradient) {
     if (colorOrGradient is Gradient) {
       return GoogleFonts.inter(

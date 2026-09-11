@@ -61,8 +61,15 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
             style: CustomTextStyle.regular16(AppColors.onboardingDesc),
           ),
         ),
-        SizedBox(height: 24.h),
-        _animations.buttonTransition(child: Image.asset(widget.data.image)),
+        SizedBox(height: 18.h),
+        Expanded(
+          child: _animations.buttonTransition(
+            child: Image.asset(
+              widget.data.image,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
       ],
     );
   }

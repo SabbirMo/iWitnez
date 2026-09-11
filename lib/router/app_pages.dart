@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iwitnez/feature/auth/create_account/screen/create_account_screen.dart';
 import 'package:iwitnez/feature/onboarding/onboarding_start_screen.dart';
 import 'package:iwitnez/feature/onboarding/screen/onboarding_screen.dart';
 import 'package:iwitnez/feature/splash/screen/splash_screen.dart';
@@ -22,6 +23,12 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.onBoardingScreen,
         builder: (context, state) => const OnboardingScreen(),
+      ),
+
+      //Account Routes
+      GoRoute(
+        path: AppRouteNames.createAccountScreen,
+        builder: (context, state) => const CreateAccountScreen(),
       ),
     ],
 
