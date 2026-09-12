@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iwitnez/feature/auth/create_account/screen/create_account_screen.dart';
+import 'package:iwitnez/feature/auth/fotgot_password/screen/forgot_password_screen.dart';
+import 'package:iwitnez/feature/auth/login/screen/login_screen.dart';
+import 'package:iwitnez/feature/auth/verification/screen/verification_screen.dart';
 import 'package:iwitnez/feature/onboarding/onboarding_start_screen.dart';
 import 'package:iwitnez/feature/onboarding/screen/onboarding_screen.dart';
 import 'package:iwitnez/feature/splash/screen/splash_screen.dart';
@@ -29,6 +32,18 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.createAccountScreen,
         builder: (context, state) => const CreateAccountScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.loginScreen,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.forgotPasswordScreen,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.verificationScreen,
+        builder: (context, state) => const VerificationScreen(),
       ),
     ],
 

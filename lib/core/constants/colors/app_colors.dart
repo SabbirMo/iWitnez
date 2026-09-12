@@ -11,7 +11,7 @@ class AppColors {
   static const Color white = Colors.white;
   static const Color black = Colors.black;
   static const Color buttonPrimaryLight = Color(0xFF7C3AED); //#7C3AED
-
+  static const Color forgotPass = Color(0xFFFF9900); //#FF9900
   static const Color onboardingDesc = Color(0xFF6B7280); //#6B7280
   static const Color gray = Color(0xFF4C4C4C); //#4C4C4C
   static const Color fieldColor = Color(0xffDADADA); //#DADADA

@@ -22,4 +22,11 @@ class AppString {
   static const String termsOfService = "Terms Of Service";
   static const String and = " And ";
   static const String privacyPolicy = "Privacy Policy .";
+
+  static const String haveAnAccount = "Don’t Have An Account?";
+  static const String createAccount = " Create Account";
+  static const String loginTitle = "Welcome Back!";
+  static const String forgotPasswordTitle = "Forgot Password";
+  static const String forgotPasswordDescription =
+      "Don't Worry! Please Enter The Email Address \nLinked With Your Account.";
 }

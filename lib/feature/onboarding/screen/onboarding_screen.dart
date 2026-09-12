@@ -32,7 +32,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       appBar: AppBar(
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              context.pushReplacement(AppRouteNames.loginScreen);
+            },
             child: Text(
               "Skip",
               style: CustomTextStyle.semiBold14(AppColors.buttonPrimaryLight),

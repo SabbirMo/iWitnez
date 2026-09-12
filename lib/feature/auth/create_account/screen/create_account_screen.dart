@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
@@ -12,6 +13,7 @@ import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/create_account/provider/create_account_provider.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
+import 'package:iwitnez/router/app_route_names.dart';
 
 class CreateAccountScreen extends ConsumerStatefulWidget {
   const CreateAccountScreen({super.key});
@@ -267,7 +269,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             }
                           : null,
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 20.h),
                     RichText(
                       text: TextSpan(
                         text: AppString.alreadyHaveAccount,
@@ -277,7 +279,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             text: "Login",
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                debugPrint("Login");
+                                context.push(AppRouteNames.loginScreen);
                               },
                             style: CustomTextStyle.regular16(
                               AppColors.buttonGradientStart,
