@@ -7,6 +7,9 @@ class ImageAssets {
   static const String logoTextWhite = "$image/logo_text_white.png";
   static const String mainLogo = "$image/main_logo.png";
 
+  static const String protectedIcon = "$image/protected_icon.png";
+  static const String sosAlert = "$image/sos_alert.png";
+
   //onboarding image
   static const String onboarding1 = "$image/onboarding1.png";
   static const String onboarding2 = "$image/onboarding2.png";
@@ -16,4 +19,11 @@ class ImageAssets {
   static const String personSvg = "$svg/person.svg";
   static const String emailSvg = "$svg/email.svg";
   static const String lockSvg = "$svg/lock.svg";
+
+//main user home
+static const String protectedCard = "$image/protected_card.png";
+static const String protectedCardIcon = "$image/protected_card_icon.png";
+//about us
+static const String ourMissionImage = "$image/our_mission.png";
+static const String whoWeAreImage = "$image/who_we_are.png";
 }

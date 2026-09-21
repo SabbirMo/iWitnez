@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/feature/auth/create_account/model/create_account_state.dart';
 
 class CreateAccountProvider extends Notifier<CreateAccountState> {
@@ -15,6 +16,10 @@ class CreateAccountProvider extends Notifier<CreateAccountState> {
 
   void checkTermsAndConditions(bool value) {
     state = state.copyWith(termsAndConditions: value);
+  }
+
+  void setRole(UserRole role) {
+    state = state.copyWith(role: role);
   }
 }
 
