@@ -6,6 +6,7 @@ class AppRouteNames {
   static final String loginScreen = "/loginScreen";
   static final String forgotPasswordScreen = "/forgotPasswordScreen";
   static final String verificationScreen = "/verificationScreen";
+  static final String locationScreen = "/locationScreen";
   static final String accountSettingsScreen = "/accountSettingsScreen";
 
   static final String mainUserShell = "/mainUser";

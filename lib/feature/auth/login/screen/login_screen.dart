@@ -11,7 +11,6 @@ import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
-import 'package:iwitnez/core/widgets/role_selector.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/login/provider/login_provider.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
@@ -87,11 +86,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                           SizedBox(height: 16.h),
 
-                          RoleSelector(
-                            selectedRole: provider.role,
-                            onChanged: notifier.setRole,
-                          ),
-
+                          // RoleSelector(
+                          //   selectedRole: provider.role,
+                          //   onChanged: notifier.setRole,
+                          // ),
                           Form(
                             key: _formKey,
                             child: Column(

@@ -10,6 +10,7 @@ import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
+import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
@@ -112,7 +113,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                             text: 'Send',
                             onTap: () {
                               if (_formKey.currentState?.validate() ?? false) {
-                                context.push(AppRouteNames.verificationScreen);
+                                context.push(
+                                  AppRouteNames.verificationScreen,
+                                  extra: VerificationAgrs(
+                                    email: _emailController.text.trim(),
+                                    type: VerificationType.forgotPassword,
+                                  ),
+                                );
                               }
                             },
                           ),

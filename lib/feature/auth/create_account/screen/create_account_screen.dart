@@ -8,12 +8,11 @@ import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
-import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
-import 'package:iwitnez/core/widgets/role_selector.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/create_account/provider/create_account_provider.dart';
+import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
@@ -90,11 +89,10 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                     ),
                     SizedBox(height: 10.h),
 
-                    RoleSelector(
-                      selectedRole: provider.role,
-                      onChanged: notifier.setRole,
-                    ),
-
+                    // RoleSelector(
+                    //   selectedRole: provider.role,
+                    //   onChanged: notifier.setRole,
+                    // ),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -271,12 +269,13 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                       onTap: provider.termsAndConditions
                           ? () {
                               if (_formKey.currentState?.validate() ?? false) {
-                                final role = provider.role;
-                                if (role == UserRole.mainUser) {
-                                  context.go(AppRouteNames.mainUserHome);
-                                } else {
-                                  context.go(AppRouteNames.trustedHome);
-                                }
+                                context.push(
+                                  AppRouteNames.verificationScreen,
+                                  extra: VerificationAgrs(
+                                    email: _emailController.text.trim(),
+                                    type: VerificationType.createAccount,
+                                  ),
+                                );
                               }
                             }
                           : null,

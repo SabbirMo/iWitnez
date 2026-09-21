@@ -11,7 +11,9 @@ import 'package:iwitnez/feature/OurMission/screen/our_mission_screen.dart';
 import 'package:iwitnez/feature/auth/create_account/screen/create_account_screen.dart';
 import 'package:iwitnez/feature/auth/fotgot_password/screen/forgot_password_screen.dart';
 import 'package:iwitnez/feature/auth/login/screen/login_screen.dart';
+import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
 import 'package:iwitnez/feature/auth/verification/screen/verification_screen.dart';
+import 'package:iwitnez/feature/location/screen/location_screen.dart';
 import 'package:iwitnez/feature/call/model/call_session_model.dart';
 import 'package:iwitnez/feature/call/screen/audio_call_screen.dart';
 import 'package:iwitnez/feature/call/screen/video_call_screen.dart';
@@ -73,27 +75,36 @@ final appPages = Provider<GoRouter>(
         path: AppRouteNames.forgotPasswordScreen,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+
       GoRoute(
         path: AppRouteNames.verificationScreen,
-        builder: (context, state) => const VerificationScreen(),
+        builder: (context, state) {
+          final extra = state.extra as VerificationAgrs;
+
+          return VerificationScreen(email: extra.email, type: extra.type);
+        },
+      ),
+      GoRoute(
+        path: AppRouteNames.locationScreen,
+        builder: (context, state) => const LocationScreen(),
       ),
       GoRoute(
         path: AppRouteNames.accountSettingsScreen,
         builder: (context, state) => const AccountSettingsScreen(),
       ),
-GoRoute(
-  path: AppRouteNames.chatDetailsScreen,
-  builder: (context, state) {
-    final extra = state.extra as Map<String, dynamic>?;
-    debugPrint('ChatDetails extra: $extra'); // ← এটা যোগ করুন
-    return ChatDetailsScreen(
-      chatId: extra?['chatId'] ?? '',
-      contactName: extra?['contactName'] ?? '',
-      avatarUrl: extra?['avatarUrl'] ?? '',
-      isOnline: extra?['isOnline'] ?? false,
-    );
-  },
-),
+      GoRoute(
+        path: AppRouteNames.chatDetailsScreen,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          debugPrint('ChatDetails extra: $extra');
+          return ChatDetailsScreen(
+            chatId: extra?['chatId'] ?? '',
+            contactName: extra?['contactName'] ?? '',
+            avatarUrl: extra?['avatarUrl'] ?? '',
+            isOnline: extra?['isOnline'] ?? false,
+          );
+        },
+      ),
       // Main User Shell (bottom nav: Home / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => AppShellScaffold(
@@ -167,7 +178,7 @@ GoRoute(
         path: AppRouteNames.ourMissionScreen,
         builder: (context, state) => const OurMissionScreen(),
       ),
-      
+
       // Trusted Contact Shell (bottom nav: Home / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => AppShellScaffold(
@@ -195,8 +206,7 @@ GoRoute(
             routes: [
               GoRoute(
                 path: AppRouteNames.trustedCalls,
-                builder: (context, state) =>
-                    const trusted_calls.CallsScreen(),
+                builder: (context, state) => const trusted_calls.CallsScreen(),
               ),
             ],
           ),
@@ -256,7 +266,8 @@ GoRoute(
       GoRoute(
         path: AppRouteNames.audioCallScreen,
         builder: (context, state) {
-          final args = state.extra as CallArguments? ??
+          final args =
+              state.extra as CallArguments? ??
               const CallArguments(
                 contactName: 'Unknown',
                 avatarUrl: '',
@@ -268,7 +279,8 @@ GoRoute(
       GoRoute(
         path: AppRouteNames.videoCallScreen,
         builder: (context, state) {
-          final args = state.extra as CallArguments? ??
+          final args =
+              state.extra as CallArguments? ??
               const CallArguments(
                 contactName: 'Unknown',
                 avatarUrl: '',

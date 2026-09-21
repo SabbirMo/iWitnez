@@ -21,6 +21,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.3.0
   provider: ^6.1.5+1
+  pin_code_fields: ^10.0.0
   
 
 dev_dependencies:

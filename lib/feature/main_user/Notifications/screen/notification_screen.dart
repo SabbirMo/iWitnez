@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iwitnez/router/app_route_names.dart';
 import '../provider/notification_provider.dart'; // <-- UPDATED IMPORT
 import '../widget/notification_card.dart';
 
@@ -38,7 +37,11 @@ class NotificationScreen extends ConsumerWidget {
         ),
         title: const Text(
           'Notifications',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -48,7 +51,7 @@ class NotificationScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-            
+
             // Filter Chip
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -58,10 +61,14 @@ class NotificationScreen extends ConsumerWidget {
               ),
               child: const Text(
                 'All',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
 
             // Render Groups
@@ -73,10 +80,16 @@ class NotificationScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 12, top: 8),
                     child: Text(
                       entry.key,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                  ...entry.value.map((notif) => NotificationCard(notification: notif)),
+                  ...entry.value.map(
+                    (notif) => NotificationCard(notification: notif),
+                  ),
                   const SizedBox(height: 10),
                 ],
               );
