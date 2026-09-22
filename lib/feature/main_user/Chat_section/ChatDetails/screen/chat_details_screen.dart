@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/controller/chat_details_controller.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/provider/chat_details_provider.dart';
@@ -57,7 +56,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F9),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: ChatDetailsAppBar(
         name: widget.contactName,
         avatarUrl: widget.avatarUrl,
@@ -99,12 +98,9 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
               },
             ),
           ),
-          Container(
-            color: AppColors.white,
-            child: ChatInputBar(
-              onSend: _provider.sendMessage,
-              onAttachmentTap: () => _controller.pickAttachment(context),
-            ),
+          ChatInputBar(
+            onSend: _provider.sendMessage,
+            onAttachmentTap: () => _controller.pickAttachment(context),
           ),
         ],
       ),

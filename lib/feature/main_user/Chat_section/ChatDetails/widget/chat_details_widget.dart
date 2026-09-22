@@ -30,50 +30,71 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: onBack ?? () => Navigator.of(context).maybePop(),
-              icon: Icon(Icons.arrow_back_ios_new_rounded,
-                  size: 18.sp, color: _kAccentPurple),
-            ),
-            CircleAvatar(
-              radius: 18.r,
-              backgroundImage: NetworkImage(avatarUrl),
-              backgroundColor: Colors.grey.shade200,
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    name,
-                    style: CustomTextStyle.regular16(AppColors.textDark)
-                        .copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
-                  ),
-                  if (isOnline)
-                    Text(
-                      'Online',
-                      style: CustomTextStyle.regular14(Colors.green)
-                          .copyWith(fontSize: 11.sp),
-                    ),
-                ],
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 18.sp,
+                  color: _kAccentPurple,
+                ),
               ),
-            ),
-            IconButton(
-              onPressed: onVoiceCall,
-              icon: Icon(Icons.call_rounded, size: 20.sp, color: _kAccentPurple),
-            ),
-            IconButton(
-              onPressed: onVideoCall,
-              icon: Icon(Icons.videocam_rounded, size: 22.sp, color: _kAccentPurple),
-            ),
-          ],
+              CircleAvatar(
+                radius: 18.r,
+                backgroundImage: NetworkImage(avatarUrl),
+                backgroundColor: Colors.grey.shade200,
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name,
+                      style: CustomTextStyle.regular16(
+                        AppColors.textDark,
+                      ).copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
+                    ),
+                    if (isOnline)
+                      Text(
+                        'Online',
+                        style:
+                            CustomTextStyle.regular14(
+                              const Color(0xFF10B981),
+                            ).copyWith(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: onVoiceCall,
+                icon: Icon(
+                  Icons.call_rounded,
+                  size: 20.sp,
+                  color: _kAccentPurple,
+                ),
+              ),
+              IconButton(
+                onPressed: onVideoCall,
+                icon: Icon(
+                  Icons.videocam_rounded,
+                  size: 22.sp,
+                  color: _kAccentPurple,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -91,22 +112,23 @@ class DateSeparatorChip extends StatelessWidget {
     return Center(
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 12.h),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Text(
           label,
-          style: CustomTextStyle.regular14(AppColors.textMuted)
-              .copyWith(fontSize: 12.sp),
+          style: CustomTextStyle.regular14(
+            const Color(0xFF6B7280),
+          ).copyWith(fontSize: 12.sp),
         ),
       ),
     );
@@ -137,15 +159,17 @@ class ChatMessageBubble extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (!isMe) ...[
             CircleAvatar(
               radius: 14.r,
-              backgroundImage:
-                  avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+              backgroundImage: avatarUrl != null
+                  ? NetworkImage(avatarUrl!)
+                  : null,
               backgroundColor: Colors.grey.shade200,
             ),
             SizedBox(width: 8.w),
@@ -166,50 +190,52 @@ class _TextBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(maxWidth: 230.w),
+      constraints: BoxConstraints(maxWidth: 240.w),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: isMe ? _kAccentPurple : Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.r),
-          topRight: Radius.circular(16.r),
-          bottomLeft: Radius.circular(isMe ? 16.r : 4.r),
-          bottomRight: Radius.circular(isMe ? 4.r : 16.r),
-        ),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+            color: isMe
+                ? _kAccentPurple.withValues(alpha: 0.25)
+                : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8.w,
+        runSpacing: 4.h,
         children: [
           Text(
             message.text,
-            style: CustomTextStyle.regular14(isMe ? Colors.white : AppColors.textDark),
+            style: CustomTextStyle.regular14(
+              isMe ? Colors.white : AppColors.textDark,
+            ).copyWith(fontSize: 13.5.sp),
           ),
-          SizedBox(height: 4.h),
           Row(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 message.time,
-                style: CustomTextStyle.regular14(
-                  isMe ? Colors.white.withOpacity(0.8) : AppColors.textMuted,
-                ).copyWith(fontSize: 10.sp),
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: isMe
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : const Color(0xFF9CA3AF),
+                ),
               ),
               if (isMe) ...[
-                SizedBox(width: 4.w),
+                SizedBox(width: 3.w),
                 Icon(
-                  Icons.done_all_rounded,
-                  size: 14.sp,
-                  color: message.status == MessageStatus.read
-                      ? Colors.lightBlueAccent
-                      : Colors.white.withOpacity(0.8),
+                  Icons.check_rounded,
+                  size: 13.sp,
+                  color: Colors.white.withValues(alpha: 0.85),
                 ),
               ],
             ],
@@ -232,52 +258,64 @@ class _LiveLocationCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
-        width: 210.w,
-        padding: EdgeInsets.all(14.w),
+        width: 230.w,
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [_kAccentPurple, _kAccentPurple.withOpacity(0.75)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: _kAccentPurple,
           borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: _kAccentPurple.withValues(alpha: 0.25),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
                 Container(
-                  width: 34.w,
-                  height: 34.h,
+                  width: 36.w,
+                  height: 36.h,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.22),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.location_on_rounded,
-                      color: Colors.white, size: 18.sp),
+                  child: Icon(
+                    Icons.location_on_rounded,
+                    color: Colors.white,
+                    size: 18.sp,
+                  ),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         message.text,
-                        style: CustomTextStyle.regular16(Colors.white)
-                            .copyWith(fontWeight: FontWeight.w700, fontSize: 14.sp),
+                        style: CustomTextStyle.regular16(Colors.white).copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
                       ),
+                      SizedBox(height: 2.h),
                       Text(
                         message.locationLabel ?? '',
-                        style: CustomTextStyle.regular14(Colors.white.withOpacity(0.9))
-                            .copyWith(fontSize: 12.sp),
+                        style: CustomTextStyle.regular14(
+                          Colors.white.withValues(alpha: 0.85),
+                        ).copyWith(fontSize: 11.sp),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
             Align(
               alignment: Alignment.bottomRight,
               child: Row(
@@ -285,11 +323,17 @@ class _LiveLocationCard extends StatelessWidget {
                 children: [
                   Text(
                     message.time,
-                    style: CustomTextStyle.regular14(Colors.white.withOpacity(0.85))
-                        .copyWith(fontSize: 10.sp),
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
                   ),
-                  SizedBox(width: 4.w),
-                  Icon(Icons.done_all_rounded, size: 14.sp, color: Colors.lightBlueAccent),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.check_rounded,
+                    size: 13.sp,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
                 ],
               ),
             ),
@@ -302,11 +346,7 @@ class _LiveLocationCard extends StatelessWidget {
 
 /// Bottom input bar: attachment, text field, emoji, send button.
 class ChatInputBar extends StatefulWidget {
-  const ChatInputBar({
-    super.key,
-    required this.onSend,
-    this.onAttachmentTap,
-  });
+  const ChatInputBar({super.key, required this.onSend, this.onAttachmentTap});
 
   final ValueChanged<String> onSend;
   final VoidCallback? onAttachmentTap;
@@ -333,62 +373,120 @@ class _ChatInputBarState extends State<ChatInputBar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: widget.onAttachmentTap,
-              icon: Icon(Icons.attach_file_rounded,
-                  color: AppColors.textMuted, size: 20.sp),
-            ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        style: CustomTextStyle.regular14(AppColors.textDark),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: 'Type a message...',
-                          hintStyle: CustomTextStyle.regular14(AppColors.textMuted),
-                        ),
-                        onSubmitted: (_) => _handleSend(),
-                        textInputAction: TextInputAction.send,
+    return Container(
+      color: const Color(0xFFF7F9FC),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          child: Row(
+            children: [
+              // Attachment button
+              GestureDetector(
+                onTap: widget.onAttachmentTap,
+                child: Container(
+                  width: 46.w,
+                  height: 46.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.attach_file_rounded,
+                      color: const Color(0xFF9CA3AF),
+                      size: 22.sp,
                     ),
-                    Icon(Icons.emoji_emotions_outlined,
-                        color: AppColors.textMuted, size: 20.sp),
-                  ],
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 8.w),
-            InkWell(
-              onTap: _handleSend,
-              borderRadius: BorderRadius.circular(24.r),
-              child: Container(
-                width: 42.w,
-                height: 42.h,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: _kAccentPurple,
-                  shape: BoxShape.circle,
+              SizedBox(width: 8.w),
+              // Message text field with emoji
+              Expanded(
+                child: Container(
+                  height: 46.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          cursorColor: _kAccentPurple,
+                          style: CustomTextStyle.regular14(AppColors.textDark),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: InputBorder.none,
+                            hintText: 'Type a message...',
+                            hintStyle: CustomTextStyle.regular14(
+                              const Color(0xFF9CA3AF),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
+                            ),
+                          ),
+                          onSubmitted: (_) => _handleSend(),
+                          textInputAction: TextInputAction.send,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 12.w),
+                        child: Icon(
+                          Icons.sentiment_satisfied_alt_outlined,
+                          color: const Color(0xFF9CA3AF),
+                          size: 22.sp,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Icon(Icons.send_rounded, color: Colors.white, size: 18.sp),
               ),
-            ),
-          ],
+              SizedBox(width: 8.w),
+              // Send button
+              GestureDetector(
+                onTap: _handleSend,
+                child: Container(
+                  width: 46.w,
+                  height: 46.h,
+                  decoration: BoxDecoration(
+                    color: _kAccentPurple,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _kAccentPurple.withValues(alpha: 0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 20.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
