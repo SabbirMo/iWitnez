@@ -66,4 +66,25 @@ class AppString {
   static const String trustedProfile = "Trusted Contact — Profile";
   static const String trustedProfileDesc =
       "Manage your profile and notification preferences as a trusted contact.";
+
+  //shareing
+
+  static const String allowLocationTitle = "Allow ";
+  static const String allowLocationImportantText = "Location";
+  static const String allowLocationImp1 = "Access";
+
+  static const String allowLocationDesc =
+      "Your location helps us connect you with people nearby in case of emergencies and show relevant results around you.";
+
+  static const String allowNotiticationTitle = "Stay";
+  static const String allowNotiticationImportantText = " informed ";
+  static const String allowNotiticationImp1 = "About your safety";
+  static const String allowNotiticationDesc =
+      "Get real-time alerts, important updates, and instant notifications that keep you and your loved ones safe.";
+
+  static const String allowCameraTitle = "Allow";
+  static const String allowCameraImportantText = "Camera & Microphone ";
+  static const String allowCameraImp1 = " ";
+  static const String allowCameraDesc =
+      "Get real-time alerts, important updates, and instant notifications that keep you and your loved ones safe.";
 }

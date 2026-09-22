@@ -306,8 +306,9 @@ class LiveLocationCard extends StatelessWidget {
                           width: 1.w,
                           color: AppColors.homeLocationCardBorder,
                         ),
-                        borderRadius:
-                            BorderRadius.horizontal(left: Radius.circular(10.r)),
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(10.r),
+                        ),
                       ),
                     ),
                   ),
@@ -333,7 +334,9 @@ class LiveLocationCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    const Color(0xFFA9D8FF).withValues(alpha: 0.85),
+                                    const Color(
+                                      0xFFA9D8FF,
+                                    ).withValues(alpha: 0.85),
                                     const Color(0xFF7FBFFF),
                                   ],
                                 ),
@@ -692,22 +695,22 @@ class QuickActionCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   factory QuickActionCard.safety({VoidCallback? onTap}) => QuickActionCard._(
-        type: QuickActionType.safety,
-        title: 'Safety Tracking',
-        circleColor: AppColors.homeQuickSafetyCircle,
-        iconColor: AppColors.buttonGradientStart,
-        circleHasShadow: false,
-        onTap: onTap,
-      );
+    type: QuickActionType.safety,
+    title: 'Safety Tracking',
+    circleColor: AppColors.homeQuickSafetyCircle,
+    iconColor: AppColors.buttonGradientStart,
+    circleHasShadow: false,
+    onTap: onTap,
+  );
 
   factory QuickActionCard.checkIn({VoidCallback? onTap}) => QuickActionCard._(
-        type: QuickActionType.checkIn,
-        title: 'Check in',
-        circleColor: AppColors.homeQuickCheckInCircle,
-        iconColor: AppColors.homeQuickCheckInBox,
-        circleHasShadow: true,
-        onTap: onTap,
-      );
+    type: QuickActionType.checkIn,
+    title: 'Check in',
+    circleColor: AppColors.homeQuickCheckInCircle,
+    iconColor: AppColors.homeQuickCheckInBox,
+    circleHasShadow: true,
+    onTap: onTap,
+  );
 
   factory QuickActionCard.scheduledTimer({VoidCallback? onTap}) =>
       QuickActionCard._(
@@ -872,41 +875,47 @@ class TrustedCircleCard extends StatelessWidget {
   final Color badgeIconColor;
   final VoidCallback? onTap;
 
-  factory TrustedCircleCard.family({VoidCallback? onTap, int memberCount = 3}) =>
-      TrustedCircleCard(
-        kind: TrustedCircleKind.family,
-        title: 'Family',
-        memberCount: memberCount,
-        memberColor: AppColors.homeTrustedMemberCountFamily,
-        badgeCircleBg: AppColors.homeTrustedBadgeFamily,
-        badgeIcon: Icons.group_add_rounded,
-        badgeIconColor: AppColors.homeTrustedFamily,
-        onTap: onTap,
-      );
+  factory TrustedCircleCard.family({
+    VoidCallback? onTap,
+    int memberCount = 3,
+  }) => TrustedCircleCard(
+    kind: TrustedCircleKind.family,
+    title: 'Family',
+    memberCount: memberCount,
+    memberColor: AppColors.homeTrustedMemberCountFamily,
+    badgeCircleBg: AppColors.homeTrustedBadgeFamily,
+    badgeIcon: Icons.group_add_rounded,
+    badgeIconColor: AppColors.homeTrustedFamily,
+    onTap: onTap,
+  );
 
-  factory TrustedCircleCard.friends({VoidCallback? onTap, int memberCount = 2}) =>
-      TrustedCircleCard(
-        kind: TrustedCircleKind.friends,
-        title: 'Friends',
-        memberCount: memberCount,
-        memberColor: AppColors.homeTrustedMemberCountFamily,
-        badgeCircleBg: AppColors.homeTrustedBadgeFriends,
-        badgeIcon: Icons.person_add_alt_rounded,
-        badgeIconColor: AppColors.homeTrustedFriends,
-        onTap: onTap,
-      );
+  factory TrustedCircleCard.friends({
+    VoidCallback? onTap,
+    int memberCount = 2,
+  }) => TrustedCircleCard(
+    kind: TrustedCircleKind.friends,
+    title: 'Friends',
+    memberCount: memberCount,
+    memberColor: AppColors.homeTrustedMemberCountFamily,
+    badgeCircleBg: AppColors.homeTrustedBadgeFriends,
+    badgeIcon: Icons.person_add_alt_rounded,
+    badgeIconColor: AppColors.homeTrustedFriends,
+    onTap: onTap,
+  );
 
-  factory TrustedCircleCard.partner({VoidCallback? onTap, int memberCount = 1}) =>
-      TrustedCircleCard(
-        kind: TrustedCircleKind.partner,
-        title: 'Partner',
-        memberCount: memberCount,
-        memberColor: AppColors.homeTrustedPartner,
-        badgeCircleBg: AppColors.homeTrustedBadgePartner,
-        badgeIcon: Icons.favorite_rounded,
-        badgeIconColor: AppColors.homeTrustedPartner,
-        onTap: onTap,
-      );
+  factory TrustedCircleCard.partner({
+    VoidCallback? onTap,
+    int memberCount = 1,
+  }) => TrustedCircleCard(
+    kind: TrustedCircleKind.partner,
+    title: 'Partner',
+    memberCount: memberCount,
+    memberColor: AppColors.homeTrustedPartner,
+    badgeCircleBg: AppColors.homeTrustedBadgePartner,
+    badgeIcon: Icons.favorite_rounded,
+    badgeIconColor: AppColors.homeTrustedPartner,
+    onTap: onTap,
+  );
 
   factory TrustedCircleCard.work({VoidCallback? onTap, int memberCount = 3}) =>
       TrustedCircleCard(
@@ -938,7 +947,10 @@ class TrustedCircleCard extends StatelessWidget {
       child: Material(
         color: AppColors.white,
         shape: RoundedRectangleBorder(
-          side: BorderSide(width: 0.49.w, color: AppColors.homeTrustedCardBorder),
+          side: BorderSide(
+            width: 0.49.w,
+            color: AppColors.homeTrustedCardBorder,
+          ),
           borderRadius: BorderRadius.circular(9.78.r),
         ),
         clipBehavior: Clip.antiAlias,
@@ -979,7 +991,8 @@ class TrustedCircleCard extends StatelessWidget {
                       children: [
                         _avatarCircle(0.0, 0),
                         _avatarCircle(avatarSize - 8, 1),
-                        if (memberCount >= 3) _avatarCircle((avatarSize - 8) * 2, 2),
+                        if (memberCount >= 3)
+                          _avatarCircle((avatarSize - 8) * 2, 2),
                       ],
                     ),
                   ),
@@ -997,7 +1010,11 @@ class TrustedCircleCard extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Icon(badgeIcon, color: badgeIconColor, size: 10.sp),
+                      child: Icon(
+                        badgeIcon,
+                        color: badgeIconColor,
+                        size: 10.sp,
+                      ),
                     ),
                   ),
                 ),
@@ -1038,25 +1055,25 @@ class TrustedCircleCard extends StatelessWidget {
   Widget _avatarCircle(double left, int index) {
     final gradients = switch (kind) {
       TrustedCircleKind.family => [
-          [const Color(0xFF0EA5E9), const Color(0xFFF97316)],
-          [const Color(0xFF38BDF8), const Color(0xFF4ADE80)],
-          [const Color(0xFFC084FC), const Color(0xFFF0ABFC)],
-        ],
+        [const Color(0xFF0EA5E9), const Color(0xFFF97316)],
+        [const Color(0xFF38BDF8), const Color(0xFF4ADE80)],
+        [const Color(0xFFC084FC), const Color(0xFFF0ABFC)],
+      ],
       TrustedCircleKind.friends => [
-          [const Color(0xFF22D3EE), const Color(0xFF7C3AED)],
-          [const Color(0xFFFB923C), const Color(0xFFF59E0B)],
-          [const Color(0xFFFDE68A), const Color(0xFF34D399)],
-        ],
+        [const Color(0xFF22D3EE), const Color(0xFF7C3AED)],
+        [const Color(0xFFFB923C), const Color(0xFFF59E0B)],
+        [const Color(0xFFFDE68A), const Color(0xFF34D399)],
+      ],
       TrustedCircleKind.partner => [
-          [const Color(0xFFFBCFE8), const Color(0xFFF472B6)],
-          [const Color(0xFFF87171), const Color(0xFFF43F5E)],
-          [const Color(0xFFFDBA74), const Color(0xFF86EFAC)],
-        ],
+        [const Color(0xFFFBCFE8), const Color(0xFFF472B6)],
+        [const Color(0xFFF87171), const Color(0xFFF43F5E)],
+        [const Color(0xFFFDBA74), const Color(0xFF86EFAC)],
+      ],
       TrustedCircleKind.work => [
-          [const Color(0xFF60A5FA), const Color(0xFF34D399)],
-          [const Color(0xFFF59E0B), const Color(0xFFF472B6)],
-          [const Color(0xFFA78BFA), const Color(0xFF6EE7B7)],
-        ],
+        [const Color(0xFF60A5FA), const Color(0xFF34D399)],
+        [const Color(0xFFF59E0B), const Color(0xFFF472B6)],
+        [const Color(0xFFA78BFA), const Color(0xFF6EE7B7)],
+      ],
     };
     final colors = gradients[index % gradients.length];
     final hasWhiteBorder = index > 0;
@@ -1125,7 +1142,7 @@ class _AnimatedSosButtonState extends State<AnimatedSosButton>
   Widget build(BuildContext context) {
     const imageSize = 124.21;
     // Pulse rings expand out to ~2× the image diameter, same ratio as splash.
-    final pulseBase   = imageSize.w;
+    final pulseBase = imageSize.w;
     final pulseExpand = imageSize.w * 0.95;
 
     return RepaintBoundary(
@@ -1178,17 +1195,21 @@ class _AnimatedSosButtonState extends State<AnimatedSosButton>
                       width: imageSize.w,
                       height: imageSize.h,
                       decoration: ShapeDecoration(
-                        gradient: SweepGradient(colors: [
-                          AppColors.homeSosStart,
-                          AppColors.homeSosMid,
-                          AppColors.homeSosEnd,
-                          AppColors.homeSosMid,
-                          AppColors.homeSosStart,
-                        ]),
+                        gradient: SweepGradient(
+                          colors: [
+                            AppColors.homeSosStart,
+                            AppColors.homeSosMid,
+                            AppColors.homeSosEnd,
+                            AppColors.homeSosMid,
+                            AppColors.homeSosStart,
+                          ],
+                        ),
                         shape: const OvalBorder(),
                         shadows: [
                           BoxShadow(
-                            color: AppColors.homeSosStart.withValues(alpha: 0.35),
+                            color: AppColors.homeSosStart.withValues(
+                              alpha: 0.35,
+                            ),
                             blurRadius: 12,
                             spreadRadius: 1,
                           ),

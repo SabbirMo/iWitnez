@@ -16,6 +16,7 @@ class CustomButton extends StatelessWidget {
   final double? iconSize;
   final bool isLoading;
   final bool isEnabled;
+  final bool isLeadingIcon;
 
   const CustomButton({
     super.key,
@@ -31,6 +32,7 @@ class CustomButton extends StatelessWidget {
     this.iconSize,
     this.isLoading = false,
     this.isEnabled = true,
+    this.isLeadingIcon = false,
   });
 
   @override
@@ -77,6 +79,16 @@ class CustomButton extends StatelessWidget {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      if (icon != null && isLeadingIcon) ...[
+                        Icon(
+                          icon,
+                          color: isEnabled
+                              ? iconColor
+                              : const Color(0xFF9CA3AF),
+                          size: iconSize ?? 20.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                      ],
                       Text(
                         text,
                         style:
@@ -90,7 +102,7 @@ class CustomButton extends StatelessWidget {
                               letterSpacing: 0.3,
                             ),
                       ),
-                      if (icon != null) ...[
+                      if (icon != null && !isLeadingIcon) ...[
                         SizedBox(width: 8.w),
                         Icon(
                           icon,

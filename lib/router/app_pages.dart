@@ -13,7 +13,7 @@ import 'package:iwitnez/feature/auth/fotgot_password/screen/forgot_password_scre
 import 'package:iwitnez/feature/auth/login/screen/login_screen.dart';
 import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
 import 'package:iwitnez/feature/auth/verification/screen/verification_screen.dart';
-import 'package:iwitnez/feature/location/screen/location_screen.dart';
+import 'package:iwitnez/feature/shareing/screen/sharing_screen.dart';
 import 'package:iwitnez/feature/call/model/call_session_model.dart';
 import 'package:iwitnez/feature/call/screen/audio_call_screen.dart';
 import 'package:iwitnez/feature/call/screen/video_call_screen.dart';
@@ -79,14 +79,17 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.verificationScreen,
         builder: (context, state) {
-          final extra = state.extra as VerificationAgrs;
+          final extra = state.extra as VerificationAgrs?;
 
-          return VerificationScreen(email: extra.email, type: extra.type);
+          return VerificationScreen(
+            email: extra?.email,
+            type: extra?.type ?? VerificationType.createAccount,
+          );
         },
       ),
       GoRoute(
-        path: AppRouteNames.locationScreen,
-        builder: (context, state) => const LocationScreen(),
+        path: AppRouteNames.shareingScreen,
+        builder: (context, state) => const SharingScreen(),
       ),
       GoRoute(
         path: AppRouteNames.accountSettingsScreen,

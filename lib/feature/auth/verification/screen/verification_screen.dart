@@ -81,13 +81,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
       context.go(AppRouteNames.loginScreen);
     } else {
       // createAccount flow -> navigate to locationScreen
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email verified successfully!'),
-          backgroundColor: Color(0xFF10B981),
-        ),
-      );
-      context.go(AppRouteNames.locationScreen);
+      context.go(AppRouteNames.shareingScreen);
     }
   }
 

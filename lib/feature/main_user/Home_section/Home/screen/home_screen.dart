@@ -40,10 +40,6 @@ class HomeScreen extends ConsumerWidget {
                     SizedBox(height: 28.h),
                     if (state.isProtected) const ProtectedBanner(),
                     SizedBox(height: 24.h),
-                    LiveLocationCard(
-                      onViewFullMapTap: () =>
-                          _controller.onViewFullMapTap(context),
-                    ),
                     SizedBox(height: 28.h),
                     const SectionHeader(title: 'Quick Actions'),
                     SizedBox(height: 14.h),
@@ -89,8 +85,9 @@ class HomeScreen extends ConsumerWidget {
     return switch (item.type) {
       QuickActionType.safety => QuickActionCard.safety(onTap: onTap),
       QuickActionType.checkIn => QuickActionCard.checkIn(onTap: onTap),
-      QuickActionType.scheduledTimer =>
-        QuickActionCard.scheduledTimer(onTap: onTap),
+      QuickActionType.scheduledTimer => QuickActionCard.scheduledTimer(
+        onTap: onTap,
+      ),
     };
   }
 
@@ -110,17 +107,27 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildTrustedCircleCard(
-      BuildContext context, TrustedCircleSummary summary) {
+    BuildContext context,
+    TrustedCircleSummary summary,
+  ) {
     final onTap = () => _controller.onTrustedCircleTap(context, summary.kind);
     return switch (summary.kind) {
-      TrustedCircleKind.family =>
-        TrustedCircleCard.family(onTap: onTap, memberCount: summary.memberCount),
-      TrustedCircleKind.friends =>
-        TrustedCircleCard.friends(onTap: onTap, memberCount: summary.memberCount),
-      TrustedCircleKind.partner =>
-        TrustedCircleCard.partner(onTap: onTap, memberCount: summary.memberCount),
-      TrustedCircleKind.work =>
-        TrustedCircleCard.work(onTap: onTap, memberCount: summary.memberCount),
+      TrustedCircleKind.family => TrustedCircleCard.family(
+        onTap: onTap,
+        memberCount: summary.memberCount,
+      ),
+      TrustedCircleKind.friends => TrustedCircleCard.friends(
+        onTap: onTap,
+        memberCount: summary.memberCount,
+      ),
+      TrustedCircleKind.partner => TrustedCircleCard.partner(
+        onTap: onTap,
+        memberCount: summary.memberCount,
+      ),
+      TrustedCircleKind.work => TrustedCircleCard.work(
+        onTap: onTap,
+        memberCount: summary.memberCount,
+      ),
     };
   }
 }

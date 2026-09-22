@@ -20,10 +20,15 @@ class ImageAssets {
   static const String emailSvg = "$svg/email.svg";
   static const String lockSvg = "$svg/lock.svg";
 
-//main user home
-static const String protectedCard = "$image/protected_card.png";
-static const String protectedCardIcon = "$image/protected_card_icon.png";
-//about us
-static const String ourMissionImage = "$image/our_mission.png";
-static const String whoWeAreImage = "$image/who_we_are.png";
+  //main user home
+  static const String protectedCard = "$image/protected_card.png";
+  static const String protectedCardIcon = "$image/protected_card_icon.png";
+  //about us
+  static const String ourMissionImage = "$image/our_mission.png";
+  static const String whoWeAreImage = "$image/who_we_are.png";
+
+  //sharing
+  static const String location = "$image/location.png";
+  static const String notification = "$image/notification.png";
+  static const String allowCamera = "$image/allow_camera.png";
 }
