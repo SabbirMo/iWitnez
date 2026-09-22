@@ -61,21 +61,13 @@ class _FloatingNavBar extends StatelessWidget {
     const inactiveColor = Color(0xFF767987);
 
     final items = [
-      _NavItemSpec(
-        index: 0,
-        label: AppString.home,
-        icon: Icons.home_rounded,
-      ),
+      _NavItemSpec(index: 0, label: AppString.home, icon: Icons.home_rounded),
       _NavItemSpec(
         index: 1,
         label: AppString.chat,
         icon: Icons.chat_bubble_rounded,
       ),
-      _NavItemSpec(
-        index: 2,
-        label: AppString.calls,
-        icon: Icons.call_rounded,
-      ),
+      _NavItemSpec(index: 2, label: AppString.calls, icon: Icons.call_rounded),
       _NavItemSpec(
         index: 3,
         label: AppString.profile,
@@ -146,8 +138,7 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isActive ? activeColor : inactiveColor;
-    final fontWeight =
-        isActive ? FontWeight.w600 : FontWeight.w500;
+    final fontWeight = isActive ? FontWeight.w600 : FontWeight.w500;
 
     return InkWell(
       onTap: onTap,
@@ -164,11 +155,7 @@ class _NavItem extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(
-                  spec.icon,
-                  color: color,
-                  size: 24.sp,
-                ),
+                Icon(spec.icon, color: color, size: 24.sp),
                 SizedBox(height: 4.h),
                 Text(
                   spec.label,

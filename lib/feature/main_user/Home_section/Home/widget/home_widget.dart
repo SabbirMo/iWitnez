@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
@@ -29,8 +30,8 @@ class SectionHeader extends StatelessWidget {
         Text(
           title,
           style: GoogleFonts.inter(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w700,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
             color: AppColors.textDark,
             height: 1.15,
           ),
@@ -155,16 +156,12 @@ class HomeAppHeader extends StatelessWidget {
                     Positioned(
                       left: 0,
                       top: 0,
-                      child: Icon(
-                        Icons.notifications_none_rounded,
-                        color: AppColors.textDark,
-                        size: 28.sp,
-                      ),
+                      child: SvgPicture.asset(ImageAssets.notificatioBell),
                     ),
                     if (hasUnreadNotification)
                       Positioned(
-                        right: 0.61.w,
-                        top: 0,
+                        right: 18,
+                        top: -8,
                         child: Container(
                           width: 8.w,
                           height: 8.h,
@@ -277,280 +274,436 @@ class ProtectedBanner extends StatelessWidget {
 }
 
 /// =====================================================================
-/// LIVE LOCATION CARD
+/// LIVE LOCATION / MAP CARD
 /// =====================================================================
-class LiveLocationCard extends StatelessWidget {
-  const LiveLocationCard({super.key, this.onViewFullMapTap});
+class LiveLocationCard extends StatefulWidget {
+  const LiveLocationCard({
+    super.key,
+    this.onViewFullMapTap,
+    this.onToggleSharing,
+    this.isSharing = true,
+    this.address = '1200 Park Ave,\nNew York, NY 10028, USA',
+  });
 
   final VoidCallback? onViewFullMapTap;
+  final VoidCallback? onToggleSharing;
+  final bool isSharing;
+  final String address;
+
+  @override
+  State<LiveLocationCard> createState() => _LiveLocationCardState();
+}
+
+class _LiveLocationCardState extends State<LiveLocationCard>
+    with SingleTickerProviderStateMixin {
+  late bool _isSharing;
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSharing = widget.isSharing;
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+    _pulseAnimation = CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant LiveLocationCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isSharing != widget.isSharing) {
+      _isSharing = widget.isSharing;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  void _handleToggle() {
+    setState(() {
+      _isSharing = !_isSharing;
+    });
+    widget.onToggleSharing?.call();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 356.w,
-      height: 148.h,
+    return Container(
+      width: double.infinity,
+      height: 154.h,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          width: 0.8.w,
+          color: AppColors.homeLocationCardBorder,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.r),
-        child: Stack(
+        borderRadius: BorderRadius.circular(12.r),
+        child: Row(
           children: [
-            Positioned.fill(
-              child: Row(
+            // Left Panel — Location Sharing status & info
+            Container(
+              width: 130.w,
+              padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                border: Border(
+                  right: BorderSide(
+                    width: 0.8.w,
+                    color: AppColors.homeLocationCardBorder,
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 110.24.w,
-                    height: 148.h,
-                    decoration: ShapeDecoration(
-                      color: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1.w,
-                          color: AppColors.homeLocationCardBorder,
+                  // Live pill
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 7.w,
+                          vertical: 2.5.h,
                         ),
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.circular(10.r),
+                        decoration: BoxDecoration(
+                          color: _isSharing
+                              ? AppColors.homeLocationSharedPillBg
+                              : const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(100.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 5.5.r,
+                              height: 5.5.r,
+                              decoration: BoxDecoration(
+                                color: _isSharing
+                                    ? AppColors.homeLocationSharedDot
+                                    : const Color(0xFF9CA3AF),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              _isSharing ? 'Live' : 'Paused',
+                              style: GoogleFonts.inter(
+                                color: _isSharing
+                                    ? AppColors.homeLocationSharedText
+                                    : const Color(0xFF6B7280),
+                                fontSize: 8.5.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: const Color(0xFF9CA3AF),
+                        size: 15.sp,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6.h),
+
+                  Text(
+                    'Location Sharing',
+                    style: GoogleFonts.inter(
+                      color: AppColors.black,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    'Shared with 3 contacts',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF64748B),
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 6.h),
+
+                  // Small avatars stack
+                  SizedBox(
+                    height: 18.h,
+                    child: Stack(
+                      children: [
+                        _avatarCircle(0, const Color(0xFFFDA4AF)),
+                        _avatarCircle(12.w, const Color(0xFFFB923C)),
+                        _avatarCircle(24.w, const Color(0xFF60A5FA)),
+                      ],
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Address snippet
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: 1.h),
+                        child: Icon(
+                          Icons.location_on_rounded,
+                          size: 10.sp,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                      SizedBox(width: 3.w),
+                      Expanded(
+                        child: Text(
+                          widget.address,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF475569),
+                            fontSize: 7.8.sp,
+                            fontWeight: FontWeight.w500,
+                            height: 1.25,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6.h),
+
+                  // Action Button (Stop Sharing / Start Sharing)
+                  InkWell(
+                    onTap: _handleToggle,
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Container(
+                      width: double.infinity,
+                      height: 22.h,
+                      decoration: BoxDecoration(
+                        color: _isSharing
+                            ? AppColors.buttonGradientStart
+                            : const Color(0xFF10B981),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _isSharing ? 'Stop Sharing' : 'Start Sharing',
+                          style: GoogleFonts.inter(
+                            color: AppColors.white,
+                            fontSize: 8.5.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Expanded(
+                ],
+              ),
+            ),
+
+            // Right Panel — Interactive Map Preview
+            Expanded(
+              child: Stack(
+                children: [
+                  // Map background gradient
+                  Positioned.fill(
                     child: Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xFFE9F1FF), Color(0xFFC8E0FF)],
+                          colors: [Color(0xFFE8F2FE), Color(0xFFD3E6FD)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                       ),
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          CustomPaint(painter: _MapGridPainter()),
-                          Positioned(
-                            bottom: -1,
-                            right: -1,
-                            top: 60.h,
-                            width: 60.w,
-                            child: Container(
+                    ),
+                  ),
+
+                  // Map grid pattern
+                  Positioned.fill(
+                    child: CustomPaint(painter: _MapGridPainter()),
+                  ),
+
+                  // Street path simulation
+                  Positioned.fill(
+                    child: CustomPaint(painter: _MapRoadsPainter()),
+                  ),
+
+                  // Friend pin on map 1
+                  Positioned(
+                    left: 24.w,
+                    top: 18.h,
+                    child: const _MapPinBadge(
+                      avatarColor: Color(0xFFFDA4AF),
+                      name: 'Sarah',
+                    ),
+                  ),
+
+                  // Friend pin on map 2
+                  Positioned(
+                    right: 20.w,
+                    top: 36.h,
+                    child: const _MapPinBadge(
+                      avatarColor: Color(0xFF60A5FA),
+                      name: 'Alex',
+                    ),
+                  ),
+
+                  // User Current Location Pin (pulsing halo + pin)
+                  Positioned(
+                    left: 56.w,
+                    bottom: 34.h,
+                    child: AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        final wave = _pulseAnimation.value;
+                        return Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Halo wave
+                            Container(
+                              width: (26 + wave * 18).r,
+                              height: (26 + wave * 18).r,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    const Color(
-                                      0xFFA9D8FF,
-                                    ).withValues(alpha: 0.85),
-                                    const Color(0xFF7FBFFF),
-                                  ],
+                                color: AppColors.homeLocationMapHalo.withValues(
+                                  alpha: (1.0 - wave) * 0.45,
                                 ),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(260.r),
-                                ),
+                                shape: BoxShape.circle,
                               ),
                             ),
-                          ),
-                          _MapAvatarPin(left: 40.w, top: 22.h),
-                          _MapAvatarPin(right: 18.w, top: 18.h),
-                          _MapAvatarPin(right: 26.w, top: 70.h),
-                          Positioned(
-                            left: 28.w,
-                            bottom: 20.h,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: 40.w,
-                                  height: 40.h,
-                                  decoration: const ShapeDecoration(
-                                    color: AppColors.homeLocationMapHalo,
-                                    shape: OvalBorder(),
-                                  ),
+                            // Inner pin
+                            Container(
+                              width: 16.r,
+                              height: 16.r,
+                              decoration: BoxDecoration(
+                                color: AppColors.homeLocationMapPin,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2.5.w,
                                 ),
-                                Container(
-                                  width: 15.w,
-                                  height: 15.h,
-                                  decoration: ShapeDecoration(
-                                    color: AppColors.homeLocationMapPin,
-                                    shape: OvalBorder(
-                                      side: BorderSide(
-                                        width: 3.w,
-                                        strokeAlign:
-                                            BorderSide.strokeAlignOutside,
-                                        color: AppColors.white,
-                                      ),
-                                    ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.homeLocationMapPin
+                                        .withValues(alpha: 0.4),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Recenter button (top right)
+                  Positioned(
+                    right: 8.w,
+                    top: 8.h,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: widget.onViewFullMapTap,
+                        borderRadius: BorderRadius.circular(100.r),
+                        child: Container(
+                          width: 26.r,
+                          height: 26.r,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
+                          child: Icon(
+                            Icons.my_location_rounded,
+                            color: AppColors.buttonGradientStart,
+                            size: 14.sp,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 10.w,
-              top: 12.87.h,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 13.06.w,
-                    height: 13.06.h,
-                    child: Icon(
-                      Icons.location_on_rounded,
-                      color: AppColors.buttonGradientStart,
-                      size: 13.06.sp,
-                    ),
-                  ),
-                  SizedBox(width: 3.73.w),
-                  Text(
-                    'Live location',
-                    style: GoogleFonts.inter(
-                      color: AppColors.black,
-                      fontSize: 10.26.sp,
-                      fontWeight: FontWeight.w600,
-                      height: 1.64,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 26.w,
-              top: 28.h,
-              child: Container(
-                width: 51.w,
-                height: 11.h,
-                decoration: ShapeDecoration(
-                  color: AppColors.homeLocationSharedPillBg,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100.r),
-                  ),
-                ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: 4.w,
-                      top: 3.55.h,
+
+                  // "View Full Map" Pill Button at bottom
+                  Positioned(
+                    left: 12.w,
+                    right: 12.w,
+                    bottom: 8.h,
+                    child: InkWell(
+                      onTap: widget.onViewFullMapTap,
+                      borderRadius: BorderRadius.circular(100.r),
                       child: Container(
-                        width: 3.90.w,
-                        height: 3.90.h,
-                        decoration: ShapeDecoration(
-                          color: AppColors.homeLocationSharedDot,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100.r),
+                        height: 24.h,
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100.r),
+                          border: Border.all(
+                            width: 0.8.w,
+                            color: const Color(0xFFE2E8F0),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.map_rounded,
+                              color: AppColors.buttonGradientStart,
+                              size: 12.sp,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'View Full Map',
+                              style: GoogleFonts.inter(
+                                color: AppColors.buttonGradientStart,
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(width: 2.w),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: AppColors.buttonGradientStart,
+                              size: 8.sp,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    Positioned(
-                      left: 10.90.w,
-                      top: 1.h,
-                      child: Text(
-                        'Sharing is ON',
-                        style: GoogleFonts.inter(
-                          color: AppColors.homeLocationSharedText,
-                          fontSize: 5.36.sp,
-                          fontWeight: FontWeight.w600,
-                          height: 1.50,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 10.w,
-              top: 44.h,
-              child: Container(
-                width: 76.w,
-                height: 22.h,
-                decoration: ShapeDecoration(
-                  color: AppColors.white,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      width: 0.20.w,
-                      color: AppColors.homeLocationInfoCardStroke,
-                    ),
-                    borderRadius: BorderRadius.circular(4.r),
                   ),
-                ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: 4.w,
-                      top: 5.5.h,
-                      child: Icon(
-                        Icons.shield_rounded,
-                        color: AppColors.homeLocationInfoCardText,
-                        size: 7.sp,
-                      ),
-                    ),
-                    Positioned(
-                      left: 14.w,
-                      top: 5.h,
-                      child: SizedBox(
-                        width: 56.w,
-                        child: Text(
-                          'Your Location is being shared\nwith trusted contacts',
-                          style: GoogleFonts.inter(
-                            color: AppColors.homeLocationInfoCardText,
-                            fontSize: 4.sp,
-                            fontWeight: FontWeight.w400,
-                            height: 1.52,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 10.w,
-              top: 77.h,
-              child: Text(
-                '1200 Park ave,\nnew york, ny 10028, USA',
-                style: GoogleFonts.inter(
-                  color: AppColors.black,
-                  fontSize: 7.19.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 1.50,
-                ),
-              ),
-            ),
-            Positioned(
-              left: 10.w,
-              top: 116.h,
-              child: InkWell(
-                onTap: onViewFullMapTap,
-                borderRadius: BorderRadius.circular(1000.r),
-                child: Container(
-                  width: 89.w,
-                  height: 20.h,
-                  decoration: ShapeDecoration(
-                    color: AppColors.homeLocationViewFullMap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(1000.r),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'View Full Map',
-                      style: GoogleFonts.inter(
-                        color: AppColors.white,
-                        fontSize: 6.sp,
-                        fontWeight: FontWeight.w400,
-                        height: 1.02,
-                      ),
-                    ),
-                  ),
-                ),
+                ],
               ),
             ),
           ],
@@ -558,113 +711,58 @@ class LiveLocationCard extends StatelessWidget {
       ),
     );
   }
-}
 
-class _MapAvatarPin extends StatelessWidget {
-  const _MapAvatarPin({this.left, this.right, required this.top});
-
-  final double? left;
-  final double? right;
-  final double top;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _avatarCircle(double left, Color color) {
     return Positioned(
       left: left,
-      right: right,
-      top: top,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 24.w,
-            height: 24.h,
-            decoration: ShapeDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFDA4AF), Color(0xFFC084FC)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: OvalBorder(
-                side: BorderSide(
-                  width: 3.w,
-                  strokeAlign: BorderSide.strokeAlignOutside,
-                  color: AppColors.white,
-                ),
-              ),
-              shadows: const [
-                BoxShadow(
-                  color: AppColors.homeLocationAvatarShadow,
-                  blurRadius: 4,
-                  offset: Offset(0, 4),
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.person_rounded,
-              color: Colors.white.withValues(alpha: 0.95),
-              size: 14.sp,
-            ),
-          ),
-          Positioned(
-            right: -2.w,
-            bottom: -2.h,
-            child: Container(
-              width: 7.w,
-              height: 7.h,
-              decoration: ShapeDecoration(
-                color: AppColors.homeLocationOnline,
-                shape: OvalBorder(
-                  side: BorderSide(
-                    width: 1.w,
-                    strokeAlign: BorderSide.strokeAlignOutside,
-                    color: AppColors.white,
-                  ),
-                ),
-                shadows: const [
-                  BoxShadow(
-                    color: AppColors.homeLocationAvatarShadow,
-                    blurRadius: 4,
-                    offset: Offset(0, 4),
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      top: 0,
+      child: Container(
+        width: 17.r,
+        height: 17.r,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 1.2.w),
+        ),
+        child: Center(
+          child: Icon(Icons.person, color: Colors.white, size: 10.sp),
+        ),
       ),
     );
   }
 }
 
+/// Map grid lines painter for streets & block simulation
 class _MapGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.6)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
+      ..color = Colors.white.withValues(alpha: 0.45)
+      ..strokeWidth = 1.0;
+
     final blockPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.28)
+      ..color = Colors.white.withValues(alpha: 0.25)
       ..style = PaintingStyle.fill;
 
-    for (var i = 1; i < 6; i++) {
-      final dy = size.height / 6 * i;
-      canvas.drawLine(Offset(-6, dy), Offset(size.width + 6, dy), paint);
+    // Grid lines
+    for (int i = 1; i < 5; i++) {
+      final dy = size.height / 5 * i;
+      canvas.drawLine(Offset(0, dy), Offset(size.width, dy), paint);
     }
-    for (var i = 1; i < 5; i++) {
-      final dx = size.width / 5 * i;
-      canvas.drawLine(Offset(dx, -6), Offset(dx, size.height + 6), paint);
+    for (int i = 1; i < 6; i++) {
+      final dx = size.width / 6 * i;
+      canvas.drawLine(Offset(dx, 0), Offset(dx, size.height), paint);
     }
+
+    // City blocks
     for (final rect in [
-      Rect.fromLTWH(4, 16, 36, 22),
-      Rect.fromLTWH(50, 48, 28, 20),
-      Rect.fromLTWH(10, 80, 42, 20),
+      Rect.fromLTWH(8, 12, 34, 20),
+      Rect.fromLTWH(52, 28, 40, 24),
+      Rect.fromLTWH(18, 56, 32, 22),
+      Rect.fromLTWH(62, 70, 48, 20),
     ]) {
       canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(2.5)),
+        RRect.fromRectAndRadius(rect, const Radius.circular(3)),
         blockPaint,
       );
     }
@@ -672,6 +770,91 @@ class _MapGridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Curved road path painter
+class _MapRoadsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final roadPaint = Paint()
+      ..color = const Color(0xFF93C5FD).withValues(alpha: 0.4)
+      ..strokeWidth = 4.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final path = Path();
+    path.moveTo(0, size.height * 0.35);
+    path.quadraticBezierTo(
+      size.width * 0.45,
+      size.height * 0.25,
+      size.width * 0.7,
+      size.height * 0.65,
+    );
+    path.lineTo(size.width, size.height * 0.75);
+
+    canvas.drawPath(path, roadPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Small avatar pin shown on map for friends
+class _MapPinBadge extends StatelessWidget {
+  final Color avatarColor;
+  final String name;
+
+  const _MapPinBadge({required this.avatarColor, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 20.r,
+          height: 20.r,
+          decoration: BoxDecoration(
+            color: avatarColor,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 1.5.w),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 3,
+                offset: const Offset(0, 1.5),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(Icons.person, color: Colors.white, size: 11.sp),
+          ),
+        ),
+        SizedBox(height: 1.5.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(4.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: Text(
+            name,
+            style: GoogleFonts.inter(
+              fontSize: 6.8.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// =====================================================================
@@ -724,79 +907,62 @@ class QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 109.w,
-      height: 90.h,
-      child: Material(
+    return Container(
+      height: 108.h,
+      decoration: BoxDecoration(
         color: AppColors.white,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(width: 0.50.w, color: AppColors.homeQuickCardBorder),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        clipBehavior: Clip.antiAlias,
-        shadowColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(width: 0.8.w, color: AppColors.homeQuickCardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16.r),
         child: InkWell(
           onTap: onTap,
-          splashFactory: InkRipple.splashFactory,
-          splashColor: circleColor.withValues(alpha: 0.3),
-          child: Container(
-            decoration: ShapeDecoration(
-              color: AppColors.white,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  width: 0.50.w,
-                  color: AppColors.homeQuickCardBorder,
-                ),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              shadows: const [
-                BoxShadow(
-                  color: AppColors.homeQuickCardShadow,
-                  blurRadius: 3,
-                  offset: Offset(0, 1),
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
+          borderRadius: BorderRadius.circular(16.r),
+          splashColor: circleColor.withValues(alpha: 0.25),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 12.h),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Positioned(
-                  left: 30.w,
-                  top: 13.h,
-                  child: Container(
-                    width: 49.w,
-                    height: 49.h,
-                    decoration: ShapeDecoration(
-                      color: circleColor,
-                      shape: const OvalBorder(),
-                      shadows: circleHasShadow
-                          ? const [
-                              BoxShadow(
-                                color: AppColors.homeLocationAvatarShadow,
-                                blurRadius: 4,
-                                offset: Offset(0, 4),
-                                spreadRadius: 0,
-                              ),
-                            ]
-                          : const [],
-                    ),
-                    child: Center(child: _iconFor(type, iconColor)),
+                Container(
+                  width: 50.r,
+                  height: 50.r,
+                  decoration: BoxDecoration(
+                    color: circleColor,
+                    shape: BoxShape.circle,
+                    boxShadow: circleHasShadow
+                        ? [
+                            BoxShadow(
+                              color: circleColor.withValues(alpha: 0.35),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
                   ),
+                  child: Center(child: _iconFor(type, iconColor)),
                 ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 14.h,
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      color: AppColors.homeQuickLabel,
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w600,
-                      height: 1.20,
-                    ),
+                SizedBox(height: 10.h),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: AppColors.homeQuickLabel,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 1.15,
                   ),
                 ),
               ],
@@ -812,40 +978,27 @@ class QuickActionCard extends StatelessWidget {
       case QuickActionType.safety:
         return Icon(Icons.shield_rounded, color: color, size: 26.sp);
       case QuickActionType.checkIn:
-        return SizedBox(
-          width: 26.w,
-          height: 26.h,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                left: 2.17.w,
-                top: 2.17.h,
-                child: Container(
-                  width: 21.67.w,
-                  height: 21.67.h,
-                  decoration: ShapeDecoration(
-                    color: AppColors.homeQuickCheckInBox,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3.25.r),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 6.50.w,
-                top: 6.50.h,
-                child: Icon(
-                  Icons.check_rounded,
-                  color: AppColors.white,
-                  size: 13.sp,
-                ),
-              ),
-            ],
+        return Container(
+          width: 23.r,
+          height: 23.r,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(5.r),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.check_rounded,
+              color: AppColors.white,
+              size: 16.sp,
+            ),
           ),
         );
       case QuickActionType.scheduledTimer:
-        return Icon(Icons.schedule_rounded, color: color, size: 24.sp);
+        return Icon(
+          Icons.access_time_rounded,
+          color: const Color(0xFF389BF2),
+          size: 26.sp,
+        );
     }
   }
 }
@@ -1223,6 +1376,367 @@ class _AnimatedSosButtonState extends State<AnimatedSosButton>
           ],
         ),
       ),
+    );
+  }
+}
+
+/// =====================================================================
+/// FULL MAP BOTTOM SHEET — Interactive Full Map Preview
+/// =====================================================================
+class FullMapBottomSheet extends StatelessWidget {
+  const FullMapBottomSheet({super.key});
+
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const FullMapBottomSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 0.78.sh,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: 10.h),
+          // Drag handle
+          Center(
+            child: Container(
+              width: 38.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD1D5DB),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 14.h),
+
+          // Header
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Live Location Tracking',
+                      style: GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6.r,
+                          height: 6.r,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF10B981),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 5.w),
+                        Text(
+                          'Sharing active · 3 contacts notified',
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: const Color(0xFF64748B),
+                    size: 22.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 12.h),
+
+          // Expanded Map Graphic
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18.r),
+                child: Stack(
+                  children: [
+                    // Gradient map ground
+                    Positioned.fill(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFFE8F2FE), Color(0xFFD5E8FD)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Grid
+                    Positioned.fill(
+                      child: CustomPaint(painter: _MapGridPainter()),
+                    ),
+
+                    // Roads
+                    Positioned.fill(
+                      child: CustomPaint(painter: _MapRoadsPainter()),
+                    ),
+
+                    // Friend Pin 1: Sarah
+                    Positioned(
+                      left: 45.w,
+                      top: 40.h,
+                      child: const _MapPinBadge(
+                        avatarColor: Color(0xFFFDA4AF),
+                        name: 'Sarah (0.4 mi)',
+                      ),
+                    ),
+
+                    // Friend Pin 2: Alex
+                    Positioned(
+                      right: 50.w,
+                      top: 80.h,
+                      child: const _MapPinBadge(
+                        avatarColor: Color(0xFF60A5FA),
+                        name: 'Alex (1.2 mi)',
+                      ),
+                    ),
+
+                    // Friend Pin 3: David
+                    Positioned(
+                      left: 90.w,
+                      bottom: 70.h,
+                      child: const _MapPinBadge(
+                        avatarColor: Color(0xFF34D399),
+                        name: 'David (2.1 mi)',
+                      ),
+                    ),
+
+                    // User Pin: Center
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 3.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.buttonGradientStart,
+                              borderRadius: BorderRadius.circular(100.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              'You are here',
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Container(
+                            width: 20.r,
+                            height: 20.r,
+                            decoration: BoxDecoration(
+                              color: AppColors.homeLocationMapPin,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 3.w,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.homeLocationMapPin
+                                      .withValues(alpha: 0.5),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Floating GPS Tools
+                    Positioned(
+                      right: 12.w,
+                      bottom: 12.h,
+                      child: Column(
+                        children: [
+                          _mapToolButton(Icons.my_location_rounded),
+                          SizedBox(height: 8.h),
+                          _mapToolButton(Icons.layers_rounded),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(height: 14.h),
+
+          // Address Card
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 18.w),
+            child: Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: const Color(0xFFE2E8F0),
+                  width: 0.8.w,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36.r,
+                    height: 36.r,
+                    decoration: BoxDecoration(
+                      color: AppColors.buttonGradientStart.withValues(
+                        alpha: 0.1,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.location_on_rounded,
+                      color: AppColors.buttonGradientStart,
+                      size: 20.sp,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '1200 Park Ave, New York',
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          'NY 10028, USA · 40.7769° N, 73.9582° W',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Share Link button
+          Padding(
+            padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 20.h),
+            child: SizedBox(
+              width: double.infinity,
+              height: 46.h,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Live tracking link copied to clipboard!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.share_rounded,
+                  color: Colors.white,
+                  size: 16.sp,
+                ),
+                label: Text(
+                  'Share Live Tracking Link',
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonGradientStart,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _mapToolButton(IconData icon) {
+    return Container(
+      width: 32.r,
+      height: 32.r,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(icon, color: const Color(0xFF475569), size: 16.sp),
     );
   }
 }

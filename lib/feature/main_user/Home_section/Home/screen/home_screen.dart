@@ -37,10 +37,16 @@ class HomeScreen extends ConsumerWidget {
                       onNotificationTap: () =>
                           _controller.onNotificationTap(context, ref),
                     ),
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 6.h),
                     if (state.isProtected) const ProtectedBanner(),
-                    SizedBox(height: 24.h),
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 16.h),
+                    LiveLocationCard(
+                      onViewFullMapTap: () =>
+                          _controller.onViewFullMapTap(context),
+                      onToggleSharing: () =>
+                          _controller.onToggleSharing(context),
+                    ),
+                    SizedBox(height: 20.h),
                     const SectionHeader(title: 'Quick Actions'),
                     SizedBox(height: 14.h),
                     _buildQuickActionsRow(context, state),

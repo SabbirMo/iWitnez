@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/home_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/provider/home_provider.dart';
+import 'package:iwitnez/feature/main_user/Home_section/Home/widget/home_widget.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
 class HomeController {
@@ -13,10 +14,24 @@ class HomeController {
     context.push(AppRouteNames.notificationScreen);
   }
 
+  void onViewFullMapTap(BuildContext context) {
+    FullMapBottomSheet.show(context);
+  }
+
+  void onToggleSharing(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Live location sharing updated'),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   void onQuickActionTap(BuildContext context, QuickActionType type) {
     switch (type) {
       case QuickActionType.safety:
-        debugPrint('Open Safety Tracking');
+        FullMapBottomSheet.show(context);
         break;
       case QuickActionType.checkIn:
         debugPrint('Open Check In');
@@ -33,10 +48,6 @@ class HomeController {
 
   void onViewAllTrustedCirclesTap(BuildContext context) {
     debugPrint('View all trusted circles');
-  }
-
-  void onViewFullMapTap(BuildContext context) {
-    debugPrint('Open full map');
   }
 
   void onSosTap(BuildContext context) {
