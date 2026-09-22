@@ -42,6 +42,10 @@ import 'package:iwitnez/feature/trusted_contact/Home_section/Home/screen/home_sc
     as trusted_home;
 import 'package:iwitnez/feature/trusted_contact/Profile_section/Profile/screen/profile_screen.dart'
     as trusted_profile;
+import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/screen/add_trusted_contact.dart';
+import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/model/trusted_contact_model.dart';
+import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/widget/add_trusted_field_widget.dart';
+import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/screen/trusted_contact_success_screen.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
 final appPages = Provider<GoRouter>(
@@ -94,6 +98,26 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.accountSettingsScreen,
         builder: (context, state) => const AccountSettingsScreen(),
+      ),
+
+      //trusted contact
+      GoRoute(
+        path: AppRouteNames.addTrustedContactScreen,
+        builder: (context, state) => const AddTrustedContactScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.addTrustedFieldWidget,
+        builder: (context, state) {
+          final contact = state.extra as TrustedContactModel?;
+          return AddTrustedFieldWidget(contact: contact);
+        },
+      ),
+      GoRoute(
+        path: AppRouteNames.trustedContactSuccessScreen,
+        builder: (context, state) {
+          final contactName = state.extra as String?;
+          return TrustedContactSuccessScreen(contactName: contactName);
+        },
       ),
       GoRoute(
         path: AppRouteNames.chatDetailsScreen,

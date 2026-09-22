@@ -27,10 +27,26 @@ class CustomTextStyle {
     );
   }
 
+  static TextStyle regular12(Color color) {
+    return GoogleFonts.inter(
+      fontSize: 12.sp,
+      fontWeight: FontWeight.w400,
+      color: color,
+    );
+  }
+
   static TextStyle bold30(Color color) {
     return GoogleFonts.inter(
       fontSize: 30.sp,
       fontWeight: FontWeight.bold,
+      color: color,
+    );
+  }
+
+  static TextStyle ibold32(Color color) {
+    return GoogleFonts.inter(
+      fontSize: 32.sp,
+      fontWeight: FontWeight.w700,
       color: color,
     );
   }

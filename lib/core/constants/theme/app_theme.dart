@@ -13,6 +13,7 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
         suffixIconColor: AppColors.onboardingDesc,

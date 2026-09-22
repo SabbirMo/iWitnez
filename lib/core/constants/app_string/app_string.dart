@@ -87,4 +87,11 @@ class AppString {
   static const String allowCameraImp1 = " ";
   static const String allowCameraDesc =
       "Get real-time alerts, important updates, and instant notifications that keep you and your loved ones safe.";
+
+  //trusted contact
+  static const String addTrustedContactTitle = "Add Trusted Contacts";
+  static const String addTrustedContactDesc =
+      "Get real-time alerts, important updates, and \ninstant notifications that keep you and your \nloved ones safe.";
+  static const String addTrustedContactEmer =
+      "ADD SINEINE YOU TRUST WHO CAN\nBE NOTIFIELD IN AN EMERGRNCY";
 }

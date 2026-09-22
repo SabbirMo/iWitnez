@@ -9,6 +9,11 @@ class AppRouteNames {
   static final String shareingScreen = "/shareingScreen";
   static final String accountSettingsScreen = "/accountSettingsScreen";
 
+  //tursted contact
+  static final String addTrustedContactScreen = "/addTrustedContactScreen";
+  static final String addTrustedFieldWidget = "/addTrustedFieldWidget";
+  static final String trustedContactSuccessScreen = "/trustedContactSuccessScreen";
+
   static final String mainUserShell = "/mainUser";
   static final String mainUserHome = "/mainUser/home";
   static final String mainUserChat = "/mainUser/chat";

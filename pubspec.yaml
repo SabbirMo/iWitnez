@@ -24,6 +24,7 @@ dependencies:
   pin_code_fields: ^10.0.0
   geolocator: ^14.0.3
   permission_handler: ^11.3.1
+  image_picker: ^1.2.3
   
 
 dev_dependencies:

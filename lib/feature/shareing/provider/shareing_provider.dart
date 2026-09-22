@@ -5,24 +5,13 @@ import 'package:iwitnez/feature/shareing/actions/sharing_step_action.dart';
 class SharingState {
   final int currentIndex;
   final bool isLoading;
-  final bool hasAutoRequestedNotification;
 
-  const SharingState({
-    this.currentIndex = 0,
-    this.isLoading = false,
-    this.hasAutoRequestedNotification = false,
-  });
+  const SharingState({this.currentIndex = 0, this.isLoading = false});
 
-  SharingState copyWith({
-    int? currentIndex,
-    bool? isLoading,
-    bool? hasAutoRequestedNotification,
-  }) {
+  SharingState copyWith({int? currentIndex, bool? isLoading}) {
     return SharingState(
       currentIndex: currentIndex ?? this.currentIndex,
       isLoading: isLoading ?? this.isLoading,
-      hasAutoRequestedNotification:
-          hasAutoRequestedNotification ?? this.hasAutoRequestedNotification,
     );
   }
 }
@@ -31,12 +20,13 @@ class ShareingProvider extends Notifier<SharingState> {
   final List<SharingStepAction> _actions;
 
   ShareingProvider({List<SharingStepAction>? actions})
-      : _actions = actions ??
-            const [
-              LocationStepAction(),
-              NotificationStepAction(),
-              MediaStepAction(),
-            ];
+    : _actions =
+          actions ??
+          const [
+            LocationStepAction(),
+            NotificationStepAction(),
+            MediaStepAction(),
+          ];
 
   @override
   SharingState build() => const SharingState();
@@ -61,10 +51,7 @@ class ShareingProvider extends Notifier<SharingState> {
     }
   }
 
-  void previousPage(
-    PageController pageController, {
-    VoidCallback? onBack,
-  }) {
+  void previousPage(PageController pageController, {VoidCallback? onBack}) {
     if (state.currentIndex > 0) {
       pageController.animateToPage(
         state.currentIndex - 1,
@@ -107,37 +94,16 @@ class ShareingProvider extends Notifier<SharingState> {
 
       if (result.isSuccess) {
         nextPage(controller, totalPages, onCompleted: onCompleted);
-      } else if (result.errorMessage != null && result.errorMessage!.isNotEmpty) {
+      } else if (result.errorMessage != null &&
+          result.errorMessage!.isNotEmpty) {
         onError?.call(result.errorMessage!, result.isPermanentlyDenied);
       }
     } finally {
       state = state.copyWith(isLoading: false);
     }
   }
-
-  /// Automatically requests notification permission when user arrives at index 1.
-  void handleAutoRequestForIndex({
-    required int index,
-    required PageController controller,
-    required int totalPages,
-    VoidCallback? onCompleted,
-    void Function(String message, bool isPermanentlyDenied)? onError,
-  }) {
-    if (index == 1 && !state.hasAutoRequestedNotification) {
-      state = state.copyWith(hasAutoRequestedNotification: true);
-      Future.delayed(const Duration(milliseconds: 350), () {
-        if (state.currentIndex == 1 && !state.isLoading) {
-          executeCurrentStep(
-            controller: controller,
-            totalPages: totalPages,
-            onCompleted: onCompleted,
-            onError: onError,
-          );
-        }
-      });
-    }
-  }
 }
 
-final shareingProvider =
-    NotifierProvider<ShareingProvider, SharingState>(ShareingProvider.new);
+final shareingProvider = NotifierProvider<ShareingProvider, SharingState>(
+  ShareingProvider.new,
+);

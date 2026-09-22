@@ -19,6 +19,7 @@ class ImageAssets {
   static const String personSvg = "$svg/person.svg";
   static const String emailSvg = "$svg/email.svg";
   static const String lockSvg = "$svg/lock.svg";
+  static const String callSvg = "$svg/call.svg";
 
   //main user home
   static const String protectedCard = "$image/protected_card.png";

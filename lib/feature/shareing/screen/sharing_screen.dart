@@ -37,8 +37,8 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
     super.dispose();
   }
 
-  void _navigateToHome() {
-    context.go(AppRouteNames.mainUserHome);
+  void _navigateToNextScreen() {
+    context.go(AppRouteNames.addTrustedContactScreen);
   }
 
   void _handleError(String message, bool isPermanentlyDenied) {
@@ -88,7 +88,7 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                           if (context.canPop()) {
                             context.pop();
                           } else {
-                            _navigateToHome();
+                            _navigateToNextScreen();
                           }
                         },
                       );
@@ -120,13 +120,6 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                   itemCount: shareingList.length,
                   onPageChanged: (index) {
                     notifier.changeIndex(index);
-                    notifier.handleAutoRequestForIndex(
-                      index: index,
-                      controller: _pageController,
-                      totalPages: shareingList.length,
-                      onCompleted: _navigateToHome,
-                      onError: _handleError,
-                    );
                   },
                   itemBuilder: (_, index) {
                     final data = shareingList[index];
@@ -143,11 +136,11 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                 onTap: sharingState.isLoading
                     ? null
                     : () => notifier.executeCurrentStep(
-                          controller: _pageController,
-                          totalPages: shareingList.length,
-                          onCompleted: _navigateToHome,
-                          onError: _handleError,
-                        ),
+                        controller: _pageController,
+                        totalPages: shareingList.length,
+                        onCompleted: _navigateToNextScreen,
+                        onError: _handleError,
+                      ),
               ),
               SizedBox(height: 8.h),
 
@@ -156,7 +149,7 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                   notifier.skip(
                     _pageController,
                     shareingList.length,
-                    onCompleted: _navigateToHome,
+                    onCompleted: _navigateToNextScreen,
                   );
                 },
                 child: Text(
