@@ -7,15 +7,19 @@ class CallLogEntry {
     required this.name,
     required this.avatarUrl,
     required this.time,
+    this.date = 'Today',
     required this.direction,
     required this.type,
+    this.duration,
     this.callCount = 1,
   });
 
   final String name;
   final String avatarUrl;
-  final String time; // pre-formatted e.g. "9:18 AM" / "Yesterday" / "Mon"
+  final String date;
+  final String time;
   final CallDirection direction;
   final CallType type;
+  final String? duration;
   final int callCount;
 }

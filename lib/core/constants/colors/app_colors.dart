@@ -84,4 +84,8 @@ class AppColors {
   static const Gradient onboardingGradient = LinearGradient(
     colors: [buttonGradientStart, primaryBlue],
   );
+
+  //calls
+  static const Color callsPurple = Color(0xff5B21B6); //#5B21B6
+  static const Color callsGray = Color(0xff4B5563); //#4B5563
 }

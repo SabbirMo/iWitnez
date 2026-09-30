@@ -33,80 +33,89 @@ class _CallsScreenState extends State<CallsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppString.calls,
-                    style: CustomTextStyle.bold30(AppColors.textDark)
-                        .copyWith(fontSize: 24.sp),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    AppString.mainUser,
-                    style: CustomTextStyle.regular14(AppColors.textMuted),
-                  ),
-                ],
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 12.h),
+
+              // Title: Calls
+              Text(
+                AppString.calls,
+                style: TextStyle(
+                  fontSize: 26.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0F172A),
+                  letterSpacing: -0.4,
+                ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: CallSearchField(onChanged: _provider.search),
-            ),
-            SizedBox(height: 20.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Text(
-                'Recent',
-                style: CustomTextStyle.regular16(AppColors.textDark)
-                    .copyWith(fontWeight: FontWeight.w700, fontSize: 13.sp),
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Expanded(
-              child: ListenableBuilder(
+
+              SizedBox(height: 16.h),
+
+              // Search Call field
+              CallSearchField(onChanged: _provider.search),
+
+              SizedBox(height: 14.h),
+
+              // All | Missed | Recent filter tabs
+              ListenableBuilder(
                 listenable: _provider,
                 builder: (context, _) {
-                  if (_provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (_provider.calls.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No calls found',
-                        style: CustomTextStyle.regular14(AppColors.textMuted),
-                      ),
-                    );
-                  }
-                  return ListView.separated(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w)
-                        .copyWith(bottom: 12.h),
-                    itemCount: _provider.calls.length,
-                    separatorBuilder: (_, __) => Divider(
-                      height: 1,
-                      thickness: 0.6,
-                      color: Colors.grey.shade200,
-                    ),
-                    itemBuilder: (context, index) {
-                      final call = _provider.calls[index];
-                      return CallLogTile(
-                        entry: call,
-                        onTap: () => _controller.openCallDetail(context, call),
-                        onCallBack: () => _controller.callBack(context, call),
-                      );
-                    },
+                  return CallFilterTabs(
+                    currentTab: _provider.currentTab,
+                    onTabSelected: _provider.setTab,
                   );
                 },
               ),
-            ),
-          ],
+
+              SizedBox(height: 14.h),
+
+              // Call logs list
+              Expanded(
+                child: ListenableBuilder(
+                  listenable: _provider,
+                  builder: (context, _) {
+                    if (_provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final calls = _provider.calls;
+                    if (calls.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No calls found',
+                          style: CustomTextStyle.regular14(AppColors.textMuted),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      padding: EdgeInsets.only(bottom: 20.h),
+                      itemCount: calls.length,
+                      separatorBuilder: (context, index) => Divider(
+                        height: 1,
+                        thickness: 0.5,
+                        color: Colors.grey.shade100,
+                      ),
+                      itemBuilder: (context, index) {
+                        final call = calls[index];
+                        return CallLogTile(
+                          entry: call,
+                          onTap: () =>
+                              _controller.openCallDetail(context, call),
+                          onVoiceCall: () =>
+                              _controller.startVoiceCall(context, call),
+                          onVideoCall: () =>
+                              _controller.startVideoCall(context, call),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
