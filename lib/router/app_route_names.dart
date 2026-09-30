@@ -26,6 +26,8 @@ class AppRouteNames {
   static final String trustedCalls = "/trustedContact/calls";
   static final String trustedProfile = "/trustedContact/profile";
   static final String chatDetailsScreen = "/chatDetailsScreen";
+  static final String chatProfileDetailsScreen = "/chatProfileDetailsScreen";
+  static final String trustedCircleScreen = "/trustedCircleScreen";
   static final String notificationScreen = "/notificationScreen";
   static final String personalInfoScreen = "/personalInfoScreen";
   static final String safetySettingsScreen = "/safetySettingsScreen";

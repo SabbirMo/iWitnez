@@ -21,7 +21,7 @@ class ProfileController {
         context.push(AppRouteNames.notificationScreen);
         break;
       case ProfileMenuAction.trustedCircle:
-        debugPrint('Open Trusted Circle');
+        context.push(AppRouteNames.trustedCircleScreen);
         break;
       case ProfileMenuAction.helpSupport:
         context.push(AppRouteNames.helpSupportScreen);
@@ -49,7 +49,6 @@ class ProfileController {
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              // TODO: clear auth/session then redirect
               context.go(AppRouteNames.loginScreen);
             },
             child: const Text('Log Out', style: TextStyle(color: Colors.red)),

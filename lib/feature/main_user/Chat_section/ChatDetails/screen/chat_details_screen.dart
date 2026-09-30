@@ -61,6 +61,12 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         name: widget.contactName,
         avatarUrl: widget.avatarUrl,
         isOnline: widget.isOnline,
+        onProfileTap: () => _controller.openProfileDetails(
+          context,
+          name: widget.contactName,
+          avatarUrl: widget.avatarUrl,
+          isOnline: widget.isOnline,
+        ),
         onVoiceCall: () =>
             _controller.startVoiceCall(context, widget.contactName, widget.avatarUrl),
         onVideoCall: () =>

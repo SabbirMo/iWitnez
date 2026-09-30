@@ -22,7 +22,9 @@ import 'package:iwitnez/feature/main_user/Calls_section/Calls/screen/calls_scree
     as main_user_calls;
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/screen/chat_screen.dart'
     as main_user_chat;
+import 'package:iwitnez/feature/main_user/TrustedCircle/screen/trusted_circle_screen.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/screen/chat_details_screen.dart';
+import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/screen/chat_profile_details_screen.dart';
 import 'package:iwitnez/feature/main_user/HelpSupport/screen/help_support_screen.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/screen/home_screen.dart'
     as main_user_home;
@@ -131,6 +133,15 @@ final appPages = Provider<GoRouter>(
             isOnline: extra?['isOnline'] ?? false,
           );
         },
+      ),
+      GoRoute(
+        path: AppRouteNames.chatProfileDetailsScreen,
+        builder: (context, state) =>
+            ChatProfileDetailsScreen.fromExtra(state.extra),
+      ),
+      GoRoute(
+        path: AppRouteNames.trustedCircleScreen,
+        builder: (context, state) => const TrustedCircleScreen(),
       ),
       // Main User Shell (bottom nav: Home / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(

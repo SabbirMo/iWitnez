@@ -16,6 +16,7 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBack,
     this.onVoiceCall,
     this.onVideoCall,
+    this.onProfileTap,
   });
 
   final String name;
@@ -24,6 +25,7 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBack;
   final VoidCallback? onVoiceCall;
   final VoidCallback? onVideoCall;
+  final VoidCallback? onProfileTap;
 
   @override
   Size get preferredSize => Size.fromHeight(64.h);
@@ -46,35 +48,50 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: _kAccentPurple,
                 ),
               ),
-              CircleAvatar(
-                radius: 18.r,
-                backgroundImage: NetworkImage(avatarUrl),
-                backgroundColor: Colors.grey.shade200,
-              ),
-              SizedBox(width: 10.w),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      name,
-                      style: CustomTextStyle.regular16(
-                        AppColors.textDark,
-                      ).copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
+                child: InkWell(
+                  onTap: onProfileTap,
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 18.r,
+                          backgroundImage: NetworkImage(avatarUrl),
+                          backgroundColor: Colors.grey.shade200,
+                        ),
+                        SizedBox(width: 10.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: CustomTextStyle.regular16(
+                                  AppColors.textDark,
+                                ).copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
+                              ),
+                              if (isOnline)
+                                Text(
+                                  'Online',
+                                  style:
+                                      CustomTextStyle.regular14(
+                                        const Color(0xFF10B981),
+                                      ).copyWith(
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    if (isOnline)
-                      Text(
-                        'Online',
-                        style:
-                            CustomTextStyle.regular14(
-                              const Color(0xFF10B981),
-                            ).copyWith(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                  ],
+                  ),
                 ),
               ),
               IconButton(

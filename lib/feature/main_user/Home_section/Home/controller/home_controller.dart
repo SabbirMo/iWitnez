@@ -43,11 +43,11 @@ class HomeController {
   }
 
   void onTrustedCircleTap(BuildContext context, TrustedCircleKind kind) {
-    debugPrint('Open Trusted Circle: ${kind.name}');
+    context.push(AppRouteNames.trustedCircleScreen);
   }
 
   void onViewAllTrustedCirclesTap(BuildContext context) {
-    debugPrint('View all trusted circles');
+    context.push(AppRouteNames.trustedCircleScreen);
   }
 
   void onSosTap(BuildContext context) {
