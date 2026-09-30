@@ -1,6 +1,7 @@
 class ImageAssets {
   static const String image = "assets/images";
   static const String svg = "assets/svg";
+  static const String icons = "assets/icons";
 
   static const String waveBg = "$image/wave_bg.png";
   static const String logoText = "$image/logo_text.png";
@@ -35,4 +36,7 @@ class ImageAssets {
   static const String location = "$image/location.png";
   static const String notification = "$image/notification.png";
   static const String allowCamera = "$image/allow_camera.png";
+
+  //sos Active
+  static const String sosActive = "$icons/active.png";
 }

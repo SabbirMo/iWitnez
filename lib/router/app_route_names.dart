@@ -39,4 +39,7 @@ class AppRouteNames {
   static final String termsOfServiceScreen = "/termsOfServiceScreen";
   static final String audioCallScreen = "/audioCallScreen";
   static final String videoCallScreen = "/videoCallScreen";
+  static final String sosCountdownScreen = "/sosCountdownScreen";
+  static final String sosActiveCameraScreen = "/sosActiveCameraScreen";
+  static final String sosVideoStoppedScreen = "/sosVideoStoppedScreen";
 }

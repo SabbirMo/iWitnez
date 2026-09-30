@@ -23,6 +23,9 @@ import 'package:iwitnez/feature/main_user/Calls_section/Calls/screen/calls_scree
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/screen/chat_screen.dart'
     as main_user_chat;
 import 'package:iwitnez/feature/main_user/TrustedCircle/screen/trusted_circle_screen.dart';
+import 'package:iwitnez/feature/main_user/Sos_section/screen/sos_countdown_screen.dart';
+import 'package:iwitnez/feature/main_user/Sos_section/screen/sos_active_camera_screen.dart';
+import 'package:iwitnez/feature/main_user/Sos_section/screen/sos_video_stopped_screen.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/screen/chat_details_screen.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/screen/chat_profile_details_screen.dart';
 import 'package:iwitnez/feature/main_user/HelpSupport/screen/help_support_screen.dart';
@@ -142,6 +145,18 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.trustedCircleScreen,
         builder: (context, state) => const TrustedCircleScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.sosCountdownScreen,
+        builder: (context, state) => const SosCountdownScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.sosActiveCameraScreen,
+        builder: (context, state) => const SosActiveCameraScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.sosVideoStoppedScreen,
+        builder: (context, state) => const SosVideoStoppedScreen(),
       ),
       // Main User Shell (bottom nav: Home / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(
