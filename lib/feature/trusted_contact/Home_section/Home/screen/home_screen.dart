@@ -21,20 +21,22 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Image.asset(ImageAssets.mainLogo, width: 42.w),
                   SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppString.trustedContact,
-                        style: CustomTextStyle.bold30(AppColors.textDark)
-                            .copyWith(fontSize: 20.sp),
-                      ),
-                      Text(
-                        AppString.trustedContactSubtitle,
-                        style: CustomTextStyle.regular14(AppColors.textMuted)
-                            .copyWith(fontSize: 12.sp),
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppString.trustedContact,
+                          style: CustomTextStyle.bold30(AppColors.textDark)
+                              .copyWith(fontSize: 20.sp),
+                        ),
+                        Text(
+                          AppString.trustedContactSubtitle,
+                          style: CustomTextStyle.regular14(AppColors.textMuted)
+                              .copyWith(fontSize: 12.sp),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

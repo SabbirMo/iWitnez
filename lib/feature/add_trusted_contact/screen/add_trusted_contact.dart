@@ -7,8 +7,8 @@ import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/provider/add_trusted_contact_provider.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/widget/add_contact_widget.dart';
+import 'package:iwitnez/feature/add_trusted_contact/provider/add_trusted_contact_provider.dart';
+import 'package:iwitnez/feature/add_trusted_contact/widget/add_contact_widget.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
 class AddTrustedContactScreen extends ConsumerStatefulWidget {

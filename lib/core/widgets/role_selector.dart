@@ -28,7 +28,7 @@ class RoleSelector extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        SizedBox(height: 15.h),
+        SizedBox(height: 10.h),
         Row(
           children: [
             Expanded(
@@ -70,9 +70,8 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = 11.79.r;
-    const borderWidth = 0.98;
-    const contentPadding = 11.79;
+    final borderRadius = 12.r;
+    const borderWidth = 1.0;
 
     final bgColor =
         isSelected ? const Color(0xFFFAF5FF) : AppColors.white;
@@ -80,22 +79,21 @@ class _RoleCard extends StatelessWidget {
         isSelected ? const Color(0xFFE9D5FF) : const Color(0xFFE5E7EB);
     final iconBg =
         isSelected ? const Color(0xFF9333EA) : const Color(0xFFF3F4F6);
-    final iconColor = isSelected ? AppColors.white : const Color(0xFF374151);
+    final iconColor = isSelected ? AppColors.white : const Color(0xFF4B5563);
     final titleColor =
         isSelected ? const Color(0xFF7E22CE) : const Color(0xFF374151);
     final titleWeight =
         isSelected ? FontWeight.w700 : FontWeight.w600;
     final subtitleColor =
-        isSelected ? AppColors.onboardingDesc : const Color(0xFF9CA3AF);
+        isSelected ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF);
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.all(contentPadding),
-        height: 57.h,
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(borderRadius),
@@ -105,8 +103,8 @@ class _RoleCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 31.44.w,
-              height: 31.44.w,
+              width: 32.w,
+              height: 32.w,
               decoration: BoxDecoration(
                 color: iconBg,
                 shape: BoxShape.circle,
@@ -114,10 +112,10 @@ class _RoleCard extends StatelessWidget {
               child: Icon(
                 icon,
                 color: iconColor,
-                size: 17.sp,
+                size: 18.sp,
               ),
             ),
-            SizedBox(width: contentPadding.w),
+            SizedBox(width: 8.w),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -125,21 +123,25 @@ class _RoleCard extends StatelessWidget {
                 children: [
                   Text(
                     role.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: titleColor,
-                      fontSize: 11.79.sp,
+                      fontSize: 11.5.sp,
                       fontWeight: titleWeight,
-                      height: 1.33,
+                      height: 1.2,
                     ),
                   ),
-                  SizedBox(height: 0.5.h),
+                  SizedBox(height: 2.h),
                   Text(
                     role.subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: subtitleColor,
-                      fontSize: 8.84.sp,
+                      fontSize: 8.5.sp,
                       fontWeight: FontWeight.w400,
-                      height: 1.5,
+                      height: 1.2,
                     ),
                   ),
                 ],

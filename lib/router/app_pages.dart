@@ -50,6 +50,8 @@ import 'package:iwitnez/feature/main_user/CheckIn/screen/check_in_screen.dart';
 import 'package:iwitnez/feature/onboarding/onboarding_start_screen.dart';
 import 'package:iwitnez/feature/onboarding/screen/onboarding_screen.dart';
 import 'package:iwitnez/feature/splash/screen/splash_screen.dart';
+import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/screen/alerts_screen.dart'
+    as trusted_alerts;
 import 'package:iwitnez/feature/trusted_contact/Calls_section/Calls/screen/calls_screen.dart'
     as trusted_calls;
 import 'package:iwitnez/feature/trusted_contact/Chat_section/Chat/screen/chat_screen.dart'
@@ -58,10 +60,10 @@ import 'package:iwitnez/feature/trusted_contact/Home_section/Home/screen/home_sc
     as trusted_home;
 import 'package:iwitnez/feature/trusted_contact/Profile_section/Profile/screen/profile_screen.dart'
     as trusted_profile;
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/screen/add_trusted_contact.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/model/trusted_contact_model.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/widget/add_trusted_field_widget.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/screen/trusted_contact_success_screen.dart';
+import 'package:iwitnez/feature/add_trusted_contact/screen/add_trusted_contact.dart';
+import 'package:iwitnez/feature/add_trusted_contact/model/trusted_contact_model.dart';
+import 'package:iwitnez/feature/add_trusted_contact/widget/add_trusted_field_widget.dart';
+import 'package:iwitnez/feature/add_trusted_contact/screen/trusted_contact_success_screen.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
 final appPages = Provider<GoRouter>(
@@ -307,7 +309,7 @@ final appPages = Provider<GoRouter>(
         builder: (context, state) => const CheckInScreen(),
       ),
 
-      // Trusted Contact Shell (bottom nav: Home / Chat / Calls / Profile)
+      // Trusted Contact Shell (bottom nav: Home / Alerts / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => AppShellScaffold(
           navigationShell: navigationShell,
@@ -319,6 +321,15 @@ final appPages = Provider<GoRouter>(
               GoRoute(
                 path: AppRouteNames.trustedHome,
                 builder: (context, state) => const trusted_home.HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRouteNames.trustedAlerts,
+                builder: (context, state) =>
+                    const trusted_alerts.AlertsScreen(),
               ),
             ],
           ),
@@ -352,10 +363,6 @@ final appPages = Provider<GoRouter>(
 
       // ── About Us sub-screens ──
       GoRoute(
-        path: AppRouteNames.ourMissionScreen,
-        builder: (context, state) => const OurMissionScreen(),
-      ),
-      GoRoute(
         path: AppRouteNames.whoWeAreScreen,
         builder: (context, state) => const WhoWeAreScreen(),
       ),
@@ -366,28 +373,6 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.termsOfServiceScreen,
         builder: (context, state) => const TermsOfServiceScreen(),
-      ),
-
-      // ── Standalone screens ──
-      GoRoute(
-        path: AppRouteNames.notificationScreen,
-        builder: (context, state) => const NotificationScreen(),
-      ),
-      GoRoute(
-        path: AppRouteNames.personalInfoScreen,
-        builder: (context, state) => const PersonalInfoScreen(),
-      ),
-      GoRoute(
-        path: AppRouteNames.safetySettingsScreen,
-        builder: (context, state) => const SafetySettingsScreen(),
-      ),
-      GoRoute(
-        path: AppRouteNames.helpSupportScreen,
-        builder: (context, state) => const HelpSupportScreen(),
-      ),
-      GoRoute(
-        path: AppRouteNames.aboutUsScreen,
-        builder: (context, state) => const AboutUsScreen(),
       ),
 
       // ── Call Feature screens ──

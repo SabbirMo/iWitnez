@@ -57,32 +57,68 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = role == UserRole.mainUser
-        ? const Color(0xFF9124FF)
-        : const Color(0xFF12B886);
-    const inactiveColor = Color(0xFF717680);
+    const activeColor = Color(0xFF9124FF);
+    const inactiveIconColor = Color(0xFF1D2939);
+    const inactiveTextColor = Color(0xFF667085);
 
-    final items = [
-      _NavItemSpec(index: 0, label: AppString.home, svgPath: ImageAssets.home),
-      _NavItemSpec(index: 1, label: AppString.chat, svgPath: ImageAssets.chat),
-      _NavItemSpec(
-        index: 2,
-        label: AppString.calls,
-        svgPath: ImageAssets.callSvg,
-      ),
-      _NavItemSpec(
-        index: 3,
-        label: AppString.profile,
-        svgPath: ImageAssets.personSvg,
-      ),
-    ];
+    final items = role == UserRole.trustedContact
+        ? [
+            _NavItemSpec(
+              index: 0,
+              label: AppString.home,
+              svgPath: ImageAssets.home,
+            ),
+            _NavItemSpec(
+              index: 1,
+              label: AppString.alerts,
+              svgPath: ImageAssets.alertsSvg,
+            ),
+            _NavItemSpec(
+              index: 2,
+              label: AppString.chat,
+              svgPath: ImageAssets.chat,
+            ),
+            _NavItemSpec(
+              index: 3,
+              label: AppString.calls,
+              svgPath: ImageAssets.callSvg,
+            ),
+            _NavItemSpec(
+              index: 4,
+              label: AppString.profile,
+              svgPath: ImageAssets.personSvg,
+            ),
+          ]
+        : [
+            _NavItemSpec(
+              index: 0,
+              label: AppString.home,
+              svgPath: ImageAssets.home,
+            ),
+            _NavItemSpec(
+              index: 1,
+              label: AppString.chat,
+              svgPath: ImageAssets.chat,
+            ),
+            _NavItemSpec(
+              index: 2,
+              label: AppString.calls,
+              svgPath: ImageAssets.callSvg,
+            ),
+            _NavItemSpec(
+              index: 3,
+              label: AppString.profile,
+              svgPath: ImageAssets.personSvg,
+            ),
+          ];
 
     return Container(
       width: double.infinity,
-      height: 60.h,
+      height: 66,
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: const Color(0xFFF2F4F7), width: 1.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -107,7 +143,8 @@ class _FloatingNavBar extends StatelessWidget {
                 isActive: currentIndex == item.index,
                 onTap: () => onTap(item.index),
                 activeColor: activeColor,
-                inactiveColor: inactiveColor,
+                inactiveIconColor: inactiveIconColor,
+                inactiveTextColor: inactiveTextColor,
               ),
             ),
         ],
@@ -134,18 +171,21 @@ class _NavItem extends StatelessWidget {
     required this.isActive,
     required this.onTap,
     required this.activeColor,
-    required this.inactiveColor,
+    required this.inactiveIconColor,
+    required this.inactiveTextColor,
   });
 
   final _NavItemSpec spec;
   final bool isActive;
   final VoidCallback onTap;
   final Color activeColor;
-  final Color inactiveColor;
+  final Color inactiveIconColor;
+  final Color inactiveTextColor;
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? activeColor : inactiveColor;
+    final iconColor = isActive ? activeColor : inactiveIconColor;
+    final textColor = isActive ? activeColor : inactiveTextColor;
     final fontWeight = isActive ? FontWeight.w600 : FontWeight.w500;
 
     return InkWell(
@@ -153,11 +193,12 @@ class _NavItem extends StatelessWidget {
       splashFactory: NoSplash.splashFactory,
       highlightColor: Colors.transparent,
       hoverColor: Colors.transparent,
-      borderRadius: BorderRadius.circular(20.r),
+      borderRadius: BorderRadius.circular(24.r),
       child: Padding(
-        padding: EdgeInsets.only(top: 7.h, bottom: 4.h),
+        padding: EdgeInsets.symmetric(vertical: 4.h),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // ── SVG Icon ──
@@ -170,10 +211,13 @@ class _NavItem extends StatelessWidget {
                   width: 19.w,
                   height: 19.h,
                   fit: BoxFit.contain,
-                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                  colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                  placeholderBuilder: (context) =>
+                      SizedBox(width: 19.w, height: 19.h),
                 ),
               ),
             ),
+            SizedBox(height: 3.h),
 
             // ── Label Text ──
             Text(
@@ -181,13 +225,14 @@ class _NavItem extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
-                color: color,
+                color: textColor,
                 fontSize: 10.5.sp,
                 fontWeight: fontWeight,
                 letterSpacing: 0.1,
                 height: 1.1,
               ),
             ),
+            SizedBox(height: 3.h),
 
             // ── Bottom Active Indicator Pill ──
             AnimatedContainer(

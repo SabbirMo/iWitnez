@@ -26,6 +26,8 @@ class AppString {
   static const String haveAnAccount = "Don’t Have An Account?";
   static const String createAccount = " Create Account";
   static const String loginTitle = "Welcome Back!";
+  static const String loginSubTitle =
+      "Sign In To Stay Connected And Protected";
   static const String forgotPasswordTitle = "Forgot Password";
   static const String forgotPasswordDescription =
       "Don't Worry! Please Enter The Email Address \nLinked With Your Account.";
@@ -43,6 +45,7 @@ class AppString {
   static const String trustedContactSubtitle = "View & stay updated";
 
   static const String home = "Home";
+  static const String alerts = "Alerts";
   static const String chat = "Chat";
   static const String calls = "Calls";
   static const String profile = "Profile";
@@ -63,6 +66,9 @@ class AppString {
   static const String trustedHome = "Trusted Contact — Home";
   static const String trustedHomeDesc =
       "Stay informed! Here you can view the Main User's live location and recent activity.";
+  static const String trustedAlerts = "Trusted Contact — Alerts";
+  static const String trustedAlertsDesc =
+      "View emergency alerts, live SOS signals, and safety notifications.";
   static const String trustedChat = "Trusted Contact — Chat";
   static const String trustedChatDesc =
       "Your messages with the Main User will appear here.";

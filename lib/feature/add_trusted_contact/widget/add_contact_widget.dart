@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/model/trusted_contact_model.dart';
+import 'package:iwitnez/feature/add_trusted_contact/model/trusted_contact_model.dart';
 
 /// Initial card on AddTrustedContactScreen when no contacts added yet
 class AddContactWidget extends StatelessWidget {
@@ -150,15 +150,12 @@ class NotificationPreferenceWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 "Emergency alerts",
-                style: CustomTextStyle.regular14(AppColors.black).copyWith(
-                  fontWeight: FontWeight.w400,
-                ),
+                style: CustomTextStyle.regular14(
+                  AppColors.black,
+                ).copyWith(fontWeight: FontWeight.w400),
               ),
             ),
-            CustomSwitchButton(
-              value: isEnabled,
-              onChanged: onChanged,
-            ),
+            CustomSwitchButton(value: isEnabled, onChanged: onChanged),
           ],
         ),
       ),
@@ -218,8 +215,9 @@ class RelationshipFieldWidget extends StatelessWidget {
                   children: [
                     Text(
                       "Select Relationship",
-                      style: CustomTextStyle.semiBold14(AppColors.black)
-                          .copyWith(fontSize: 16.sp),
+                      style: CustomTextStyle.semiBold14(
+                        AppColors.black,
+                      ).copyWith(fontSize: 16.sp),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, size: 20),
@@ -235,19 +233,22 @@ class RelationshipFieldWidget extends StatelessWidget {
                   itemCount: relationships.length,
                   itemBuilder: (context, index) {
                     final item = relationships[index];
-                    final isSelected = item.toLowerCase() ==
+                    final isSelected =
+                        item.toLowerCase() ==
                         selectedRelationship.toLowerCase();
                     return ListTile(
                       title: Text(
                         item,
-                        style: CustomTextStyle.regular14(
-                          isSelected
-                              ? AppColors.buttonGradientStart
-                              : AppColors.black,
-                        ).copyWith(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
-                        ),
+                        style:
+                            CustomTextStyle.regular14(
+                              isSelected
+                                  ? AppColors.buttonGradientStart
+                                  : AppColors.black,
+                            ).copyWith(
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
                       ),
                       trailing: isSelected
                           ? const Icon(
@@ -297,21 +298,19 @@ class RelationshipFieldWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 selectedRelationship.isEmpty ? "Sister" : selectedRelationship,
-                style: CustomTextStyle.regular14(
-                  selectedRelationship.isEmpty
-                      ? AppColors.gray.withValues(alpha: 0.5)
-                      : AppColors.black,
-                ).copyWith(
-                  fontWeight: selectedRelationship.isEmpty
-                      ? FontWeight.w400
-                      : FontWeight.w500,
-                ),
+                style:
+                    CustomTextStyle.regular14(
+                      selectedRelationship.isEmpty
+                          ? AppColors.gray.withValues(alpha: 0.5)
+                          : AppColors.black,
+                    ).copyWith(
+                      fontWeight: selectedRelationship.isEmpty
+                          ? FontWeight.w400
+                          : FontWeight.w500,
+                    ),
               ),
             ),
-            const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey),
           ],
         ),
       ),
@@ -381,11 +380,7 @@ class TrustedContactCard extends StatelessWidget {
   final TrustedContactModel contact;
   final VoidCallback? onEdit;
 
-  const TrustedContactCard({
-    super.key,
-    required this.contact,
-    this.onEdit,
-  });
+  const TrustedContactCard({super.key, required this.contact, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -401,10 +396,7 @@ class TrustedContactCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ContactAvatarWidget(
-            avatarUrl: contact.avatarUrl,
-            radius: 20,
-          ),
+          ContactAvatarWidget(avatarUrl: contact.avatarUrl, radius: 20),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -413,10 +405,9 @@ class TrustedContactCard extends StatelessWidget {
               children: [
                 Text(
                   contact.fullName,
-                  style: CustomTextStyle.regular14(AppColors.black).copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14.sp,
-                  ),
+                  style: CustomTextStyle.regular14(
+                    AppColors.black,
+                  ).copyWith(fontWeight: FontWeight.w600, fontSize: 14.sp),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -486,9 +477,9 @@ class AddAnotherContactWidget extends StatelessWidget {
               SizedBox(width: 8.w),
               Text(
                 "Add Another Contact",
-                style: CustomTextStyle.regular14(AppColors.onboardingDesc).copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: CustomTextStyle.regular14(
+                  AppColors.onboardingDesc,
+                ).copyWith(fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -522,17 +513,20 @@ class DashedPillPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final Path path = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        radius,
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          radius,
+        ),
+      );
 
     final Path dashedPath = Path();
     for (final metric in path.computeMetrics()) {
       double distance = 0.0;
       while (distance < metric.length) {
-        final double length =
-            (distance + dash < metric.length) ? dash : metric.length - distance;
+        final double length = (distance + dash < metric.length)
+            ? dash
+            : metric.length - distance;
         dashedPath.addPath(
           metric.extractPath(distance, distance + length),
           Offset.zero,

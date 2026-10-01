@@ -14,9 +14,9 @@ import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_model.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/widget/remove_member_bottom_sheet.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/model/trusted_contact_model.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/provider/add_trusted_contact_provider.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/widget/add_contact_widget.dart';
+import 'package:iwitnez/feature/add_trusted_contact/model/trusted_contact_model.dart';
+import 'package:iwitnez/feature/add_trusted_contact/provider/add_trusted_contact_provider.dart';
+import 'package:iwitnez/feature/add_trusted_contact/widget/add_contact_widget.dart';
 
 class AddTrustedFieldWidget extends ConsumerStatefulWidget {
   final TrustedContactModel? contact;

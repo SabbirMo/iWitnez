@@ -8,7 +8,7 @@ import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_mod
 import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/widget/circle_member_card.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/widget/remove_member_bottom_sheet.dart';
-import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/provider/add_trusted_contact_provider.dart';
+import 'package:iwitnez/feature/add_trusted_contact/provider/add_trusted_contact_provider.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
 class CircleDetailsScreen extends ConsumerWidget {

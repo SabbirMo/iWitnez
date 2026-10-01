@@ -27,6 +27,7 @@ class ImageAssets {
   static const String quickSafety = "$svg/quick_safety.svg";
   static const String quickCheckIn = "$svg/quick_check_in.svg";
   static const String quickTimer = "$svg/quick_timer.svg";
+  static const String alertsSvg = "$svg/alerts.svg";
 
   //main user home
   static const String protectedCard = "$image/protected_card.png";

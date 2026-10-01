@@ -24,6 +24,7 @@ class AppRouteNames {
 
   static final String trustedShell = "/trustedContact";
   static final String trustedHome = "/trustedContact/home";
+  static final String trustedAlerts = "/trustedContact/alerts";
   static final String trustedChat = "/trustedContact/chat";
   static final String trustedCalls = "/trustedContact/calls";
   static final String trustedProfile = "/trustedContact/profile";
