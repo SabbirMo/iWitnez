@@ -37,7 +37,7 @@ class HomeController {
         debugPrint('Open Check In');
         break;
       case QuickActionType.scheduledTimer:
-        debugPrint('Open Scheduled & Timer');
+        context.push(AppRouteNames.scheduledTimerScreen);
         break;
     }
   }
