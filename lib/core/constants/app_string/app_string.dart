@@ -29,6 +29,12 @@ class AppString {
   static const String forgotPasswordTitle = "Forgot Password";
   static const String forgotPasswordDescription =
       "Don't Worry! Please Enter The Email Address \nLinked With Your Account.";
+  static const String newPasswordTitle = "Create New Password";
+  static const String newPasswordDescription =
+      "Your new password must be different from\npreviously used passwords.";
+  static const String newPassword = "New Password";
+  static const String confirmPassword = "Confirm Password";
+  static const String resetPassword = "Reset Password";
 
   static const String loginAs = "Login as";
   static const String mainUser = "Main User";

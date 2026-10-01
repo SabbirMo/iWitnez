@@ -6,13 +6,15 @@ class AppRouteNames {
   static final String loginScreen = "/loginScreen";
   static final String forgotPasswordScreen = "/forgotPasswordScreen";
   static final String verificationScreen = "/verificationScreen";
+  static final String newPasswordScreen = "/newPasswordScreen";
   static final String shareingScreen = "/shareingScreen";
   static final String accountSettingsScreen = "/accountSettingsScreen";
 
   //tursted contact
   static final String addTrustedContactScreen = "/addTrustedContactScreen";
   static final String addTrustedFieldWidget = "/addTrustedFieldWidget";
-  static final String trustedContactSuccessScreen = "/trustedContactSuccessScreen";
+  static final String trustedContactSuccessScreen =
+      "/trustedContactSuccessScreen";
 
   static final String mainUserShell = "/mainUser";
   static final String mainUserHome = "/mainUser/home";

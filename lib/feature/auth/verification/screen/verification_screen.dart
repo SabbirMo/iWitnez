@@ -72,13 +72,10 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
 
     final type = ref.read(verificationProvider).type;
     if (type == VerificationType.forgotPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email verified! Please login to your account.'),
-          backgroundColor: Color(0xFF10B981),
-        ),
+      context.go(
+        AppRouteNames.newPasswordScreen,
+        extra: ref.read(verificationProvider).email,
       );
-      context.go(AppRouteNames.loginScreen);
     } else {
       // createAccount flow -> navigate to locationScreen
       context.go(AppRouteNames.shareingScreen);
