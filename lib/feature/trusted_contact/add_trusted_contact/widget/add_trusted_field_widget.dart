@@ -111,22 +111,6 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
     }
   }
 
-  // void _showFeedback(String message, {bool isError = false}) {
-  //   if (!mounted) return;
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //       backgroundColor: isError
-  //           ? AppColors.accentRed
-  //           : AppColors.buttonGradientStart,
-  //       behavior: SnackBarBehavior.floating,
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(10.r),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   void _handleRemoveMember() {
     final member = widget.circleMember;
     final circleTitle = widget.circleTitle ?? 'Family';

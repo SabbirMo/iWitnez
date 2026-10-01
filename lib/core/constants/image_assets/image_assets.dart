@@ -24,6 +24,9 @@ class ImageAssets {
   static const String notificatioBell = "$svg/notification-bell.svg";
   static const String home = "$svg/home.svg";
   static const String chat = "$svg/message.svg";
+  static const String quickSafety = "$svg/quick_safety.svg";
+  static const String quickCheckIn = "$svg/quick_check_in.svg";
+  static const String quickTimer = "$svg/quick_timer.svg";
 
   //main user home
   static const String protectedCard = "$image/protected_card.png";

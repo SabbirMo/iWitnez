@@ -76,24 +76,19 @@ class HomeScreen extends ConsumerWidget {
     return Row(
       children: [
         for (int i = 0; i < state.quickActions.length; i++) ...[
-          if (i != 0) SizedBox(width: 14.w),
+          if (i > 0) SizedBox(width: 14.w),
           Expanded(
-            child: _buildQuickActionCard(context, state.quickActions[i]),
+            child: QuickActionCard(
+              type: state.quickActions[i].type,
+              onTap: () => _controller.onQuickActionTap(
+                context,
+                state.quickActions[i].type,
+              ),
+            ),
           ),
         ],
       ],
     );
-  }
-
-  Widget _buildQuickActionCard(BuildContext context, QuickActionItem item) {
-    void onTap() => _controller.onQuickActionTap(context, item.type);
-    return switch (item.type) {
-      QuickActionType.safety => QuickActionCard.safety(onTap: onTap),
-      QuickActionType.checkIn => QuickActionCard.checkIn(onTap: onTap),
-      QuickActionType.scheduledTimer => QuickActionCard.scheduledTimer(
-        onTap: onTap,
-      ),
-    };
   }
 
   Widget _buildTrustedCirclesRow(BuildContext context, HomeState state) {
