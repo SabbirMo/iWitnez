@@ -10,7 +10,7 @@ import 'package:iwitnez/feature/AboutUs/screen/terms_of_service_screen.dart';
 import 'package:iwitnez/feature/OurMission/screen/our_mission_screen.dart';
 import 'package:iwitnez/feature/auth/create_account/screen/create_account_screen.dart';
 import 'package:iwitnez/feature/auth/fotgot_password/screen/forgot_password_screen.dart';
-import 'package:iwitnez/feature/auth/fotgot_password/screen/new_password.dart';
+import 'package:iwitnez/feature/auth/fotgot_password/screen/new_password_screen.dart';
 import 'package:iwitnez/feature/auth/login/screen/login_screen.dart';
 import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
 import 'package:iwitnez/feature/auth/verification/screen/verification_screen.dart';

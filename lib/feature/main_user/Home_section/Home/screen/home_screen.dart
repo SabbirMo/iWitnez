@@ -37,7 +37,6 @@ class HomeScreen extends ConsumerWidget {
                       onNotificationTap: () =>
                           _controller.onNotificationTap(context, ref),
                     ),
-                    SizedBox(height: 6.h),
                     if (state.isProtected) const ProtectedBanner(),
                     SizedBox(height: 16.h),
                     LiveLocationCard(
@@ -87,7 +86,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildQuickActionCard(BuildContext context, QuickActionItem item) {
-    final onTap = () => _controller.onQuickActionTap(context, item.type);
+    void onTap() => _controller.onQuickActionTap(context, item.type);
     return switch (item.type) {
       QuickActionType.safety => QuickActionCard.safety(onTap: onTap),
       QuickActionType.checkIn => QuickActionCard.checkIn(onTap: onTap),
@@ -116,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
     BuildContext context,
     TrustedCircleSummary summary,
   ) {
-    final onTap = () => _controller.onTrustedCircleTap(context, summary.kind);
+    void onTap() => _controller.onTrustedCircleTap(context, summary.kind);
     return switch (summary.kind) {
       TrustedCircleKind.family => TrustedCircleCard.family(
         onTap: onTap,
