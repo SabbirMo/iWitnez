@@ -54,4 +54,5 @@ class ImageAssets {
   static const String historyMap = "$image/history_map.png";
   static const String liveTrackingMap = "$image/live_tracking_map.png";
   static const String safePlaceIcon = "$icons/safePlaceIcon.png";
+  static const String checkinImage = "$image/checkin_image.png";
 }

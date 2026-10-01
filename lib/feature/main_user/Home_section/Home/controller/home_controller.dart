@@ -34,7 +34,7 @@ class HomeController {
         context.push(AppRouteNames.safetyTrackingScreen);
         break;
       case QuickActionType.checkIn:
-        debugPrint('Open Check In');
+        context.push(AppRouteNames.checkInScreen);
         break;
       case QuickActionType.scheduledTimer:
         context.push(AppRouteNames.scheduledTimerScreen);

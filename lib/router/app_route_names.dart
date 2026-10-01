@@ -52,4 +52,5 @@ class AppRouteNames {
   static final String safetyTrackingScreen = "/safetyTrackingScreen";
   static final String addSafePlaceScreen = "/addSafePlaceScreen";
   static final String scheduledTimerScreen = "/scheduledTimerScreen";
+  static final String checkInScreen = "/checkInScreen";
 }
