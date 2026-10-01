@@ -4,6 +4,8 @@ enum SafePlaceType {
   home,
   work,
   university,
+  favorite,
+  star,
   other,
 }
 
@@ -12,6 +14,8 @@ extension SafePlaceTypeX on SafePlaceType {
     SafePlaceType.home => 'Home',
     SafePlaceType.work => 'Work',
     SafePlaceType.university => 'University',
+    SafePlaceType.favorite => 'Favorite',
+    SafePlaceType.star => 'Starred',
     SafePlaceType.other => 'Safe Place',
   };
 
@@ -19,6 +23,8 @@ extension SafePlaceTypeX on SafePlaceType {
     SafePlaceType.home => Icons.home_rounded,
     SafePlaceType.work => Icons.business_center_rounded,
     SafePlaceType.university => Icons.school_rounded,
+    SafePlaceType.favorite => Icons.favorite_rounded,
+    SafePlaceType.star => Icons.star_rounded,
     SafePlaceType.other => Icons.place_rounded,
   };
 
@@ -26,6 +32,8 @@ extension SafePlaceTypeX on SafePlaceType {
     SafePlaceType.home => const Color(0xFF7C3AED),
     SafePlaceType.work => const Color(0xFF0284C7),
     SafePlaceType.university => const Color(0xFF059669),
+    SafePlaceType.favorite => const Color(0xFFEC4899),
+    SafePlaceType.star => const Color(0xFFF59E0B),
     SafePlaceType.other => const Color(0xFFD97706),
   };
 
@@ -33,6 +41,8 @@ extension SafePlaceTypeX on SafePlaceType {
     SafePlaceType.home => const Color(0xFFF3E8FF),
     SafePlaceType.work => const Color(0xFFE0F2FE),
     SafePlaceType.university => const Color(0xFFDCFCE7),
+    SafePlaceType.favorite => const Color(0xFFFCE7F3),
+    SafePlaceType.star => const Color(0xFFFEF3C7),
     SafePlaceType.other => const Color(0xFFFEF3C7),
   };
 }
@@ -43,6 +53,10 @@ class SafePlaceModel {
   final String address;
   final bool isInside;
   final SafePlaceType type;
+  final IconData? customIcon;
+  final Color? customIconColor;
+  final Color? customBgColor;
+  final int? radius;
 
   const SafePlaceModel({
     required this.id,
@@ -50,7 +64,15 @@ class SafePlaceModel {
     required this.address,
     required this.isInside,
     required this.type,
+    this.customIcon,
+    this.customIconColor,
+    this.customBgColor,
+    this.radius,
   });
+
+  IconData get displayIcon => customIcon ?? type.iconData;
+  Color get displayIconColor => customIconColor ?? type.iconColor;
+  Color get displayBackgroundColor => customBgColor ?? type.backgroundColor;
 
   SafePlaceModel copyWith({
     String? id,
@@ -58,6 +80,10 @@ class SafePlaceModel {
     String? address,
     bool? isInside,
     SafePlaceType? type,
+    IconData? customIcon,
+    Color? customIconColor,
+    Color? customBgColor,
+    int? radius,
   }) {
     return SafePlaceModel(
       id: id ?? this.id,
@@ -65,6 +91,10 @@ class SafePlaceModel {
       address: address ?? this.address,
       isInside: isInside ?? this.isInside,
       type: type ?? this.type,
+      customIcon: customIcon ?? this.customIcon,
+      customIconColor: customIconColor ?? this.customIconColor,
+      customBgColor: customBgColor ?? this.customBgColor,
+      radius: radius ?? this.radius,
     );
   }
 }

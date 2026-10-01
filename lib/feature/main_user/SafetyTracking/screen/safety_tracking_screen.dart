@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/provider/safety_tracking_provider.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/widget/add_safe_place_modal.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/widget/safe_places_card.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/widget/safety_alerts_card.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/widget/safety_history_date_card.dart';
@@ -117,21 +115,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
                     );
                   },
                   onAddSafePlaceTap: () {
-                    AddSafePlaceBottomSheet.show(
-                      context,
-                      onSave: (newPlace) {
-                        notifier.addSafePlace(newPlace);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${newPlace.title} added to Safe Places',
-                            ),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                    );
+                    context.push(AppRouteNames.addSafePlaceScreen);
                   },
                 ),
                 SizedBox(height: 14.h),
@@ -264,12 +248,12 @@ class SafetyTrackingScreen extends ConsumerWidget {
                     width: 38.r,
                     height: 38.r,
                     decoration: BoxDecoration(
-                      color: place.type.backgroundColor,
+                      color: place.displayBackgroundColor,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      place.type.iconData,
-                      color: place.type.iconColor,
+                      place.displayIcon,
+                      color: place.displayIconColor,
                       size: 20.sp,
                     ),
                   ),

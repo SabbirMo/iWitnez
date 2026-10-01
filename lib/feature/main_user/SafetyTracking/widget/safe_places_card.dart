@@ -107,13 +107,13 @@ class SafePlacesCard extends StatelessWidget {
                 width: 44.r,
                 height: 44.r,
                 decoration: BoxDecoration(
-                  color: place.type.backgroundColor,
+                  color: place.displayBackgroundColor,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Icon(
-                    place.type.iconData,
-                    color: place.type.iconColor,
+                    place.displayIcon,
+                    color: place.displayIconColor,
                     size: 22.sp,
                   ),
                 ),

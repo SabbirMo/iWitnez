@@ -135,7 +135,10 @@ class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
   }
 
   void addSafePlace(SafePlaceModel place) {
-    state = state.copyWith(safePlaces: [...state.safePlaces, place]);
+    state = state.copyWith(
+      safePlaces: [...state.safePlaces, place],
+      selectedTabIndex: 0,
+    );
   }
 
   void removeSafePlace(String id) {
@@ -161,6 +164,6 @@ class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
 }
 
 final safetyTrackingProvider =
-    NotifierProvider.autoDispose<SafetyTrackingNotifier, SafetyTrackingState>(
+    NotifierProvider<SafetyTrackingNotifier, SafetyTrackingState>(
       SafetyTrackingNotifier.new,
     );
