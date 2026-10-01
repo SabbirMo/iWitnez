@@ -88,4 +88,8 @@ class AppColors {
   //calls
   static const Color callsPurple = Color(0xff5B21B6); //#5B21B6
   static const Color callsGray = Color(0xff4B5563); //#4B5563
+
+  //live location
+  static const Color liveLocationPurple = Color(0xff6C48F5); //#6C48F5
+  static const Color liveLocationLightPurple = Color(0xffE6E0FF); //#E6E0FF
 }

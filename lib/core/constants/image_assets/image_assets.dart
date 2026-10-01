@@ -39,4 +39,9 @@ class ImageAssets {
 
   //sos Active
   static const String sosActive = "$icons/active.png";
+
+  //sharing
+  static const String protected = "$image/protected.png";
+
+  static const String stopProtection = "$image/stop_protection.png";
 }

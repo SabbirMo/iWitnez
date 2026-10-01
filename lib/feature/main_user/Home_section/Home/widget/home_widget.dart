@@ -214,7 +214,8 @@ class ProtectedBanner extends StatelessWidget {
             child: Image.asset(
               ImageAssets.protectedCard,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
             ),
           ),
           // Left side — text content
@@ -259,7 +260,7 @@ class ProtectedBanner extends StatelessWidget {
                 width: 56.w,
                 height: 64.h,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Icon(
+                errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.shield_rounded,
                   size: 54.sp,
                   color: Colors.white,
@@ -517,116 +518,121 @@ class _LiveLocationCardState extends State<LiveLocationCard>
 
             // Right Panel — Detailed Interactive Dummy Map
             Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(16.r),
-                  bottomRight: Radius.circular(16.r),
-                ),
-                child: Stack(
-                  children: [
-                    // Vector-styled map matching Manhattan grid layout
-                    Positioned.fill(
-                      child: CustomPaint(painter: const _DetailedMapPainter()),
-                    ),
+              child: InkWell(
+                onTap: widget.onViewFullMapTap,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(16.r),
+                    bottomRight: Radius.circular(16.r),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Vector-styled map matching Manhattan grid layout
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: const _DetailedMapPainter(),
+                        ),
+                      ),
 
-                    // User Location (pulsing halo + vibrant blue dot)
-                    Positioned(
-                      left: 36.w,
-                      bottom: 22.h,
-                      child: AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          final wave = _pulseAnimation.value;
-                          return Stack(
-                            alignment: Alignment.center,
-                            clipBehavior: Clip.none,
-                            children: [
-                              // Outer pulse halo
-                              Container(
-                                width: (34 + wave * 16).r,
-                                height: (34 + wave * 16).r,
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF3B82F6,
-                                  ).withValues(alpha: (1.0 - wave) * 0.35),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              // Static halo ring
-                              Container(
-                                width: 30.r,
-                                height: 30.r,
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF93C5FD,
-                                  ).withValues(alpha: 0.45),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              // Center blue circle with white border
-                              Container(
-                                width: 17.r,
-                                height: 17.r,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF007AFF),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2.2.w,
+                      // User Location (pulsing halo + vibrant blue dot)
+                      Positioned(
+                        left: 36.w,
+                        bottom: 22.h,
+                        child: AnimatedBuilder(
+                          animation: _pulseAnimation,
+                          builder: (context, child) {
+                            final wave = _pulseAnimation.value;
+                            return Stack(
+                              alignment: Alignment.center,
+                              clipBehavior: Clip.none,
+                              children: [
+                                // Outer pulse halo
+                                Container(
+                                  width: (34 + wave * 16).r,
+                                  height: (34 + wave * 16).r,
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF3B82F6,
+                                    ).withValues(alpha: (1.0 - wave) * 0.35),
+                                    shape: BoxShape.circle,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFF007AFF,
-                                      ).withValues(alpha: 0.4),
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
-                              ),
-                            ],
-                          );
-                        },
+                                // Static halo ring
+                                Container(
+                                  width: 30.r,
+                                  height: 30.r,
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF93C5FD,
+                                    ).withValues(alpha: 0.45),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                // Center blue circle with white border
+                                Container(
+                                  width: 17.r,
+                                  height: 17.r,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF007AFF),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2.2.w,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFF007AFF,
+                                        ).withValues(alpha: 0.4),
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
 
-                    // Avatar 1 (Woman - top left / middle)
-                    Positioned(
-                      left: 18.w,
-                      top: 14.h,
-                      child: _buildMapAvatar(
-                        imageUrl:
-                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-                        fallbackName: 'Sarah',
-                        fallbackColor: const Color(0xFFFDA4AF),
+                      // Avatar 1 (Woman - top left / middle)
+                      Positioned(
+                        left: 18.w,
+                        top: 14.h,
+                        child: _buildMapAvatar(
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+                          fallbackName: 'Sarah',
+                          fallbackColor: const Color(0xFFFDA4AF),
+                        ),
                       ),
-                    ),
 
-                    // Avatar 2 (Young man - top right)
-                    Positioned(
-                      right: 36.w,
-                      top: 12.h,
-                      child: _buildMapAvatar(
-                        imageUrl:
-                            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-                        fallbackName: 'Alex',
-                        fallbackColor: const Color(0xFF60A5FA),
+                      // Avatar 2 (Young man - top right)
+                      Positioned(
+                        right: 36.w,
+                        top: 12.h,
+                        child: _buildMapAvatar(
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+                          fallbackName: 'Alex',
+                          fallbackColor: const Color(0xFF60A5FA),
+                        ),
                       ),
-                    ),
 
-                    // Avatar 3 (Man with beard - middle right)
-                    Positioned(
-                      right: 12.w,
-                      top: 60.h,
-                      child: _buildMapAvatar(
-                        imageUrl:
-                            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-                        fallbackName: 'John',
-                        fallbackColor: const Color(0xFFFB923C),
+                      // Avatar 3 (Man with beard - middle right)
+                      Positioned(
+                        right: 12.w,
+                        top: 60.h,
+                        child: _buildMapAvatar(
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+                          fallbackName: 'John',
+                          fallbackColor: const Color(0xFFFB923C),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -873,131 +879,6 @@ class _DetailedMapPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Map grid lines painter for streets & block simulation
-class _MapGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.45)
-      ..strokeWidth = 1.0;
-
-    final blockPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.25)
-      ..style = PaintingStyle.fill;
-
-    // Grid lines
-    for (int i = 1; i < 5; i++) {
-      final dy = size.height / 5 * i;
-      canvas.drawLine(Offset(0, dy), Offset(size.width, dy), paint);
-    }
-    for (int i = 1; i < 6; i++) {
-      final dx = size.width / 6 * i;
-      canvas.drawLine(Offset(dx, 0), Offset(dx, size.height), paint);
-    }
-
-    // City blocks
-    for (final rect in [
-      Rect.fromLTWH(8, 12, 34, 20),
-      Rect.fromLTWH(52, 28, 40, 24),
-      Rect.fromLTWH(18, 56, 32, 22),
-      Rect.fromLTWH(62, 70, 48, 20),
-    ]) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(3)),
-        blockPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Curved road path painter
-class _MapRoadsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final roadPaint = Paint()
-      ..color = const Color(0xFF93C5FD).withValues(alpha: 0.4)
-      ..strokeWidth = 4.0
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    final path = Path();
-    path.moveTo(0, size.height * 0.35);
-    path.quadraticBezierTo(
-      size.width * 0.45,
-      size.height * 0.25,
-      size.width * 0.7,
-      size.height * 0.65,
-    );
-    path.lineTo(size.width, size.height * 0.75);
-
-    canvas.drawPath(path, roadPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Small avatar pin shown on map for friends
-class _MapPinBadge extends StatelessWidget {
-  final Color avatarColor;
-  final String name;
-
-  const _MapPinBadge({required this.avatarColor, required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20.r,
-          height: 20.r,
-          decoration: BoxDecoration(
-            color: avatarColor,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 1.5.w),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 3,
-                offset: const Offset(0, 1.5),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(Icons.person, color: Colors.white, size: 11.sp),
-          ),
-        ),
-        SizedBox(height: 1.5.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(4.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 2,
-              ),
-            ],
-          ),
-          child: Text(
-            name,
-            style: GoogleFonts.inter(
-              fontSize: 6.8.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1E293B),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 /// =====================================================================
@@ -1487,7 +1368,7 @@ class _AnimatedSosButtonState extends State<AnimatedSosButton>
                   child: Image.asset(
                     ImageAssets.sosAlert,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (context, error, stackTrace) => Container(
                       width: imageSize.w,
                       height: imageSize.h,
                       decoration: ShapeDecoration(
@@ -1519,367 +1400,6 @@ class _AnimatedSosButtonState extends State<AnimatedSosButton>
           ],
         ),
       ),
-    );
-  }
-}
-
-/// =====================================================================
-/// FULL MAP BOTTOM SHEET — Interactive Full Map Preview
-/// =====================================================================
-class FullMapBottomSheet extends StatelessWidget {
-  const FullMapBottomSheet({super.key});
-
-  static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const FullMapBottomSheet(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 0.78.sh,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          SizedBox(height: 10.h),
-          // Drag handle
-          Center(
-            child: Container(
-              width: 38.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD1D5DB),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
-          ),
-          SizedBox(height: 14.h),
-
-          // Header
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Live Location Tracking',
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Row(
-                      children: [
-                        Container(
-                          width: 6.r,
-                          height: 6.r,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF10B981),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 5.w),
-                        Text(
-                          'Sharing active · 3 contacts notified',
-                          style: GoogleFonts.inter(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF64748B),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: const Color(0xFF64748B),
-                    size: 22.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: 12.h),
-
-          // Expanded Map Graphic
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18.r),
-                child: Stack(
-                  children: [
-                    // Gradient map ground
-                    Positioned.fill(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFFE8F2FE), Color(0xFFD5E8FD)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Grid
-                    Positioned.fill(
-                      child: CustomPaint(painter: _MapGridPainter()),
-                    ),
-
-                    // Roads
-                    Positioned.fill(
-                      child: CustomPaint(painter: _MapRoadsPainter()),
-                    ),
-
-                    // Friend Pin 1: Sarah
-                    Positioned(
-                      left: 45.w,
-                      top: 40.h,
-                      child: const _MapPinBadge(
-                        avatarColor: Color(0xFFFDA4AF),
-                        name: 'Sarah (0.4 mi)',
-                      ),
-                    ),
-
-                    // Friend Pin 2: Alex
-                    Positioned(
-                      right: 50.w,
-                      top: 80.h,
-                      child: const _MapPinBadge(
-                        avatarColor: Color(0xFF60A5FA),
-                        name: 'Alex (1.2 mi)',
-                      ),
-                    ),
-
-                    // Friend Pin 3: David
-                    Positioned(
-                      left: 90.w,
-                      bottom: 70.h,
-                      child: const _MapPinBadge(
-                        avatarColor: Color(0xFF34D399),
-                        name: 'David (2.1 mi)',
-                      ),
-                    ),
-
-                    // User Pin: Center
-                    Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8.w,
-                              vertical: 3.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.buttonGradientStart,
-                              borderRadius: BorderRadius.circular(100.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 4,
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              'You are here',
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Container(
-                            width: 20.r,
-                            height: 20.r,
-                            decoration: BoxDecoration(
-                              color: AppColors.homeLocationMapPin,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 3.w,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.homeLocationMapPin
-                                      .withValues(alpha: 0.5),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Floating GPS Tools
-                    Positioned(
-                      right: 12.w,
-                      bottom: 12.h,
-                      child: Column(
-                        children: [
-                          _mapToolButton(Icons.my_location_rounded),
-                          SizedBox(height: 8.h),
-                          _mapToolButton(Icons.layers_rounded),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          SizedBox(height: 14.h),
-
-          // Address Card
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 18.w),
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: const Color(0xFFE2E8F0),
-                  width: 0.8.w,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36.r,
-                    height: 36.r,
-                    decoration: BoxDecoration(
-                      color: AppColors.buttonGradientStart.withValues(
-                        alpha: 0.1,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.location_on_rounded,
-                      color: AppColors.buttonGradientStart,
-                      size: 20.sp,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '1200 Park Ave, New York',
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'NY 10028, USA · 40.7769° N, 73.9582° W',
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            color: const Color(0xFF64748B),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SizedBox(height: 16.h),
-
-          // Share Link button
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 20.h),
-            child: SizedBox(
-              width: double.infinity,
-              height: 46.h,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Live tracking link copied to clipboard!'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                icon: Icon(
-                  Icons.share_rounded,
-                  color: Colors.white,
-                  size: 16.sp,
-                ),
-                label: Text(
-                  'Share Live Tracking Link',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonGradientStart,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Widget _mapToolButton(IconData icon) {
-    return Container(
-      width: 32.r,
-      height: 32.r,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Icon(icon, color: const Color(0xFF475569), size: 16.sp),
     );
   }
 }
