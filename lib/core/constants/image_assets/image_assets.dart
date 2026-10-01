@@ -49,4 +49,8 @@ class ImageAssets {
   static const String protected = "$image/protected.png";
 
   static const String stopProtection = "$image/stop_protection.png";
+
+  //safety tracking
+  static const String historyMap = "$image/history_map.png";
+  static const String liveTrackingMap = "$image/live_tracking_map.png";
 }

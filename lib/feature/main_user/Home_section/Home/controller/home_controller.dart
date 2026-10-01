@@ -31,7 +31,7 @@ class HomeController {
   void onQuickActionTap(BuildContext context, QuickActionType type) {
     switch (type) {
       case QuickActionType.safety:
-        context.push(AppRouteNames.liveLocationScreen);
+        context.push(AppRouteNames.safetyTrackingScreen);
         break;
       case QuickActionType.checkIn:
         debugPrint('Open Check In');

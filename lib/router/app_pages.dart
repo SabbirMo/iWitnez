@@ -43,6 +43,7 @@ import 'package:iwitnez/feature/main_user/PersonalInformation/screen/personal_in
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/screen/profile_screen.dart'
     as main_user_profile;
 import 'package:iwitnez/feature/main_user/SafetySettings/screen/safety_settings_screen.dart';
+import 'package:iwitnez/feature/main_user/SafetyTracking/screen/safety_tracking_screen.dart';
 import 'package:iwitnez/feature/onboarding/onboarding_start_screen.dart';
 import 'package:iwitnez/feature/onboarding/screen/onboarding_screen.dart';
 import 'package:iwitnez/feature/splash/screen/splash_screen.dart';
@@ -281,6 +282,11 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.manageSharingScreen,
         builder: (context, state) => const ManageSharingScreen(),
+      ),
+      // Safety Tracking Screen
+      GoRoute(
+        path: AppRouteNames.safetyTrackingScreen,
+        builder: (context, state) => const SafetyTrackingScreen(),
       ),
 
       // Trusted Contact Shell (bottom nav: Home / Chat / Calls / Profile)
