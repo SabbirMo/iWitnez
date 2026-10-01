@@ -43,9 +43,9 @@ class CustomTextStyle {
     );
   }
 
-  static TextStyle ibold32(Color color) {
+  static TextStyle ibold28(Color color) {
     return GoogleFonts.inter(
-      fontSize: 32.sp,
+      fontSize: 28.sp,
       fontWeight: FontWeight.w700,
       color: color,
     );

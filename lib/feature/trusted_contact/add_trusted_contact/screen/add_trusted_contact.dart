@@ -63,7 +63,7 @@ class _AddTrustedContactScreenState
                 child: Text(
                   AppString.addTrustedContactTitle,
                   textAlign: TextAlign.center,
-                  style: CustomTextStyle.ibold32(AppColors.black),
+                  style: CustomTextStyle.ibold28(AppColors.black),
                 ),
               ),
 
@@ -155,8 +155,9 @@ class _AddTrustedContactScreenState
                   isLeadingIcon: true,
                   trailingIcon: Icons.arrow_forward_rounded,
                   onTap: () {
-                    final latestContact =
-                        contacts.isNotEmpty ? contacts.last.fullName : null;
+                    final latestContact = contacts.isNotEmpty
+                        ? contacts.last.fullName
+                        : null;
                     context.go(
                       AppRouteNames.trustedContactSuccessScreen,
                       extra: latestContact,

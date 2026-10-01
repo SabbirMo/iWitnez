@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
@@ -10,13 +11,26 @@ import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_model.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/widget/remove_member_bottom_sheet.dart';
 import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/model/trusted_contact_model.dart';
 import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/provider/add_trusted_contact_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/add_trusted_contact/widget/add_contact_widget.dart';
 
 class AddTrustedFieldWidget extends ConsumerStatefulWidget {
   final TrustedContactModel? contact;
-  const AddTrustedFieldWidget({super.key, this.contact});
+  final CircleMember? circleMember;
+  final String? circleTitle;
+  final bool isEditMember;
+
+  const AddTrustedFieldWidget({
+    super.key,
+    this.contact,
+    this.circleMember,
+    this.circleTitle,
+    this.isEditMember = false,
+  });
 
   @override
   ConsumerState<AddTrustedFieldWidget> createState() =>
@@ -32,19 +46,39 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
   @override
   void initState() {
     super.initState();
+    final circleMember = widget.circleMember;
     final contact = widget.contact;
     final state = ref.read(addTrustedContactProvider);
+
     _nameController = TextEditingController(
-      text: contact?.fullName ?? state.fullName,
+      text: circleMember?.name ?? contact?.fullName ?? state.fullName,
     );
     _emailController = TextEditingController(
-      text: contact?.email ?? state.email,
+      text: circleMember?.email ?? contact?.email ?? state.email,
     );
     _phoneController = TextEditingController(
-      text: contact?.phoneNumber ?? state.phoneNumber,
+      text: circleMember?.phone ?? contact?.phoneNumber ?? state.phoneNumber,
     );
 
-    if (widget.contact != null) {
+    if (widget.circleMember != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(addTrustedContactProvider.notifier)
+            .setContact(
+              TrustedContactModel(
+                id: widget.circleMember!.id,
+                fullName: widget.circleMember!.name,
+                email: widget.circleMember!.email,
+                phoneNumber: widget.circleMember!.phone,
+                relationship: widget.circleMember!.relationship.isNotEmpty
+                    ? widget.circleMember!.relationship
+                    : 'Sister',
+                emergencyAlerts: widget.circleMember!.emergencyAlerts,
+                avatarUrl: widget.circleMember!.avatarUrl,
+              ),
+            );
+      });
+    } else if (widget.contact != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(addTrustedContactProvider.notifier)
@@ -77,19 +111,39 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
     }
   }
 
-  void _showFeedback(String message, {bool isError = false}) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError
-            ? AppColors.accentRed
-            : AppColors.buttonGradientStart,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-      ),
+  // void _showFeedback(String message, {bool isError = false}) {
+  //   if (!mounted) return;
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text(message),
+  //       backgroundColor: isError
+  //           ? AppColors.accentRed
+  //           : AppColors.buttonGradientStart,
+  //       behavior: SnackBarBehavior.floating,
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(10.r),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  void _handleRemoveMember() {
+    final member = widget.circleMember;
+    final circleTitle = widget.circleTitle ?? 'Family';
+    if (member == null) return;
+
+    RemoveMemberBottomSheet.show(
+      context: context,
+      member: member,
+      circleTitle: circleTitle,
+      onConfirmRemove: () {
+        ref
+            .read(trustedCircleProvider.notifier)
+            .removeMember(circleTitle, member.id);
+        if (mounted && context.canPop()) {
+          context.pop();
+        }
+      },
     );
   }
 
@@ -99,45 +153,91 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
     final email = _emailController.text.trim();
 
     if (name.isEmpty) {
-      _showFeedback("Please enter full name", isError: true);
       return;
     }
 
     if (phone.isEmpty) {
-      _showFeedback("Please enter phone number", isError: true);
       return;
     }
 
     final state = ref.read(addTrustedContactProvider);
-    final existingId = widget.contact?.id ?? state.id;
+    final chosenAvatar =
+        state.avatarUrl ??
+        widget.circleMember?.avatarUrl ??
+        widget.contact?.avatarUrl;
+    final chosenRelationship = state.relationship.isNotEmpty
+        ? state.relationship
+        : (widget.circleMember?.relationship.isNotEmpty == true
+              ? widget.circleMember!.relationship
+              : (widget.contact?.relationship.isNotEmpty == true
+                    ? widget.contact!.relationship
+                    : 'Sister'));
 
+    if (widget.isEditMember && widget.circleMember != null) {
+      final circleTitle = widget.circleTitle ?? 'Family';
+      final updatedMember = widget.circleMember!.copyWith(
+        name: name,
+        phone: phone,
+        email: email,
+        relationship: chosenRelationship,
+        emergencyAlerts: state.emergencyAlerts,
+        avatarUrl: chosenAvatar,
+      );
+
+      ref
+          .read(trustedCircleProvider.notifier)
+          .updateMember(circleTitle, updatedMember);
+
+      ref.read(addTrustedContactProvider.notifier).resetForm();
+
+      if (context.canPop()) {
+        context.pop();
+      }
+      return;
+    }
+
+    final newMemberId =
+        widget.contact?.id ??
+        state.id ??
+        DateTime.now().millisecondsSinceEpoch.toString();
+
+    final avatarToSave = chosenAvatar != null && chosenAvatar.isNotEmpty
+        ? chosenAvatar
+        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+
+    // 1. Add to Trusted Circle (e.g. Family or active circle)
+    final targetCircleTitle = widget.circleTitle ?? 'Family';
+    final newCircleMember = CircleMember(
+      id: newMemberId,
+      name: name,
+      phone: phone,
+      email: email,
+      relationship: chosenRelationship,
+      emergencyAlerts: state.emergencyAlerts,
+      avatarUrl: avatarToSave,
+    );
+
+    ref
+        .read(trustedCircleProvider.notifier)
+        .addMember(targetCircleTitle, newCircleMember);
+
+    // 2. Also save or update in shared provider list
     final savedContact = TrustedContactModel(
-      id: existingId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: newMemberId,
       fullName: name,
       email: email,
       phoneNumber: phone,
-      relationship: state.relationship.isNotEmpty
-          ? state.relationship
-          : (widget.contact?.relationship.isNotEmpty == true
-                ? widget.contact!.relationship
-                : 'Sister'),
+      relationship: chosenRelationship,
       emergencyAlerts: state.emergencyAlerts,
-      avatarUrl: state.avatarUrl ?? widget.contact?.avatarUrl,
+      avatarUrl: avatarToSave,
     );
 
-    // Save or update in shared provider list
     ref
         .read(trustedContactsProvider.notifier)
         .saveOrUpdateContact(savedContact);
 
     // Reset form state
     ref.read(addTrustedContactProvider.notifier).resetForm();
-
-    _showFeedback(
-      existingId != null
-          ? "Updated contact: $name"
-          : "Added $name to trusted contacts",
-    );
 
     if (context.canPop()) {
       context.pop();
@@ -154,18 +254,48 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
+          icon: Icon(
+            Icons.chevron_left_rounded,
             color: AppColors.black,
-            size: 20,
+            size: 32.sp,
           ),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
+            } else {
+              Navigator.of(context).maybePop();
             }
           },
         ),
+        title: widget.isEditMember
+            ? Text(
+                'Edit Member',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                  letterSpacing: -0.2,
+                ),
+              )
+            : null,
+        actions: [
+          if (widget.isEditMember)
+            TextButton(
+              onPressed: _handleSaveContact,
+              child: Text(
+                'Save',
+                style: GoogleFonts.inter(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.buttonGradientStart,
+                ),
+              ),
+            ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -173,22 +303,26 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             children: [
-              Text(
-                AppString.addTrustedContactTitle,
-                textAlign: TextAlign.center,
-                style: CustomTextStyle.ibold32(AppColors.black),
-              ),
-              SizedBox(height: 6.h),
-              Text(
-                AppString.addTrustedContactEmer,
-                textAlign: TextAlign.center,
-                style: CustomTextStyle.regular12(AppColors.gray),
-              ),
-              SizedBox(height: 24.h),
+              if (!widget.isEditMember) ...[
+                Text(
+                  AppString.addTrustedContactTitle,
+                  textAlign: TextAlign.center,
+                  style: CustomTextStyle.ibold28(AppColors.black),
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  AppString.addTrustedContactEmer,
+                  textAlign: TextAlign.center,
+                  style: CustomTextStyle.regular12(AppColors.gray),
+                ),
+                SizedBox(height: 24.h),
+              ] else ...[
+                SizedBox(height: 10.h),
+              ],
 
               // Avatar picker with purple border and gallery image picker
               _AvatarPicker(
-                avatarUrl: state.avatarUrl,
+                avatarUrl: state.avatarUrl ?? widget.circleMember?.avatarUrl,
                 onTap: _pickImageFromGallery,
               ),
 
@@ -223,7 +357,9 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
 
                   const TextFieldHintText(text: "Relationship"),
                   RelationshipFieldWidget(
-                    selectedRelationship: state.relationship,
+                    selectedRelationship: state.relationship.isNotEmpty
+                        ? state.relationship
+                        : (widget.circleMember?.relationship ?? 'Sister'),
                     onRelationshipChanged: notifier.updateRelationship,
                   ),
 
@@ -237,13 +373,53 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
 
                   SizedBox(height: 28.h),
 
-                  // Save Contact Button
-                  CustomButton(
-                    text: "Save Contact",
-                    icon: Icons.person_add_alt_1_outlined,
-                    isLeadingIcon: true,
-                    onTap: _handleSaveContact,
-                  ),
+                  // Button: either "Remove Member" (edit mode) or "Save Contact" (add mode)
+                  if (widget.isEditMember)
+                    InkWell(
+                      onTap: _handleRemoveMember,
+                      borderRadius: BorderRadius.circular(50.r),
+                      child: Container(
+                        height: 52.h,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50.r),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFEF4444,
+                            ).withValues(alpha: 0.8),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              ImageAssets.deleteIcon,
+                              width: 18.w,
+                              height: 18.w,
+                              color: const Color(0xFFEF4444),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              "Remove Member",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    CustomButton(
+                      text: "Save Contact",
+                      icon: Icons.person_add_alt_1_outlined,
+                      isLeadingIcon: true,
+                      onTap: _handleSaveContact,
+                    ),
                 ],
               ),
 

@@ -154,7 +154,7 @@ class _TrustedContactSuccessScreenState
                         Text(
                           "Trusted Contact Added!",
                           textAlign: TextAlign.center,
-                          style: CustomTextStyle.ibold32(AppColors.black)
+                          style: CustomTextStyle.ibold28(AppColors.black)
                               .copyWith(
                                 fontSize: 26.sp,
                                 fontWeight: FontWeight.w700,

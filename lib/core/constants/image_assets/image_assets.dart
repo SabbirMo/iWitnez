@@ -39,6 +39,8 @@ class ImageAssets {
 
   //sos Active
   static const String sosActive = "$icons/active.png";
+  static const String deleteEffect = "$icons/delete-effect.png";
+  static const String deleteIcon = "$icons/delete.png";
 
   //sharing
   static const String protected = "$image/protected.png";

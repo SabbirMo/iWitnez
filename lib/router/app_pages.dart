@@ -25,6 +25,8 @@ import 'package:iwitnez/feature/main_user/Calls_section/Calls/screen/calls_scree
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/screen/chat_screen.dart'
     as main_user_chat;
 import 'package:iwitnez/feature/main_user/TrustedCircle/screen/trusted_circle_screen.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/screen/circle_details_screen.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_model.dart';
 import 'package:iwitnez/feature/main_user/Sos_section/screen/sos_countdown_screen.dart';
 import 'package:iwitnez/feature/main_user/Sos_section/screen/sos_active_camera_screen.dart';
 import 'package:iwitnez/feature/main_user/Sos_section/screen/sos_video_stopped_screen.dart';
@@ -129,8 +131,19 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.addTrustedFieldWidget,
         builder: (context, state) {
-          final contact = state.extra as TrustedContactModel?;
-          return AddTrustedFieldWidget(contact: contact);
+          final extra = state.extra;
+          if (extra is Map) {
+            return AddTrustedFieldWidget(
+              contact: extra['contact'] as TrustedContactModel?,
+              circleMember: extra['member'] as CircleMember?,
+              circleTitle: extra['circleTitle'] as String?,
+              isEditMember: extra['isEdit'] == true,
+            );
+          }
+          if (extra is TrustedContactModel) {
+            return AddTrustedFieldWidget(contact: extra);
+          }
+          return const AddTrustedFieldWidget();
         },
       ),
       GoRoute(
@@ -161,6 +174,13 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.trustedCircleScreen,
         builder: (context, state) => const TrustedCircleScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.circleDetailsScreen,
+        builder: (context, state) {
+          final circle = state.extra as TrustedCircleItem?;
+          return CircleDetailsScreen(circle: circle);
+        },
       ),
       GoRoute(
         path: AppRouteNames.sosCountdownScreen,
