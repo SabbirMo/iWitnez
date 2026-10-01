@@ -19,6 +19,7 @@ import 'package:iwitnez/feature/call/model/call_session_model.dart';
 import 'package:iwitnez/feature/call/screen/audio_call_screen.dart';
 import 'package:iwitnez/feature/call/screen/video_call_screen.dart';
 import 'package:iwitnez/feature/main_user/AccountSettings/screen/account_settings_screen.dart';
+import 'package:iwitnez/feature/main_user/AccountSettings/screen/change_password_screen.dart';
 import 'package:iwitnez/feature/main_user/Calls_section/Calls/screen/calls_screen.dart'
     as main_user_calls;
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/screen/chat_screen.dart'
@@ -114,6 +115,10 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.accountSettingsScreen,
         builder: (context, state) => const AccountSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRouteNames.changePasswordScreen,
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
 
       //trusted contact

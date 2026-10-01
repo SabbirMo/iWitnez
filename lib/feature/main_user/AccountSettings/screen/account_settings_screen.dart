@@ -81,8 +81,9 @@ class AccountSettingsScreen extends ConsumerWidget {
                       title: 'Update Email',
                       initialValue: state.email,
                       keyboardType: TextInputType.emailAddress,
-                      onSave: (val) =>
-                          ref.read(accountSettingsProvider.notifier).updateEmail(val),
+                      onSave: (val) => ref
+                          .read(accountSettingsProvider.notifier)
+                          .updateEmail(val),
                     ),
                   ),
 
@@ -97,8 +98,9 @@ class AccountSettingsScreen extends ConsumerWidget {
                       title: 'Update Phone',
                       initialValue: state.phone,
                       keyboardType: TextInputType.phone,
-                      onSave: (val) =>
-                          ref.read(accountSettingsProvider.notifier).updatePhone(val),
+                      onSave: (val) => ref
+                          .read(accountSettingsProvider.notifier)
+                          .updatePhone(val),
                     ),
                   ),
 
@@ -108,7 +110,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                     title: 'Password',
                     subtitle: '••••••••',
                     onTap: () {
-                      // TODO: navigate to change-password screen
+                      context.push(AppRouteNames.changePasswordScreen);
                     },
                   ),
 
@@ -159,17 +161,27 @@ class AccountSettingsScreen extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          title,
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+        ),
         content: TextField(
           controller: controller,
           keyboardType: keyboardType,
           autofocus: true,
           decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.r),
-              borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 1.5),
+              borderSide: const BorderSide(
+                color: Color(0xFF8B5CF6),
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -181,7 +193,9 @@ class AccountSettingsScreen extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF8B5CF6),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
             onPressed: () {
               onSave(controller.text.trim());
@@ -199,14 +213,22 @@ class AccountSettingsScreen extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         title: Text(
           'Delete Account',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: const Color(0xFFEF4444)),
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFFEF4444),
+          ),
         ),
         content: Text(
           'Are you sure you want to permanently delete your account? This action cannot be undone.',
-          style: GoogleFonts.inter(fontSize: 14.sp, color: const Color(0xFF6B7280)),
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: const Color(0xFF6B7280),
+          ),
         ),
         actions: [
           TextButton(
@@ -216,7 +238,9 @@ class AccountSettingsScreen extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEF4444),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
             onPressed: () {
               Navigator.of(ctx).pop();

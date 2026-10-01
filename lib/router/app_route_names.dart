@@ -47,4 +47,5 @@ class AppRouteNames {
   static final String liveLocationScreen = "/liveLocationScreen";
   static final String stopSharingLocationScreen = "/stopSharingLocationScreen";
   static final String manageSharingScreen = "/manageSharingScreen";
+  static final String changePasswordScreen = "/changePasswordScreen";
 }
