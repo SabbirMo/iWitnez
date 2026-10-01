@@ -6,6 +6,7 @@ class SharingPersonModel {
   final String subtitle;
   final String imageUrl;
   final bool isLive;
+  final bool isSharingWith;
   final Color fallbackColor;
   final double? relativeX;
   final double? relativeY;
@@ -16,6 +17,7 @@ class SharingPersonModel {
     required this.subtitle,
     required this.imageUrl,
     this.isLive = false,
+    this.isSharingWith = true,
     this.fallbackColor = const Color(0xFF6B7280),
     this.relativeX,
     this.relativeY,
@@ -27,6 +29,7 @@ class SharingPersonModel {
     String? subtitle,
     String? imageUrl,
     bool? isLive,
+    bool? isSharingWith,
     Color? fallbackColor,
     double? relativeX,
     double? relativeY,
@@ -37,6 +40,7 @@ class SharingPersonModel {
       subtitle: subtitle ?? this.subtitle,
       imageUrl: imageUrl ?? this.imageUrl,
       isLive: isLive ?? this.isLive,
+      isSharingWith: isSharingWith ?? this.isSharingWith,
       fallbackColor: fallbackColor ?? this.fallbackColor,
       relativeX: relativeX ?? this.relativeX,
       relativeY: relativeY ?? this.relativeY,

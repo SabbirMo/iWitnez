@@ -46,4 +46,5 @@ class AppRouteNames {
   static final String sosVideoStoppedScreen = "/sosVideoStoppedScreen";
   static final String liveLocationScreen = "/liveLocationScreen";
   static final String stopSharingLocationScreen = "/stopSharingLocationScreen";
+  static final String manageSharingScreen = "/manageSharingScreen";
 }

@@ -8,6 +8,7 @@ import 'package:iwitnez/feature/main_user/LiveLocation/widget/live_location_bott
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/live_location_map_controls.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/live_location_map_view.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/live_location_notice_card.dart';
+import 'package:iwitnez/router/app_route_names.dart';
 
 class LiveLocationScreen extends ConsumerStatefulWidget {
   const LiveLocationScreen({super.key});
@@ -133,14 +134,13 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen>
             right: 16.w,
             top: 12.h,
             child: LiveLocationNoticeCard(
-              contactsCount: liveState.contacts.length,
+              contactsCount: liveState.contacts
+                  .where((c) =>
+                      !c.name.toLowerCase().contains('(you)') &&
+                      c.isSharingWith)
+                  .length,
               onManageTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Manage Contacts tapped'),
-                    duration: Duration(milliseconds: 1200),
-                  ),
-                );
+                context.push(AppRouteNames.manageSharingScreen);
               },
             ),
           ),

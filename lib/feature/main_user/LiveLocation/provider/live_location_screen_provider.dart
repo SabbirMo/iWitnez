@@ -59,6 +59,7 @@ class LiveLocationScreenState {
         imageUrl:
             'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
         fallbackColor: Color(0xFF10B981),
+        isSharingWith: false,
         relativeX: 0.45,
         relativeY: 0.85,
       ),
@@ -94,6 +95,17 @@ class LiveLocationScreenNotifier extends Notifier<LiveLocationScreenState> {
 
   void startSharing() {
     state = state.copyWith(isSharing: true);
+  }
+
+  void toggleContactSharing(String id) {
+    state = state.copyWith(
+      contacts: state.contacts.map((contact) {
+        if (contact.id == id) {
+          return contact.copyWith(isSharingWith: !contact.isSharingWith);
+        }
+        return contact;
+      }).toList(),
+    );
   }
 
   void zoomIn() {
