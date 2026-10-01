@@ -1,87 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iwitnez/core/constants/app_string/app_string.dart';
-import 'package:iwitnez/core/constants/colors/app_colors.dart';
-import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
-import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/feature/trusted_contact/Home_section/Home/controller/home_controller.dart';
+import 'package:iwitnez/feature/trusted_contact/Home_section/Home/provider/home_provider.dart';
+import 'package:iwitnez/feature/trusted_contact/Home_section/Home/widget/home_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  static const TrustedHomeController _controller = TrustedHomeController();
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(trustedHomeProvider);
+
     return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFC),
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Image.asset(ImageAssets.mainLogo, width: 42.w),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppString.trustedContact,
-                          style: CustomTextStyle.bold30(AppColors.textDark)
-                              .copyWith(fontSize: 20.sp),
-                        ),
-                        Text(
-                          AppString.trustedContactSubtitle,
-                          style: CustomTextStyle.regular14(AppColors.textMuted)
-                              .copyWith(fontSize: 12.sp),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              // 1. Top Header: User avatar, greeting, notification bell
+              TrustedHomeHeader(
+                userName: state.userName,
+                subtitle: state.userSubtitle,
+                avatarUrl: state.userAvatarUrl,
+                hasNotification: state.hasNotification,
+                onNotificationTap: () =>
+                    _controller.onNotificationTap(context, ref),
+              ),
+              SizedBox(height: 16.h),
+
+              // 2. Someone You Care About Is safe with Us gradient banner
+              const TrustedCareBanner(),
+              SizedBox(height: 16.h),
+
+              // 3. Emma's Live Location map card with radar & pin
+              TrustedLiveLocationCard(
+                wardName: state.wardName,
+                wardStatus: state.wardStatus,
+                address: state.wardAddress,
+                wardAvatarUrl: state.wardAvatarUrl,
+                onViewFullMapTap: () => _controller.onViewFullMapTap(context),
+              ),
+              SizedBox(height: 20.h),
+
+              // 4. Quick Actions: Check In Status & Journey / ETA
+              TrustedQuickActions(
+                onCheckInStatusTap: () =>
+                    _controller.onCheckInStatusTap(context),
+                onJourneyEtaTap: () => _controller.onJourneyEtaTap(context),
               ),
               SizedBox(height: 24.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.r),
-                  gradient: LinearGradient(
-                    colors: [AppColors.primaryBlue, const Color(0xFF12B886)],
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppString.trustedHome,
-                      style: CustomTextStyle.bold32(Colors.white)
-                          .copyWith(fontSize: 22.sp),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      AppString.trustedHomeDesc,
-                      style: CustomTextStyle.regular14(
-                        Colors.white.withValues(alpha: 0.9),
-                      ),
-                    ),
-                  ],
-                ),
+
+              // 5. Recent Activity: Emma checked in, Emma left Home, etc.
+              TrustedRecentActivitySection(
+                activities: state.activities,
+                onViewAllTap: () => _controller.onViewAllActivityTap(context),
+                onItemTap: (item) =>
+                    _controller.onActivityItemTap(context, item),
               ),
               SizedBox(height: 24.h),
-              Text(
-                "Home Screen",
-                style: CustomTextStyle.bold32(
-                  LinearGradient(
-                    colors: [AppColors.primaryBlue, const Color(0xFF12B886)],
-                  ),
-                ).copyWith(fontSize: 40.sp),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                "(Live location status & activity feed will appear here)",
-                style: CustomTextStyle.regular16(AppColors.textMuted),
-              ),
             ],
           ),
         ),

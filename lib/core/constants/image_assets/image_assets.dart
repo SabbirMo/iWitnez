@@ -56,4 +56,5 @@ class ImageAssets {
   static const String liveTrackingMap = "$image/live_tracking_map.png";
   static const String safePlaceIcon = "$icons/safePlaceIcon.png";
   static const String checkinImage = "$image/checkin_image.png";
+  static const String traffic = "$image/traffice.png";
 }

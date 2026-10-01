@@ -58,6 +58,8 @@ import 'package:iwitnez/feature/trusted_contact/Chat_section/Chat/screen/chat_sc
     as trusted_chat;
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/screen/home_screen.dart'
     as trusted_home;
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/screen/trusted_live_location_screen.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/screen/get_directions_screen.dart';
 import 'package:iwitnez/feature/trusted_contact/Profile_section/Profile/screen/profile_screen.dart'
     as trusted_profile;
 import 'package:iwitnez/feature/add_trusted_contact/screen/add_trusted_contact.dart';
@@ -307,6 +309,16 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.checkInScreen,
         builder: (context, state) => const CheckInScreen(),
+      ),
+      // Trusted Contact Live Location Screen
+      GoRoute(
+        path: AppRouteNames.trustedLiveLocationScreen,
+        builder: (context, state) => const TrustedLiveLocationScreen(),
+      ),
+      // Get Directions Screen
+      GoRoute(
+        path: AppRouteNames.getDirectionsScreen,
+        builder: (context, state) => const GetDirectionsScreen(),
       ),
 
       // Trusted Contact Shell (bottom nav: Home / Alerts / Chat / Calls / Profile)
