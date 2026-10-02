@@ -33,6 +33,39 @@ class PersonalInfoController extends StateNotifier<PersonalInfoState> {
         ),
       );
 
+  // Update all personal information at once upon save
+  void updateUserInfo({
+    required String fullName,
+    required String phoneNumber,
+    required String email,
+    required String dateOfBirth,
+    required String gender,
+    required String address,
+    String? profileImageUrl,
+  }) {
+    state = state.copyWith(
+      userInfo: state.userInfo.copyWith(
+        fullName: fullName.trim().isNotEmpty ? fullName.trim() : state.userInfo.fullName,
+        phoneNumber: phoneNumber.trim().isNotEmpty ? phoneNumber.trim() : state.userInfo.phoneNumber,
+        email: email.trim().isNotEmpty ? email.trim() : state.userInfo.email,
+        dateOfBirth: dateOfBirth.trim().isNotEmpty ? dateOfBirth.trim() : state.userInfo.dateOfBirth,
+        gender: gender.trim().isNotEmpty ? gender.trim() : state.userInfo.gender,
+        address: address.trim().isNotEmpty ? address.trim() : state.userInfo.address,
+        profileImageUrl: (profileImageUrl != null && profileImageUrl.isNotEmpty)
+            ? profileImageUrl
+            : state.userInfo.profileImageUrl,
+      ),
+      isEditing: false,
+    );
+    debugPrint("Personal info updated and saved!");
+  }
+
+  void updateProfileImage(String imageUrl) {
+    state = state.copyWith(
+      userInfo: state.userInfo.copyWith(profileImageUrl: imageUrl),
+    );
+  }
+
   // Update specific fields
   void updateFullName(String name) {
     state = state.copyWith(userInfo: state.userInfo.copyWith(fullName: name));

@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../provider/personal_info_provider.dart';
 import '../widget/custom_text_field.dart';
 
@@ -16,6 +18,38 @@ class PersonalInfoScreen extends ConsumerStatefulWidget {
 class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
   final GlobalKey _genderFieldKey = GlobalKey();
 
+  late final TextEditingController _fullNameController;
+  late final TextEditingController _phoneNumberController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _dobController;
+  late final TextEditingController _genderController;
+  late final TextEditingController _addressController;
+
+  String? _pickedImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = ref.read(personalInfoControllerProvider).userInfo;
+    _fullNameController = TextEditingController(text: user.fullName);
+    _phoneNumberController = TextEditingController(text: user.phoneNumber);
+    _emailController = TextEditingController(text: user.email);
+    _dobController = TextEditingController(text: user.dateOfBirth);
+    _genderController = TextEditingController(text: user.gender);
+    _addressController = TextEditingController(text: user.address);
+  }
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _phoneNumberController.dispose();
+    _emailController.dispose();
+    _dobController.dispose();
+    _genderController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
   IconData _getGenderIcon(String gender) {
     final g = gender.toLowerCase();
     if (g.contains('female')) {
@@ -26,6 +60,42 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       return Icons.transgender_rounded;
     }
     return Icons.person_outline_rounded;
+  }
+
+  ImageProvider _getProfileImage(String savedUrl) {
+    if (_pickedImagePath != null && _pickedImagePath!.isNotEmpty) {
+      final file = File(_pickedImagePath!);
+      if (file.existsSync()) {
+        return FileImage(file);
+      }
+    }
+    if (savedUrl.startsWith('http://') || savedUrl.startsWith('https://')) {
+      return NetworkImage(savedUrl);
+    }
+    if (savedUrl.isNotEmpty) {
+      final file = File(savedUrl);
+      if (file.existsSync()) {
+        return FileImage(file);
+      }
+    }
+    return const NetworkImage('https://i.pravatar.cc/150?img=5');
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (pickedFile != null && mounted) {
+        setState(() {
+          _pickedImagePath = pickedFile.path;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
   }
 
   Future<void> _selectDate(String currentDateStr) async {
@@ -97,9 +167,9 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       ];
       final formatted =
           '${picked.day} ${monthNames[picked.month - 1]} ${picked.year}';
-      ref
-          .read(personalInfoControllerProvider.notifier)
-          .updateDateOfBirth(formatted);
+      setState(() {
+        _dobController.text = formatted;
+      });
     }
   }
 
@@ -201,14 +271,39 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
     );
 
     if (selected != null && mounted) {
-      ref.read(personalInfoControllerProvider.notifier).updateGender(selected);
+      setState(() {
+        _genderController.text = selected;
+      });
     }
+  }
+
+  void _onSave() {
+    FocusScope.of(context).unfocus();
+    final controller = ref.read(personalInfoControllerProvider.notifier);
+
+    controller.updateUserInfo(
+      fullName: _fullNameController.text,
+      phoneNumber: _phoneNumberController.text,
+      email: _emailController.text,
+      dateOfBirth: _dobController.text,
+      gender: _genderController.text,
+      address: _addressController.text,
+      profileImageUrl: _pickedImagePath,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Personal information saved successfully!'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Color(0xFF8B5CF6),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(personalInfoControllerProvider);
-    final controller = ref.read(personalInfoControllerProvider.notifier);
     final user = state.userInfo;
 
     return Scaffold(
@@ -239,16 +334,7 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              controller.saveChanges();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Profile Saved!'),
-                  behavior: SnackBarBehavior.floating,
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
+            onPressed: _onSave,
             child: const Text(
               'Save',
               style: TextStyle(
@@ -280,7 +366,7 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- Profile Header ---
+              // --- Profile Header (Displays saved information) ---
               Row(
                 children: [
                   Stack(
@@ -292,7 +378,7 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                           image: DecorationImage(
-                            image: NetworkImage(user.profileImageUrl),
+                            image: _getProfileImage(user.profileImageUrl),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -300,16 +386,19 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                       Positioned(
                         bottom: 0,
                         right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF8B5CF6),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 14,
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF8B5CF6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -341,34 +430,31 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
               // --- Form Fields ---
               CustomTextField(
                 label: 'Full Name',
-                value: user.fullName,
+                controller: _fullNameController,
                 icon: Icons.person_outline,
-                onChanged: (val) => controller.updateFullName(val),
               ),
               const SizedBox(height: 20),
 
               CustomTextField(
                 label: 'Phone Number',
-                value: user.phoneNumber,
+                controller: _phoneNumberController,
                 icon: Icons.phone_outlined,
-                onChanged: (val) => controller.updatePhoneNumber(val),
               ),
               const SizedBox(height: 20),
 
               CustomTextField(
                 label: 'Email Address',
-                value: user.email,
+                controller: _emailController,
                 icon: Icons.email_outlined,
-                onChanged: (val) => controller.updateEmail(val),
               ),
               const SizedBox(height: 20),
 
               CustomTextField(
                 label: 'Date of Birth',
-                value: user.dateOfBirth,
+                controller: _dobController,
                 icon: Icons.calendar_today_outlined,
                 isDropdown: true,
-                onTap: () => _selectDate(user.dateOfBirth),
+                onTap: () => _selectDate(_dobController.text),
               ),
               const SizedBox(height: 20),
 
@@ -376,20 +462,19 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                 key: _genderFieldKey,
                 child: CustomTextField(
                   label: 'Gender',
-                  value: user.gender,
-                  icon: _getGenderIcon(user.gender),
+                  controller: _genderController,
+                  icon: _getGenderIcon(_genderController.text),
                   isDropdown: true,
-                  onTap: () => _selectGender(user.gender),
+                  onTap: () => _selectGender(_genderController.text),
                 ),
               ),
               const SizedBox(height: 20),
 
               CustomTextField(
                 label: 'Address',
-                value: user.address,
+                controller: _addressController,
                 icon: Icons.location_on_outlined,
                 isMultiline: true,
-                onChanged: (val) => controller.updateAddress(val),
               ),
             ],
           ),

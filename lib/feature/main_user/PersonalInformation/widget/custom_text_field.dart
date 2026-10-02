@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
   final String label;
-  final String value;
+  final String? value;
+  final TextEditingController? controller;
   final IconData icon;
   final bool isDropdown;
   final bool isMultiline;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
+  final TextInputType? keyboardType;
 
   const CustomTextField({
     super.key,
     required this.label,
-    required this.value,
+    this.value,
+    this.controller,
     required this.icon,
     this.isDropdown = false,
     this.isMultiline = false,
     this.onChanged,
     this.onTap,
+    this.keyboardType,
   });
 
   @override
@@ -40,9 +44,17 @@ class CustomTextField extends StatelessWidget {
           child: IgnorePointer(
             ignoring: isDropdown,
             child: TextFormField(
-              key: ValueKey(value),
-              initialValue: value,
+              controller: controller,
+              initialValue: controller == null ? value : null,
               onChanged: onChanged,
+              keyboardType: keyboardType ??
+                  (isMultiline
+                      ? TextInputType.multiline
+                      : (label.toLowerCase().contains('phone')
+                          ? TextInputType.phone
+                          : (label.toLowerCase().contains('email')
+                              ? TextInputType.emailAddress
+                              : TextInputType.text))),
               maxLines: isMultiline ? 3 : 1,
               readOnly: isDropdown,
               decoration: InputDecoration(
@@ -52,7 +64,10 @@ class CustomTextField extends StatelessWidget {
                     : null,
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
