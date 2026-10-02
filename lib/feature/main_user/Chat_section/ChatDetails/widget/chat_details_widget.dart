@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
+import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/widget/chat_emoji_picker.dart';
 
 const Color _kAccentPurple = Color(0xFF6C4DF6);
 
@@ -53,7 +55,10 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onTap: onProfileTap,
                   borderRadius: BorderRadius.circular(12.r),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 4.h,
+                      horizontal: 4.w,
+                    ),
                     child: Row(
                       children: [
                         CircleAvatar(
@@ -71,9 +76,13 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: CustomTextStyle.regular16(
-                                  AppColors.textDark,
-                                ).copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
+                                style:
+                                    CustomTextStyle.regular16(
+                                      AppColors.textDark,
+                                    ).copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15.sp,
+                                    ),
                               ),
                               if (isOnline)
                                 Text(
@@ -169,9 +178,14 @@ class ChatMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMe = message.isMe;
 
-    final bubble = message.type == MessageType.liveLocation
-        ? _LiveLocationCard(message: message, onTap: onLocationTap)
-        : _TextBubble(message: message, isMe: isMe);
+    final bubble = switch (message.type) {
+      MessageType.liveLocation => _LiveLocationCard(
+        message: message,
+        onTap: onLocationTap,
+      ),
+      MessageType.image => _ImageBubble(message: message, isMe: isMe),
+      MessageType.text => _TextBubble(message: message, isMe: isMe),
+    };
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -192,6 +206,90 @@ class ChatMessageBubble extends StatelessWidget {
             SizedBox(width: 8.w),
           ],
           Flexible(child: bubble),
+        ],
+      ),
+    );
+  }
+}
+
+class _ImageBubble extends StatelessWidget {
+  const _ImageBubble({required this.message, required this.isMe});
+
+  final ChatMessage message;
+  final bool isMe;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaPath = message.mediaPath;
+    final isUrl = mediaPath != null && mediaPath.startsWith('http');
+    final fileExists =
+        mediaPath != null && !isUrl && File(mediaPath).existsSync();
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: 240.w),
+      padding: EdgeInsets.all(4.r),
+      decoration: BoxDecoration(
+        color: isMe ? _kAccentPurple : Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: isMe
+                ? _kAccentPurple.withValues(alpha: 0.25)
+                : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.r),
+            child: SizedBox(
+              width: 232.w,
+              height: 180.h,
+              child: isUrl
+                  ? Image.network(mediaPath, fit: BoxFit.cover)
+                  : fileExists
+                  ? Image.file(File(mediaPath), fit: BoxFit.cover)
+                  : Container(
+                      color: Colors.grey.shade200,
+                      child: const Center(
+                        child: Icon(
+                          Icons.broken_image_rounded,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(6.w, 4.h, 6.w, 2.h),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  message.time,
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    color: isMe
+                        ? Colors.white.withValues(alpha: 0.85)
+                        : const Color(0xFF9CA3AF),
+                  ),
+                ),
+                if (isMe) ...[
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.check_rounded,
+                    size: 13.sp,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -374,6 +472,8 @@ class ChatInputBar extends StatefulWidget {
 
 class _ChatInputBarState extends State<ChatInputBar> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _showEmojiPicker = false;
 
   void _handleSend() {
     final text = _controller.text;
@@ -385,6 +485,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -394,116 +495,152 @@ class _ChatInputBarState extends State<ChatInputBar> {
       color: const Color(0xFFF7F9FC),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          child: Row(
-            children: [
-              // Attachment button
-              GestureDetector(
-                onTap: widget.onAttachmentTap,
-                child: Container(
-                  width: 46.w,
-                  height: 46.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.attach_file_rounded,
-                      color: const Color(0xFF9CA3AF),
-                      size: 22.sp,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              // Message text field with emoji
-              Expanded(
-                child: Container(
-                  height: 46.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          cursorColor: _kAccentPurple,
-                          style: CustomTextStyle.regular14(AppColors.textDark),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            hintText: 'Type a message...',
-                            hintStyle: CustomTextStyle.regular14(
-                              const Color(0xFF9CA3AF),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 12.h,
-                            ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              child: Row(
+                children: [
+                  // Attachment button
+                  GestureDetector(
+                    onTap: () {
+                      if (_showEmojiPicker) {
+                        setState(() => _showEmojiPicker = false);
+                      }
+                      widget.onAttachmentTap?.call();
+                    },
+                    child: Container(
+                      width: 46.w,
+                      height: 46.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                          onSubmitted: (_) => _handleSend(),
-                          textInputAction: TextInputAction.send,
-                        ),
+                        ],
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 12.w),
+                      child: Center(
                         child: Icon(
-                          Icons.sentiment_satisfied_alt_outlined,
+                          Icons.attach_file_rounded,
                           color: const Color(0xFF9CA3AF),
                           size: 22.sp,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              // Send button
-              GestureDetector(
-                onTap: _handleSend,
-                child: Container(
-                  width: 46.w,
-                  height: 46.h,
-                  decoration: BoxDecoration(
-                    color: _kAccentPurple,
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _kAccentPurple.withValues(alpha: 0.35),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.send_rounded,
-                      color: Colors.white,
-                      size: 20.sp,
                     ),
                   ),
-                ),
+                  SizedBox(width: 8.w),
+                  // Message text field with emoji
+                  Expanded(
+                    child: Container(
+                      height: 46.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              cursorColor: _kAccentPurple,
+                              style: CustomTextStyle.regular14(
+                                AppColors.textDark,
+                              ),
+                              decoration: InputDecoration(
+                                isDense: true,
+                                focusedBorder: InputBorder.none,
+                                border: InputBorder.none,
+                                hintText: 'Type a message...',
+                                hintStyle: CustomTextStyle.regular14(
+                                  const Color(0xFF9CA3AF),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 12.h,
+                                ),
+                              ),
+                              onTap: () {
+                                if (_showEmojiPicker) {
+                                  setState(() => _showEmojiPicker = false);
+                                }
+                              },
+                              onSubmitted: (_) => _handleSend(),
+                              textInputAction: TextInputAction.send,
+                            ),
+                          ),
+                          // Emoji toggle button
+                          GestureDetector(
+                            onTap: () {
+                              if (_showEmojiPicker) {
+                                setState(() => _showEmojiPicker = false);
+                                _focusNode.requestFocus();
+                              } else {
+                                _focusNode.unfocus();
+                                setState(() => _showEmojiPicker = true);
+                              }
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 12.w),
+                              child: Icon(
+                                _showEmojiPicker
+                                    ? Icons.keyboard_rounded
+                                    : Icons.sentiment_satisfied_alt_outlined,
+                                color: _showEmojiPicker
+                                    ? _kAccentPurple
+                                    : const Color(0xFF9CA3AF),
+                                size: 22.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  // Send button
+                  GestureDetector(
+                    onTap: _handleSend,
+                    child: Container(
+                      width: 46.w,
+                      height: 46.h,
+                      decoration: BoxDecoration(
+                        color: _kAccentPurple,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _kAccentPurple.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                          size: 20.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            if (_showEmojiPicker) ChatEmojiPicker(controller: _controller),
+          ],
         ),
       ),
     );

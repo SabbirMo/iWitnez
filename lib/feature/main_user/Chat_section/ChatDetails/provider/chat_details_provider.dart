@@ -49,6 +49,21 @@ class ChatDetailsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void sendImage(String filePath) {
+    _messages = [
+      ..._messages,
+      ChatMessage(
+        text: 'Photo',
+        time: _nowFormatted(),
+        isMe: true,
+        type: MessageType.image,
+        mediaPath: filePath,
+        status: MessageStatus.sent,
+      ),
+    ];
+    notifyListeners();
+  }
+
   String _nowFormatted() {
     final now = DateTime.now();
     final hour = now.hour % 12 == 0 ? 12 : now.hour % 12;

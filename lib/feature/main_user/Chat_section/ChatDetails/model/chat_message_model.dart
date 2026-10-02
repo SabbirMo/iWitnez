@@ -1,4 +1,4 @@
-enum MessageType { text, liveLocation }
+enum MessageType { text, liveLocation, image }
 
 enum MessageStatus { sent, delivered, read }
 
@@ -10,6 +10,7 @@ class ChatMessage {
     this.type = MessageType.text,
     this.status = MessageStatus.sent,
     this.locationLabel,
+    this.mediaPath,
   });
 
   final String text;
@@ -18,4 +19,5 @@ class ChatMessage {
   final MessageType type;
   final MessageStatus status;
   final String? locationLabel; // e.g. "View on map" subtitle for liveLocation type
+  final String? mediaPath; // file path or network url
 }

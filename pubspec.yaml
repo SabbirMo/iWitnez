@@ -29,6 +29,7 @@ dependencies:
   video_player: ^2.14.0
   audioplayers: ^6.8.1
   share_plus: ^13.3.1
+  emoji_picker_flutter: ^4.5.4
   
 
 dev_dependencies:

@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:iwitnez/feature/call/controller/call_flow_controller.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
+import 'package:image_picker/image_picker.dart';
+import '../provider/chat_details_provider.dart';
+
 class ChatDetailsController {
   ChatDetailsController();
 
@@ -48,8 +51,30 @@ class ChatDetailsController {
     debugPrint('Open live location on map');
   }
 
-  void pickAttachment(BuildContext context) {
-    // TODO: open attachment picker
-    debugPrint('Open attachment picker');
+  Future<void> pickAttachment(
+    BuildContext context,
+    ChatDetailsProvider provider,
+  ) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      List<XFile> files = [];
+      try {
+        files = await picker.pickMultiImage(imageQuality: 85);
+      } catch (_) {
+        final single = await picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 85,
+        );
+        if (single != null) files = [single];
+      }
+
+      if (files.isNotEmpty) {
+        for (final file in files) {
+          provider.sendImage(file.path);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking attachment from storage: $e');
+    }
   }
 }

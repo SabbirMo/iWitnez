@@ -67,10 +67,16 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           avatarUrl: widget.avatarUrl,
           isOnline: widget.isOnline,
         ),
-        onVoiceCall: () =>
-            _controller.startVoiceCall(context, widget.contactName, widget.avatarUrl),
-        onVideoCall: () =>
-            _controller.startVideoCall(context, widget.contactName, widget.avatarUrl),
+        onVoiceCall: () => _controller.startVoiceCall(
+          context,
+          widget.contactName,
+          widget.avatarUrl,
+        ),
+        onVideoCall: () => _controller.startVideoCall(
+          context,
+          widget.contactName,
+          widget.avatarUrl,
+        ),
       ),
       body: Column(
         children: [
@@ -85,7 +91,10 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                 _scrollToBottom();
                 return ListView.builder(
                   controller: _scrollController,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   itemCount: messages.length + 1, // +1 for date chip
                   itemBuilder: (context, index) {
                     if (index == 0) {
@@ -106,7 +115,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           ),
           ChatInputBar(
             onSend: _provider.sendMessage,
-            onAttachmentTap: () => _controller.pickAttachment(context),
+            onAttachmentTap: () =>
+                _controller.pickAttachment(context, _provider),
           ),
         ],
       ),
