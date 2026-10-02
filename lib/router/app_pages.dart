@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,133 +78,156 @@ final appPages = Provider<GoRouter>(
     routes: [
       GoRoute(
         path: AppRouteNames.splashScreen,
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SplashScreen()),
       ),
 
       GoRoute(
         path: AppRouteNames.onBoardingStartScreen,
-        builder: (context, state) => const OnboardingStartScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const OnboardingStartScreen()),
       ),
       GoRoute(
         path: AppRouteNames.onBoardingScreen,
-        builder: (context, state) => const OnboardingScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const OnboardingScreen()),
       ),
 
       //Account Routes
       GoRoute(
         path: AppRouteNames.createAccountScreen,
-        builder: (context, state) => const CreateAccountScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const CreateAccountScreen()),
       ),
       GoRoute(
         path: AppRouteNames.loginScreen,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const LoginScreen()),
       ),
       GoRoute(
         path: AppRouteNames.forgotPasswordScreen,
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const ForgotPasswordScreen()),
       ),
 
       GoRoute(
         path: AppRouteNames.verificationScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as VerificationAgrs?;
 
-          return VerificationScreen(
-            email: extra?.email,
-            type: extra?.type ?? VerificationType.createAccount,
+          return CupertinoPage(
+            child: VerificationScreen(
+              email: extra?.email,
+              type: extra?.type ?? VerificationType.createAccount,
+            ),
           );
         },
       ),
       GoRoute(
         path: AppRouteNames.newPasswordScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final email = state.extra as String?;
-          return NewPasswordScreen(email: email);
+          return CupertinoPage(child: NewPasswordScreen(email: email));
         },
       ),
       GoRoute(
         path: AppRouteNames.shareingScreen,
-        builder: (context, state) => const SharingScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SharingScreen()),
       ),
       GoRoute(
         path: AppRouteNames.accountSettingsScreen,
-        builder: (context, state) => const AccountSettingsScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const AccountSettingsScreen()),
       ),
       GoRoute(
         path: AppRouteNames.changePasswordScreen,
-        builder: (context, state) => const ChangePasswordScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const ChangePasswordScreen()),
       ),
 
       //trusted contact
       GoRoute(
         path: AppRouteNames.addTrustedContactScreen,
-        builder: (context, state) => const AddTrustedContactScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const AddTrustedContactScreen()),
       ),
       GoRoute(
         path: AppRouteNames.addTrustedFieldWidget,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra;
           if (extra is Map) {
-            return AddTrustedFieldWidget(
-              contact: extra['contact'] as TrustedContactModel?,
-              circleMember: extra['member'] as CircleMember?,
-              circleTitle: extra['circleTitle'] as String?,
-              isEditMember: extra['isEdit'] == true,
+            return CupertinoPage(
+              child: AddTrustedFieldWidget(
+                contact: extra['contact'] as TrustedContactModel?,
+                circleMember: extra['member'] as CircleMember?,
+                circleTitle: extra['circleTitle'] as String?,
+                isEditMember: extra['isEdit'] == true,
+              ),
             );
           }
           if (extra is TrustedContactModel) {
-            return AddTrustedFieldWidget(contact: extra);
+            return CupertinoPage(child: AddTrustedFieldWidget(contact: extra));
           }
-          return const AddTrustedFieldWidget();
+          return CupertinoPage(child: const AddTrustedFieldWidget());
         },
       ),
       GoRoute(
         path: AppRouteNames.trustedContactSuccessScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final contactName = state.extra as String?;
-          return TrustedContactSuccessScreen(contactName: contactName);
+          return CupertinoPage(
+            child: TrustedContactSuccessScreen(contactName: contactName),
+          );
         },
       ),
       GoRoute(
         path: AppRouteNames.chatDetailsScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           debugPrint('ChatDetails extra: $extra');
-          return ChatDetailsScreen(
-            chatId: extra?['chatId'] ?? '',
-            contactName: extra?['contactName'] ?? '',
-            avatarUrl: extra?['avatarUrl'] ?? '',
-            isOnline: extra?['isOnline'] ?? false,
+          return CupertinoPage(
+            child: ChatDetailsScreen(
+              chatId: extra?['chatId'] ?? '',
+              contactName: extra?['contactName'] ?? '',
+              avatarUrl: extra?['avatarUrl'] ?? '',
+              isOnline: extra?['isOnline'] ?? false,
+            ),
           );
         },
       ),
       GoRoute(
         path: AppRouteNames.chatProfileDetailsScreen,
-        builder: (context, state) =>
-            ChatProfileDetailsScreen.fromExtra(state.extra),
+        pageBuilder: (context, state) => CupertinoPage(
+          child: ChatProfileDetailsScreen.fromExtra(state.extra),
+        ),
       ),
       GoRoute(
         path: AppRouteNames.trustedCircleScreen,
-        builder: (context, state) => const TrustedCircleScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TrustedCircleScreen()),
       ),
       GoRoute(
         path: AppRouteNames.circleDetailsScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final circle = state.extra as TrustedCircleItem?;
-          return CircleDetailsScreen(circle: circle);
+          return CupertinoPage(child: CircleDetailsScreen(circle: circle));
         },
       ),
       GoRoute(
         path: AppRouteNames.sosCountdownScreen,
-        builder: (context, state) => const SosCountdownScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SosCountdownScreen()),
       ),
       GoRoute(
         path: AppRouteNames.sosActiveCameraScreen,
-        builder: (context, state) => const SosActiveCameraScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SosActiveCameraScreen()),
       ),
       GoRoute(
         path: AppRouteNames.sosVideoStoppedScreen,
-        builder: (context, state) => const SosVideoStoppedScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SosVideoStoppedScreen()),
       ),
       // Main User Shell (bottom nav: Home / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(
@@ -216,7 +240,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.mainUserHome,
-                builder: (context, state) => const main_user_home.HomeScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const main_user_home.HomeScreen()),
               ),
             ],
           ),
@@ -224,7 +249,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.mainUserChat,
-                builder: (context, state) => const main_user_chat.ChatScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const main_user_chat.ChatScreen()),
               ),
             ],
           ),
@@ -232,8 +258,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.mainUserCalls,
-                builder: (context, state) =>
-                    const main_user_calls.CallsScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const main_user_calls.CallsScreen()),
               ),
             ],
           ),
@@ -241,8 +267,9 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.mainUserProfile,
-                builder: (context, state) =>
-                    const main_user_profile.ProfileScreen(),
+                pageBuilder: (context, state) => CupertinoPage(
+                  child: const main_user_profile.ProfileScreen(),
+                ),
               ),
             ],
           ),
@@ -251,92 +278,110 @@ final appPages = Provider<GoRouter>(
       // Notifications Screen
       GoRoute(
         path: AppRouteNames.notificationScreen,
-        builder: (context, state) => const NotificationScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const NotificationScreen()),
       ),
       // Trusted Notifications Screen
       GoRoute(
         path: AppRouteNames.trustedNotificationScreen,
-        builder: (context, state) => const TrustedNotificationScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TrustedNotificationScreen()),
       ),
       // Personal Information Screen
       GoRoute(
         path: AppRouteNames.personalInfoScreen,
-        builder: (context, state) => const PersonalInfoScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const PersonalInfoScreen()),
       ),
       // Safety Settings Screen
       GoRoute(
         path: AppRouteNames.safetySettingsScreen,
-        builder: (context, state) => const SafetySettingsScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SafetySettingsScreen()),
       ),
       // Help Support Screen
       GoRoute(
         path: AppRouteNames.helpSupportScreen,
-        builder: (context, state) => const HelpSupportScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const HelpSupportScreen()),
       ),
       // About Us Screen
       GoRoute(
         path: AppRouteNames.aboutUsScreen,
-        builder: (context, state) => const AboutUsScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const AboutUsScreen()),
       ),
       // Our Mission Screen
       GoRoute(
         path: AppRouteNames.ourMissionScreen,
-        builder: (context, state) => const OurMissionScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const OurMissionScreen()),
       ),
       // Live Location Screen
       GoRoute(
         path: AppRouteNames.liveLocationScreen,
-        builder: (context, state) => const LiveLocationScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const LiveLocationScreen()),
       ),
       // Stop Sharing Location Screen
       GoRoute(
         path: AppRouteNames.stopSharingLocationScreen,
-        builder: (context, state) => const StopSharingLocationScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const StopSharingLocationScreen()),
       ),
       // Manage Sharing Screen
       GoRoute(
         path: AppRouteNames.manageSharingScreen,
-        builder: (context, state) => const ManageSharingScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const ManageSharingScreen()),
       ),
       // Safety Tracking Screen
       GoRoute(
         path: AppRouteNames.safetyTrackingScreen,
-        builder: (context, state) => const SafetyTrackingScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const SafetyTrackingScreen()),
       ),
       // Add Safe Place Screen
       GoRoute(
         path: AppRouteNames.addSafePlaceScreen,
-        builder: (context, state) => const AddSafePlaceScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const AddSafePlaceScreen()),
       ),
       // Scheduled Timer Screen
       GoRoute(
         path: AppRouteNames.scheduledTimerScreen,
-        builder: (context, state) => const ScheduledTimerScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const ScheduledTimerScreen()),
       ),
       // Check-In Screen
       GoRoute(
         path: AppRouteNames.checkInScreen,
-        builder: (context, state) => const CheckInScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const CheckInScreen()),
       ),
       // Trusted Contact Live Location Screen
       GoRoute(
         path: AppRouteNames.trustedLiveLocationScreen,
-        builder: (context, state) => const TrustedLiveLocationScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TrustedLiveLocationScreen()),
       ),
       // Get Directions Screen
       GoRoute(
         path: AppRouteNames.getDirectionsScreen,
-        builder: (context, state) => const GetDirectionsScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const GetDirectionsScreen()),
       ),
       // Trusted Contact Journey & ETA Screen
       GoRoute(
         path: AppRouteNames.trustedJourneyEtaScreen,
-        builder: (context, state) => const TrustedJourneyEtaScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TrustedJourneyEtaScreen()),
       ),
       // Trusted Contact Check In Status Screen
       GoRoute(
         path: AppRouteNames.trustedCheckInStatusScreen,
-        builder: (context, state) => const TrustedCheckInStatusScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TrustedCheckInStatusScreen()),
       ),
 
       // Trusted Contact Shell (bottom nav: Home / Alerts / Chat / Calls / Profile)
@@ -350,7 +395,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.trustedHome,
-                builder: (context, state) => const trusted_home.HomeScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const trusted_home.HomeScreen()),
               ),
             ],
           ),
@@ -358,8 +404,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.trustedAlerts,
-                builder: (context, state) =>
-                    const trusted_alerts.AlertsScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const trusted_alerts.AlertsScreen()),
               ),
             ],
           ),
@@ -367,7 +413,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.trustedChat,
-                builder: (context, state) => const trusted_chat.ChatScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const trusted_chat.ChatScreen()),
               ),
             ],
           ),
@@ -375,7 +422,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.trustedCalls,
-                builder: (context, state) => const trusted_calls.CallsScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const trusted_calls.CallsScreen()),
               ),
             ],
           ),
@@ -383,8 +431,8 @@ final appPages = Provider<GoRouter>(
             routes: [
               GoRoute(
                 path: AppRouteNames.trustedProfile,
-                builder: (context, state) =>
-                    const trusted_profile.ProfileScreen(),
+                pageBuilder: (context, state) =>
+                    CupertinoPage(child: const trusted_profile.ProfileScreen()),
               ),
             ],
           ),
@@ -394,21 +442,24 @@ final appPages = Provider<GoRouter>(
       // ── About Us sub-screens ──
       GoRoute(
         path: AppRouteNames.whoWeAreScreen,
-        builder: (context, state) => const WhoWeAreScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const WhoWeAreScreen()),
       ),
       GoRoute(
         path: AppRouteNames.privacyPolicyScreen,
-        builder: (context, state) => const PrivacyPolicyScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const PrivacyPolicyScreen()),
       ),
       GoRoute(
         path: AppRouteNames.termsOfServiceScreen,
-        builder: (context, state) => const TermsOfServiceScreen(),
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TermsOfServiceScreen()),
       ),
 
       // ── Call Feature screens ──
       GoRoute(
         path: AppRouteNames.audioCallScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final args =
               state.extra as CallArguments? ??
               const CallArguments(
@@ -416,12 +467,12 @@ final appPages = Provider<GoRouter>(
                 avatarUrl: '',
                 callType: CallType.voice,
               );
-          return AudioCallScreen(arguments: args);
+          return CupertinoPage(child: AudioCallScreen(arguments: args));
         },
       ),
       GoRoute(
         path: AppRouteNames.videoCallScreen,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final args =
               state.extra as CallArguments? ??
               const CallArguments(
@@ -429,7 +480,7 @@ final appPages = Provider<GoRouter>(
                 avatarUrl: '',
                 callType: CallType.video,
               );
-          return VideoCallScreen(arguments: args);
+          return CupertinoPage(child: VideoCallScreen(arguments: args));
         },
       ),
     ],
