@@ -27,10 +27,13 @@ class _AlertsScreenView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AlertsProvider>();
+    final bottomClearance =
+        68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -145,7 +148,7 @@ class _AlertsScreenView extends StatelessWidget {
             // 3. Main Content
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 80.h),
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, bottomClearance),
                 child: provider.selectedTab == 0
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

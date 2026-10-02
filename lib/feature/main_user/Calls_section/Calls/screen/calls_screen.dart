@@ -91,7 +91,9 @@ class _CallsScreenState extends State<CallsScreen> {
                       );
                     }
                     return ListView.separated(
-                      padding: EdgeInsets.only(bottom: 20.h),
+                      padding: EdgeInsets.only(
+                        bottom: 68.h + MediaQuery.of(context).padding.bottom,
+                      ),
                       itemCount: calls.length,
                       separatorBuilder: (context, index) => Divider(
                         height: 1,

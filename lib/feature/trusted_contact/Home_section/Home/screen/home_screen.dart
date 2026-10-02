@@ -13,6 +13,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(trustedHomeProvider);
+    final bottomClearance =
+        68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFC),
@@ -22,7 +24,7 @@ class HomeScreen extends ConsumerWidget {
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
-          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, bottomClearance),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -66,7 +68,6 @@ class HomeScreen extends ConsumerWidget {
                 onItemTap: (item) =>
                     _controller.onActivityItemTap(context, item),
               ),
-              SizedBox(height: 24.h),
             ],
           ),
         ),

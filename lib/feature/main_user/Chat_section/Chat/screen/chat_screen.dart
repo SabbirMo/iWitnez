@@ -77,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   }
                   return ListView.separated(
                     padding: EdgeInsets.symmetric(horizontal: 20.w)
-                        .copyWith(bottom: 12.h),
+                        .copyWith(bottom: 68.h + MediaQuery.of(context).padding.bottom),
                     itemCount: _provider.chats.length,
                     separatorBuilder: (_, _) => Divider(
                       height: 1,

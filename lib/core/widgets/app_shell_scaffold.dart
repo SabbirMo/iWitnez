@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,11 +23,13 @@ class AppShellScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       body: navigationShell,
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
+          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 6.h),
           child: _FloatingNavBar(
             currentIndex: navigationShell.currentIndex,
             onTap: (index) => _goBranch(index),
@@ -112,42 +116,54 @@ class _FloatingNavBar extends StatelessWidget {
             ),
           ];
 
+    final borderRadius = BorderRadius.circular(16.r);
+
     return Container(
       width: double.infinity,
-      height: 66,
+      height: 62.h,
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFF2F4F7), width: 1.0),
+        color: AppColors.white.withValues(alpha: 0.94),
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: const Color(0xff000000).withValues(alpha: 0.15),
+          width: 0.7,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, -2),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
             spreadRadius: 0,
           ),
         ],
       ),
-      child: Row(
-        children: [
-          for (final item in items)
-            Expanded(
-              child: _NavItem(
-                spec: item,
-                isActive: currentIndex == item.index,
-                onTap: () => onTap(item.index),
-                activeColor: activeColor,
-                inactiveIconColor: inactiveIconColor,
-                inactiveTextColor: inactiveTextColor,
-              ),
-            ),
-        ],
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final item in items)
+                Expanded(
+                  child: _NavItem(
+                    spec: item,
+                    isActive: currentIndex == item.index,
+                    onTap: () => onTap(item.index),
+                    activeColor: activeColor,
+                    inactiveIconColor: inactiveIconColor,
+                    inactiveTextColor: inactiveTextColor,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -193,60 +209,55 @@ class _NavItem extends StatelessWidget {
       splashFactory: NoSplash.splashFactory,
       highlightColor: Colors.transparent,
       hoverColor: Colors.transparent,
-      borderRadius: BorderRadius.circular(24.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4.h),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // ── SVG Icon ──
-            SizedBox(
-              width: 20.w,
-              height: 20.h,
-              child: Center(
-                child: SvgPicture.asset(
-                  spec.svgPath,
-                  width: 19.w,
-                  height: 19.h,
-                  fit: BoxFit.contain,
-                  colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-                  placeholderBuilder: (context) =>
-                      SizedBox(width: 19.w, height: 19.h),
-                ),
+      child: Column(
+        children: [
+          SizedBox(height: 5.h),
+          // ── SVG Icon ──
+          SizedBox(
+            width: 22.w,
+            height: 22.h,
+            child: Center(
+              child: SvgPicture.asset(
+                spec.svgPath,
+                width: 20.w,
+                height: 20.h,
+                fit: BoxFit.contain,
+                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                placeholderBuilder: (context) =>
+                    SizedBox(width: 20.w, height: 20.h),
               ),
             ),
-            SizedBox(height: 3.h),
+          ),
+          SizedBox(height: 3.h),
 
-            // ── Label Text ──
-            Text(
-              spec.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
-                color: textColor,
-                fontSize: 10.5.sp,
-                fontWeight: fontWeight,
-                letterSpacing: 0.1,
-                height: 1.1,
-              ),
+          // ── Label Text ──
+          Text(
+            spec.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              color: textColor,
+              fontSize: 11.sp,
+              fontWeight: fontWeight,
+              letterSpacing: 0.1,
+              height: 1.1,
             ),
-            SizedBox(height: 3.h),
+          ),
+          const Spacer(),
 
-            // ── Bottom Active Indicator Pill ──
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              width: isActive ? 20.w : 0,
-              height: 3.h,
-              decoration: BoxDecoration(
-                color: isActive ? activeColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(6.r),
-              ),
+          // ── Bottom Active Indicator Pill ──
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            width: isActive ? 30.w : 0,
+            height: 3.5.h,
+            decoration: BoxDecoration(
+              color: isActive ? activeColor : Colors.transparent,
+              borderRadius: BorderRadius.circular(3.r),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 2.h),
+        ],
       ),
     );
   }
