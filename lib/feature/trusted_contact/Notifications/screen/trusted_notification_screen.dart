@@ -37,9 +37,9 @@ class TrustedNotificationScreen extends StatelessWidget {
 
   void _navigateToCheckIn(BuildContext context) {
     try {
-      context.push(AppRouteNames.checkInScreen);
+      context.push(AppRouteNames.trustedCheckInStatusScreen);
     } catch (_) {
-      context.go(AppRouteNames.checkInScreen);
+      context.go(AppRouteNames.trustedCheckInStatusScreen);
     }
   }
 

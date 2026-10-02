@@ -18,7 +18,7 @@ class TrustedHomeController {
   }
 
   void onCheckInStatusTap(BuildContext context) {
-    context.push(AppRouteNames.checkInScreen);
+    context.push(AppRouteNames.trustedCheckInStatusScreen);
   }
 
   void onJourneyEtaTap(BuildContext context) {
@@ -30,6 +30,10 @@ class TrustedHomeController {
   }
 
   void onActivityItemTap(BuildContext context, TrustedActivityItem item) {
-    context.go(AppRouteNames.trustedAlerts);
+    if (item.type == TrustedActivityType.checkIn) {
+      context.push(AppRouteNames.trustedCheckInStatusScreen);
+    } else {
+      context.go(AppRouteNames.trustedAlerts);
+    }
   }
 }
