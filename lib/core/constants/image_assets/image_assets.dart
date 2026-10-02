@@ -57,4 +57,14 @@ class ImageAssets {
   static const String safePlaceIcon = "$icons/safePlaceIcon.png";
   static const String checkinImage = "$image/checkin_image.png";
   static const String traffic = "$image/traffice.png";
+  static const String alertVideoThumbnail = "$image/alert_video_thumbnail.jpg";
+  static const String emmaAvatar = "$image/emma_avatar.jpg";
+  static const String historyVideoThumbnail = "$image/history_video_thumb.jpg";
+
+  // Media
+  static const String video = "assets/video";
+  static const String audio = "assets/audio";
+  static const String demoAlertVideo = "$video/demo_alert_video.mp4";
+  static const String demoVoiceAudio = "$audio/demo_voice.mp3";
 }
+
