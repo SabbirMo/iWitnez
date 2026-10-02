@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iwitnez/core/constants/user_role/user_role.dart';
+import 'package:iwitnez/feature/trusted_contact/Notifications/screen/trusted_notification_screen.dart';
 import '../provider/notification_provider.dart'; // <-- UPDATED IMPORT
 import '../widget/notification_card.dart';
 
@@ -9,6 +11,11 @@ class NotificationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(userRoleProvider);
+    if (role == UserRole.trustedContact) {
+      return const TrustedNotificationScreen();
+    }
+
     // Watch the state from the provider
     final state = ref.watch(notificationControllerProvider);
 

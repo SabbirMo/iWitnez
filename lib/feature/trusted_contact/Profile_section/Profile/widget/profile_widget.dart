@@ -1,1 +1,1 @@
-// Placeholder file: scaffold layer stub for future implementation.
+export 'package:iwitnez/feature/main_user/Profile_section/Profile/widget/profile_widget.dart';

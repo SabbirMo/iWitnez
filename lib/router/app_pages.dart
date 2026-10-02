@@ -62,6 +62,7 @@ import 'package:iwitnez/feature/trusted_contact/LiveLocation/screen/trusted_live
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/screen/get_directions_screen.dart';
 import 'package:iwitnez/feature/trusted_contact/Profile_section/Profile/screen/profile_screen.dart'
     as trusted_profile;
+import 'package:iwitnez/feature/trusted_contact/Notifications/screen/trusted_notification_screen.dart';
 import 'package:iwitnez/feature/add_trusted_contact/screen/add_trusted_contact.dart';
 import 'package:iwitnez/feature/add_trusted_contact/model/trusted_contact_model.dart';
 import 'package:iwitnez/feature/add_trusted_contact/widget/add_trusted_field_widget.dart';
@@ -249,6 +250,11 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.notificationScreen,
         builder: (context, state) => const NotificationScreen(),
+      ),
+      // Trusted Notifications Screen
+      GoRoute(
+        path: AppRouteNames.trustedNotificationScreen,
+        builder: (context, state) => const TrustedNotificationScreen(),
       ),
       // Personal Information Screen
       GoRoute(

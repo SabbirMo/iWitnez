@@ -32,7 +32,6 @@ class UserRoleProvider extends Notifier<UserRole> {
   }
 }
 
-final userRoleProvider =
-    NotifierProvider.autoDispose<UserRoleProvider, UserRole>(
+final userRoleProvider = NotifierProvider<UserRoleProvider, UserRole>(
   UserRoleProvider.new,
 );

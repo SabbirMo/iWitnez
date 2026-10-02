@@ -79,7 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 20.w)
                         .copyWith(bottom: 12.h),
                     itemCount: _provider.chats.length,
-                    separatorBuilder: (_, __) => Divider(
+                    separatorBuilder: (_, _) => Divider(
                       height: 1,
                       thickness: 0.6,
                       color: Colors.grey.shade200,

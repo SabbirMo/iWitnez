@@ -20,7 +20,7 @@ class ProfileHeaderCard extends StatelessWidget {
           padding: EdgeInsets.all(3.w),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: _kAccentPurple.withOpacity(0.4), width: 2),
+            border: Border.all(color: _kAccentPurple.withValues(alpha: 0.4), width: 2),
           ),
           child: CircleAvatar(
             radius: 32.r,
@@ -94,8 +94,8 @@ class ProfileMenuTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final iconColor = item.isDestructive ? Colors.red : _kAccentPurple;
     final iconBg = item.isDestructive
-        ? Colors.red.withOpacity(0.08)
-        : _kAccentPurple.withOpacity(0.08);
+        ? Colors.red.withValues(alpha: 0.08)
+        : _kAccentPurple.withValues(alpha: 0.08);
     final labelColor = item.isDestructive ? Colors.red : AppColors.textDark;
 
     return InkWell(
@@ -157,7 +157,7 @@ class ProfileMenuGroup extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

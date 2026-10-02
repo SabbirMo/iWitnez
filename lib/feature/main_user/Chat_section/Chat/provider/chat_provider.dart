@@ -9,8 +9,10 @@ class ChatProvider extends ChangeNotifier {
   List<ChatEntry> get chats => _searchQuery.isEmpty
       ? _chats
       : _chats
-          .where((c) => c.name.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
+            .where(
+              (c) => c.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+            )
+            .toList();
 
   bool get isLoading => _isLoading;
 
@@ -23,7 +25,6 @@ class ChatProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // TODO: replace with real API/local-db call
     await Future.delayed(const Duration(milliseconds: 400));
     _chats = _dummyChats;
 
@@ -45,6 +46,13 @@ class ChatProvider extends ChangeNotifier {
   }
 
   static final List<ChatEntry> _dummyChats = [
+    const ChatEntry(
+      name: 'Emma Watson',
+      avatarUrl: 'https://i.pravatar.cc/150?img=47',
+      lastMessage: 'Great! Take care ❤️',
+      time: '9:15 AM',
+      unreadCount: 1,
+    ),
     const ChatEntry(
       name: 'Sarah Khan',
       avatarUrl: 'https://i.pravatar.cc/150?img=5',

@@ -10,7 +10,7 @@ class TrustedHomeController {
 
   void onNotificationTap(BuildContext context, WidgetRef ref) {
     ref.read(trustedHomeProvider.notifier).clearNotification();
-    context.push(AppRouteNames.notificationScreen);
+    context.push(AppRouteNames.trustedNotificationScreen);
   }
 
   void onViewFullMapTap(BuildContext context) {

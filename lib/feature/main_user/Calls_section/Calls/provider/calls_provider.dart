@@ -50,6 +50,14 @@ class CallsProvider extends ChangeNotifier {
 
   static final List<CallLogEntry> _dummyCalls = [
     const CallLogEntry(
+      name: 'Emma Watson',
+      avatarUrl: 'https://i.pravatar.cc/150?img=47',
+      date: 'Today',
+      time: '10:32 AM',
+      direction: CallDirection.missed,
+      type: CallType.voice,
+    ),
+    const CallLogEntry(
       name: 'Sarah Khan',
       avatarUrl: 'https://i.pravatar.cc/150?img=5',
       date: 'Today',

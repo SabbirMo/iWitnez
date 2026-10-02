@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../model/personal_info_model.dart';
 
@@ -62,6 +63,6 @@ class PersonalInfoController extends StateNotifier<PersonalInfoState> {
   void saveChanges() {
     // Logic to save to backend/DB would go here
     state = state.copyWith(isEditing: false);
-    print("Changes saved!");
+    debugPrint("Changes saved!");
   }
 }
