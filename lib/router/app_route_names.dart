@@ -57,4 +57,5 @@ class AppRouteNames {
   static final String trustedLiveLocationScreen = "/trustedLiveLocationScreen";
   static final String getDirectionsScreen = "/getDirectionsScreen";
   static final String trustedNotificationScreen = "/trustedNotificationScreen";
+  static final String trustedJourneyEtaScreen = "/trustedJourneyEtaScreen";
 }

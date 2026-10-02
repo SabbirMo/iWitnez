@@ -22,7 +22,7 @@ class TrustedHomeController {
   }
 
   void onJourneyEtaTap(BuildContext context) {
-    context.push(AppRouteNames.safetyTrackingScreen);
+    context.push(AppRouteNames.trustedJourneyEtaScreen);
   }
 
   void onViewAllActivityTap(BuildContext context) {
