@@ -16,6 +16,14 @@ class VerificationRepository {
     );
   }
 
+  Future<void> verifyPasswordResetOtp(VerificationModel request) async {
+    await _apiServices.post(
+      ApiEndPoints.verifyPasswordOtp,
+      data: request.toJson(),
+      requireAuth: false,
+    );
+  }
+
   Future<void> resendOtp(ResendOtpModel request) async {
     await _apiServices.post(
       ApiEndPoints.resendOtp,

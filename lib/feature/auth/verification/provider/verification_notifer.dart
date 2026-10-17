@@ -8,18 +8,34 @@ class VerificationNotifer extends AsyncNotifier<void> {
     return;
   }
 
-  Future<bool> verifyEmail({required String email, required String otp}) async {
+  Future<bool> verifyOtp({
+    required String email,
+    required String otp,
+    bool isForgotPassword = false,
+  }) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
       final repository = ref.read(verificationRepository);
       final model = VerificationModel(email: email, otp: otp);
 
-      //call repository
-      await repository.verifyEmail(model);
+      if (isForgotPassword) {
+        await repository.verifyPasswordResetOtp(model);
+      } else {
+        await repository.verifyEmail(model);
+      }
     });
     return !state.hasError;
   }
+
+  Future<bool> verifyEmail({required String email, required String otp}) =>
+      verifyOtp(email: email, otp: otp, isForgotPassword: false);
+
+  Future<bool> verifyPasswordResetOtp({
+    required String email,
+    required String otp,
+  }) =>
+      verifyOtp(email: email, otp: otp, isForgotPassword: true);
 
   Future<bool> resendOtp({
     required String email,

@@ -126,8 +126,18 @@ final appPages = Provider<GoRouter>(
       GoRoute(
         path: AppRouteNames.newPasswordScreen,
         pageBuilder: (context, state) {
-          final email = state.extra as String?;
-          return CupertinoPage(child: NewPasswordScreen(email: email));
+          final extra = state.extra;
+          String? email;
+          String? otp;
+          if (extra is Map) {
+            email = extra['email']?.toString();
+            otp = extra['otp']?.toString();
+          } else if (extra is String) {
+            email = extra;
+          }
+          return CupertinoPage(
+            child: NewPasswordScreen(email: email, otp: otp),
+          );
         },
       ),
       GoRoute(

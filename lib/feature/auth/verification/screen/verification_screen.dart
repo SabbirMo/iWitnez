@@ -84,18 +84,26 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
 
     FocusScope.of(context).unfocus();
 
+    final isForgotPassword = state.type == VerificationType.forgotPassword;
+
     final success = await ref
         .read(verificationNotiferProvider.notifier)
-        .verifyEmail(email: state.email, otp: enteredCode);
+        .verifyOtp(
+          email: state.email,
+          otp: enteredCode,
+          isForgotPassword: isForgotPassword,
+        );
 
     if (!mounted) return;
 
     if (success) {
       CustomSnackBar.showSuccess(
         context,
-        message: 'Email verified successfully!',
+        message: isForgotPassword
+            ? 'Code verified successfully!'
+            : 'Email verified successfully!',
       );
-      _handleSuccess();
+      _handleSuccess(enteredCode);
     } else {
       notifier.pinController.triggerError();
       final error = ref.read(verificationNotiferProvider).error;
@@ -123,10 +131,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
 
     final success = await ref
         .read(verificationNotiferProvider.notifier)
-        .resendOtp(
-          email: state.email,
-          purpose: purpose,
-        );
+        .resendOtp(email: state.email, purpose: purpose);
 
     if (!mounted) return;
 
@@ -142,25 +147,30 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
       final message = error is ApiError
           ? error.message
           : error != null
-              ? ApiErrorHandler.getMessage(error)
-              : 'Failed to resend code. Please try again.';
+          ? ApiErrorHandler.getMessage(error)
+          : 'Failed to resend code. Please try again.';
 
       CustomSnackBar.showError(context, message: message);
     }
   }
 
-  void _handleSuccess() {
+  void _handleSuccess([String? code]) {
     if (!mounted) return;
     if (widget.onVerified != null) {
       widget.onVerified!();
       return;
     }
 
-    final type = ref.read(verificationProvider).type;
-    if (type == VerificationType.forgotPassword) {
+    final state = ref.read(verificationProvider);
+    if (state.type == VerificationType.forgotPassword) {
       context.go(
         AppRouteNames.newPasswordScreen,
-        extra: ref.read(verificationProvider).email,
+        extra: {
+          'email': state.email,
+          'otp':
+              code ??
+              ref.read(verificationProvider.notifier).pinController.text,
+        },
       );
     } else {
       // createAccount flow -> navigate to locationScreen

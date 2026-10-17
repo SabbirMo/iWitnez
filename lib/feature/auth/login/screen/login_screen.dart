@@ -76,8 +76,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       final role = isTrusted ? UserRole.trustedContact : UserRole.mainUser;
 
       ref.read(userRoleProvider.notifier).set(role);
-      CustomSnackBar.showSuccess(context, message: 'Logged in successfully!');
-
       if (isTrusted) {
         context.go(AppRouteNames.trustedHome);
       } else {

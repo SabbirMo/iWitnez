@@ -6,4 +6,7 @@ class ApiEndPoints {
   static const String refreshToken = '/api/v1/auth/token/refresh/';
   static const String verifyEmail = '/api/v1/auth/verify-email/';
   static const String resendOtp = '/api/v1/auth/resend-otp/';
+  static const String forgotPassword = '/api/v1/auth/password/forgot/';
+  static const String verifyPasswordOtp = '/api/v1/auth/password/verify-otp/';
+  static const String resetPassword = '/api/v1/auth/password/reset/';
 }

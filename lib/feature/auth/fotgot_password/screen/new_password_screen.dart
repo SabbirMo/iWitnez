@@ -8,8 +8,10 @@ import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/fotgot_password/provider/new_password_provider.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
@@ -17,8 +19,9 @@ import 'package:iwitnez/router/app_route_names.dart';
 
 class NewPasswordScreen extends ConsumerStatefulWidget {
   final String? email;
+  final String? otp;
 
-  const NewPasswordScreen({super.key, this.email});
+  const NewPasswordScreen({super.key, this.email, this.otp});
 
   @override
   ConsumerState<NewPasswordScreen> createState() => _NewPasswordScreenState();
@@ -58,16 +61,47 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
   Future<void> _handleSubmit(NewPasswordProvider notifier) async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    FocusScope.of(context).unfocus();
-    notifier.setLoading(true);
+    final email = widget.email?.trim();
+    if (email == null || email.isEmpty) {
+      CustomSnackBar.showError(
+        context,
+        message: 'Email not found. Please restart the forgot password process.',
+      );
+      return;
+    }
 
-    // Simulate network request for updating the password
-    await Future.delayed(const Duration(milliseconds: 600));
+    final otp = widget.otp?.trim();
+    if (otp == null || otp.isEmpty) {
+      CustomSnackBar.showError(
+        context,
+        message: 'OTP code not found. Please verify your OTP code first.',
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    final success = await notifier.resetPassword(
+      email: email,
+      otp: otp,
+      newPassword: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+    );
 
     if (!mounted) return;
-    notifier.setLoading(false);
 
-    _showSuccessDialog();
+    if (success) {
+      _showSuccessDialog();
+    } else {
+      final error = ref.read(newPasswordProvider).error;
+      final message = error is ApiError
+          ? error.message
+          : error != null
+          ? ApiErrorHandler.getMessage(error)
+          : 'Failed to reset password. Please try again.';
+
+      CustomSnackBar.showError(context, message: message);
+    }
   }
 
   void _showSuccessDialog() {
