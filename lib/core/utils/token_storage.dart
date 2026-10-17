@@ -41,10 +41,30 @@ class TokenStorage {
     }
   }
 
+  static const String _userRoleKey = "userRole";
+
+  static Future<void> saveUserRole(String role) async {
+    try {
+      await _storage.write(key: _userRoleKey, value: role);
+    } catch (e) {
+      debugPrint("TokenStorage.saveUserRole error: $e");
+    }
+  }
+
+  static Future<String?> getUserRole() async {
+    try {
+      return await _storage.read(key: _userRoleKey);
+    } catch (e) {
+      debugPrint("TokenStorage.getUserRole error: $e");
+      return null;
+    }
+  }
+
   static Future<void> clearTokens() async {
     try {
       await _storage.delete(key: _accessTokenKey);
       await _storage.delete(key: _refreshTokenKey);
+      await _storage.delete(key: _userRoleKey);
     } catch (e) {
       debugPrint("TokenStorage.clearTokens error: $e");
     }

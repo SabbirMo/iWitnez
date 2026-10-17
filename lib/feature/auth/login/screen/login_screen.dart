@@ -10,9 +10,11 @@ import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
-import 'package:iwitnez/core/widgets/role_selector.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
+import 'package:iwitnez/feature/auth/login/provider/login_notifier.dart';
 import 'package:iwitnez/feature/auth/login/provider/login_provider.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/router/app_route_names.dart';
@@ -53,10 +55,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.dispose();
   }
 
+  Future<void> _handleLogin() async {
+    FocusScope.of(context).unfocus();
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    final userRole = await ref
+        .read(loginNotifierProvider.notifier)
+        .login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+    if (!mounted) return;
+
+    if (userRole != null) {
+      final isTrusted = userRole == 'trusted_contact';
+      final role = isTrusted ? UserRole.trustedContact : UserRole.mainUser;
+
+      ref.read(userRoleProvider.notifier).set(role);
+      CustomSnackBar.showSuccess(context, message: 'Logged in successfully!');
+
+      if (isTrusted) {
+        context.go(AppRouteNames.trustedHome);
+      } else {
+        context.go(AppRouteNames.mainUserHome);
+      }
+    } else {
+      final error = ref.read(loginNotifierProvider).error;
+      final message = error is ApiError
+          ? error.message
+          : error != null
+          ? ApiErrorHandler.getMessage(error)
+          : 'Login failed. Please check your credentials and try again.';
+
+      CustomSnackBar.showError(context, message: message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = ref.watch(loginProvider);
     final notifier = ref.read(loginProvider.notifier);
+    final loginState = ref.watch(loginNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -85,13 +128,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               AppColors.gray,
                             ).copyWith(fontSize: 12.sp),
                           ),
-                          SizedBox(height: 16.h),
+                          SizedBox(height: 20.h),
 
-                          RoleSelector(
-                            selectedRole: provider.role,
-                            onChanged: notifier.setRole,
-                          ),
-                          SizedBox(height: 16.h),
                           Form(
                             key: _formKey,
                             child: Column(
@@ -172,17 +210,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           SizedBox(height: 14.h),
                           CustomButton(
                             text: 'Log In',
-                            onTap: () {
-                              if (_formKey.currentState?.validate() ?? false) {
-                                final role = provider.role;
-                                ref.read(userRoleProvider.notifier).set(role);
-                                if (role == UserRole.mainUser) {
-                                  context.go(AppRouteNames.mainUserHome);
-                                } else {
-                                  context.go(AppRouteNames.trustedHome);
-                                }
-                              }
-                            },
+                            isLoading: loginState.isLoading,
+                            onTap: loginState.isLoading
+                                ? null
+                                : () => _handleLogin(),
                           ),
                           SizedBox(height: 20.h),
                           RichText(
