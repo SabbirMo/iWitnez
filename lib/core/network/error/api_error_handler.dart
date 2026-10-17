@@ -98,6 +98,30 @@ class ApiErrorHandler {
     }
 
     if (data is Map) {
+      // Check server 'errors' field first (often contains field-specific details)
+      if (data.containsKey('errors') && data['errors'] != null) {
+        final err = data['errors'];
+        if (err is String && err.trim().isNotEmpty) {
+          return err.trim();
+        }
+        if (err is List && err.isNotEmpty) {
+          return err.first.toString();
+        }
+        if (err is Map) {
+          final errList = <String>[];
+          err.forEach((key, value) {
+            if (value is List && value.isNotEmpty) {
+              errList.add('$key: ${value.join(', ')}');
+            } else if (value is String && value.trim().isNotEmpty) {
+              errList.add('$key: $value');
+            }
+          });
+          if (errList.isNotEmpty) {
+            return errList.join('\n');
+          }
+        }
+      }
+
       // Check common error message keys
       for (final key in ['message', 'detail', 'error', 'msg']) {
         if (data.containsKey(key) && data[key] != null) {

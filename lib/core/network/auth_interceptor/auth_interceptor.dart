@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
 import 'package:iwitnez/core/network/base_url/api_base_url.dart';
 import 'package:iwitnez/core/utils/token_storage.dart';
 
@@ -92,7 +93,7 @@ class AuthInterceptor extends Interceptor {
       );
 
       final response = await refreshDio.post<dynamic>(
-        '/api/users/token/refresh/',
+        ApiEndPoints.refreshToken,
         data: {'refresh': refreshToken},
       );
 

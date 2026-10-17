@@ -8,9 +8,14 @@ import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/constants/user_role/user_role.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/role_selector.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
+import 'package:iwitnez/feature/auth/create_account/model/create_account_state.dart';
+import 'package:iwitnez/feature/auth/create_account/provider/create_account_notifer.dart';
 import 'package:iwitnez/feature/auth/create_account/provider/create_account_provider.dart';
 import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
@@ -59,10 +64,70 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     super.dispose();
   }
 
+  Future<void> _handleCreateAccount(CreateAccountState provider) async {
+    FocusScope.of(context).unfocus();
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    if (!provider.termsAndConditions) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please accept the Terms of Service and Privacy Policy',
+          ),
+          backgroundColor: AppColors.accentRed,
+        ),
+      );
+      return;
+    }
+
+    final roleStr = provider.role == UserRole.mainUser
+        ? 'main_user'
+        : 'trusted_contact';
+
+    final success = await ref
+        .read(createAccountNotiferProvider.notifier)
+        .registerUser(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          confirmPassword: _confirmPasswordController.text,
+          terms: provider.termsAndConditions,
+          role: roleStr,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      ref.read(userRoleProvider.notifier).set(provider.role);
+      context.push(
+        AppRouteNames.verificationScreen,
+        extra: VerificationAgrs(
+          email: _emailController.text.trim(),
+          type: VerificationType.createAccount,
+        ),
+      );
+    } else {
+      final error = ref.read(createAccountNotiferProvider).error;
+      final message = error is ApiError
+          ? error.message
+          : error != null
+          ? ApiErrorHandler.getMessage(error)
+          : 'Failed to create account. Please try again.';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: AppColors.accentRed),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = ref.watch(createAccountProvider);
     final notifier = ref.read(createAccountProvider.notifier);
+    final createAccountState = ref.watch(createAccountNotiferProvider);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -89,10 +154,10 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                     ),
                     SizedBox(height: 10.h),
 
-                    // RoleSelector(
-                    //   selectedRole: provider.role,
-                    //   onChanged: notifier.setRole,
-                    // ),
+                    RoleSelector(
+                      selectedRole: provider.role,
+                      onChanged: notifier.setRole,
+                    ),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -265,20 +330,10 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
 
                     CustomButton(
                       text: 'Create Account',
-                      isEnabled: provider.termsAndConditions,
-                      onTap: provider.termsAndConditions
-                          ? () {
-                              if (_formKey.currentState?.validate() ?? false) {
-                                context.push(
-                                  AppRouteNames.verificationScreen,
-                                  extra: VerificationAgrs(
-                                    email: _emailController.text.trim(),
-                                    type: VerificationType.createAccount,
-                                  ),
-                                );
-                              }
-                            }
-                          : null,
+                      isLoading: createAccountState.isLoading,
+                      onTap: createAccountState.isLoading
+                          ? null
+                          : () => _handleCreateAccount(provider),
                     ),
                     SizedBox(height: 20.h),
                     RichText(
