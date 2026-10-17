@@ -26,6 +26,7 @@ class PermissionResult {
 }
 
 abstract class IPermissionService {
+  Future<PermissionResult> requestLocation();
   Future<PermissionResult> requestNotification();
   Future<PermissionResult> requestCameraAndMicrophone();
   Future<bool> openSettings();
@@ -33,6 +34,31 @@ abstract class IPermissionService {
 
 class PermissionService implements IPermissionService {
   const PermissionService();
+
+  @override
+  Future<PermissionResult> requestLocation() async {
+    try {
+      final status = await Permission.locationWhenInUse.request();
+      if (status.isGranted) {
+        return PermissionResult.granted();
+      } else if (status.isPermanentlyDenied) {
+        return PermissionResult.denied(
+          message:
+              'Location permission is permanently denied. Please enable it in app settings.',
+          isPermanentlyDenied: true,
+        );
+      } else {
+        return PermissionResult.denied(
+          message: 'Location permission was denied.',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error requesting location permission: $e');
+      return PermissionResult.denied(
+        message: 'Error requesting location permission: $e',
+      );
+    }
+  }
 
   @override
   Future<PermissionResult> requestNotification() async {

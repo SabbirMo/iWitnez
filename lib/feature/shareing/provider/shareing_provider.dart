@@ -41,11 +41,13 @@ class ShareingProvider extends Notifier<SharingState> {
     VoidCallback? onCompleted,
   }) {
     if (state.currentIndex < totalPages - 1) {
-      pageController.animateToPage(
-        state.currentIndex + 1,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
+      if (pageController.hasClients) {
+        pageController.animateToPage(
+          state.currentIndex + 1,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      }
     } else {
       onCompleted?.call();
     }
@@ -53,11 +55,13 @@ class ShareingProvider extends Notifier<SharingState> {
 
   void previousPage(PageController pageController, {VoidCallback? onBack}) {
     if (state.currentIndex > 0) {
-      pageController.animateToPage(
-        state.currentIndex - 1,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
+      if (pageController.hasClients) {
+        pageController.animateToPage(
+          state.currentIndex - 1,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      }
     } else {
       onBack?.call();
     }

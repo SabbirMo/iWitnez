@@ -78,15 +78,26 @@ class LocationService {
         );
       }
 
-      const locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 15),
-      );
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 5),
+          ),
+        );
+      } catch (e) {
+        debugPrint('getCurrentPosition failed or timed out: $e. Falling back to last known position.');
+        position = await Geolocator.getLastKnownPosition();
+      }
 
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings,
-      );
-      return LocationResult.success(position);
+      if (position != null) {
+        return LocationResult.success(position);
+      } else {
+        return LocationResult.failure(
+          'Unable to determine device position. Please ensure GPS is active.',
+        );
+      }
     } catch (e) {
       debugPrint('Error getting location: $e');
       return LocationResult.failure('Failed to get location: $e');

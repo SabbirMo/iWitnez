@@ -7,8 +7,11 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/feature/auth/verification/model/verification_type.dart';
+import 'package:iwitnez/feature/auth/verification/provider/verification_notifer.dart';
 import 'package:iwitnez/feature/auth/verification/provider/verification_provider.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/router/app_route_names.dart';
@@ -63,6 +66,89 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
     super.dispose();
   }
 
+  Future<void> _handleVerify([String? code]) async {
+    if (ref.read(verificationNotiferProvider).isLoading) return;
+
+    final state = ref.read(verificationProvider);
+    final notifier = ref.read(verificationProvider.notifier);
+    final enteredCode = (code ?? notifier.pinController.text).trim();
+
+    if (enteredCode.length != state.codeLength) {
+      notifier.pinController.triggerError();
+      CustomSnackBar.showError(
+        context,
+        message: 'Please enter the complete ${state.codeLength}-digit code',
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    final success = await ref
+        .read(verificationNotiferProvider.notifier)
+        .verifyEmail(email: state.email, otp: enteredCode);
+
+    if (!mounted) return;
+
+    if (success) {
+      CustomSnackBar.showSuccess(
+        context,
+        message: 'Email verified successfully!',
+      );
+      _handleSuccess();
+    } else {
+      notifier.pinController.triggerError();
+      final error = ref.read(verificationNotiferProvider).error;
+      final message = error is ApiError
+          ? error.message
+          : error != null
+          ? ApiErrorHandler.getMessage(error)
+          : 'Verification failed. Please check the code and try again.';
+
+      CustomSnackBar.showError(context, message: message);
+    }
+  }
+
+  Future<void> _handleResendOtp() async {
+    final state = ref.read(verificationProvider);
+    final notifier = ref.read(verificationProvider.notifier);
+
+    if (!state.canResend || ref.read(verificationNotiferProvider).isLoading) {
+      return;
+    }
+
+    final purpose = state.type == VerificationType.forgotPassword
+        ? 'password_reset'
+        : 'email_verification';
+
+    final success = await ref
+        .read(verificationNotiferProvider.notifier)
+        .resendOtp(
+          email: state.email,
+          purpose: purpose,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      notifier.restartTimer();
+      notifier.clear();
+      CustomSnackBar.showSuccess(
+        context,
+        message: 'A fresh verification code has been sent to your email.',
+      );
+    } else {
+      final error = ref.read(verificationNotiferProvider).error;
+      final message = error is ApiError
+          ? error.message
+          : error != null
+              ? ApiErrorHandler.getMessage(error)
+              : 'Failed to resend code. Please try again.';
+
+      CustomSnackBar.showError(context, message: message);
+    }
+  }
+
   void _handleSuccess() {
     if (!mounted) return;
     if (widget.onVerified != null) {
@@ -82,17 +168,12 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
     }
   }
 
-  void _showError(String errorMsg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorMsg), backgroundColor: AppColors.accentRed),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(verificationProvider);
     final notifier = ref.read(verificationProvider.notifier);
+    final verifyState = ref.watch(verificationNotiferProvider);
+    final isLoading = verifyState.isLoading || state.isLoading;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -188,12 +269,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                               ),
                             ),
                             onChanged: notifier.onPinChanged,
-                            onCompleted: (pin) {
-                              notifier.verifyCode(
-                                onSuccess: _handleSuccess,
-                                onError: _showError,
-                              );
-                            },
+                            onCompleted: (pin) => _handleVerify(pin),
                           ),
                           SizedBox(height: 24.h),
 
@@ -210,32 +286,15 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                                 ),
                               ),
                               GestureDetector(
-                                onTap: state.canResend
-                                    ? () {
-                                        notifier.resendCode(
-                                          onResent: () {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Verification code resent successfully!',
-                                                ),
-                                                backgroundColor: AppColors
-                                                    .buttonGradientStart,
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }
+                                onTap: state.canResend && !isLoading
+                                    ? _handleResendOtp
                                     : null,
                                 child: Text(
                                   'Resend',
                                   style: GoogleFonts.inter(
                                     fontSize: 13.5.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: state.canResend
+                                    color: state.canResend && !isLoading
                                         ? AppColors.buttonGradientStart
                                         : AppColors.buttonGradientStart
                                               .withValues(alpha: 0.75),
@@ -260,13 +319,8 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                           CustomButton(
                             text: 'Verify Email',
                             icon: Icons.arrow_forward_rounded,
-                            isLoading: state.isLoading,
-                            onTap: () {
-                              notifier.verifyCode(
-                                onSuccess: _handleSuccess,
-                                onError: _showError,
-                              );
-                            },
+                            isLoading: isLoading,
+                            onTap: isLoading ? null : () => _handleVerify(),
                           ),
                           SizedBox(height: 24.h),
 

@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/services/permission_service.dart';
-import 'package:iwitnez/feature/shareing/provider/live_location_provider.dart';
 
 class StepActionResult {
   final bool isSuccess;
@@ -18,12 +17,11 @@ class StepActionResult {
   factory StepActionResult.failure(
     String? errorMessage, {
     bool isPermanentlyDenied = false,
-  }) =>
-      StepActionResult(
-        isSuccess: false,
-        isPermanentlyDenied: isPermanentlyDenied,
-        errorMessage: errorMessage,
-      );
+  }) => StepActionResult(
+    isSuccess: false,
+    isPermanentlyDenied: isPermanentlyDenied,
+    errorMessage: errorMessage,
+  );
 }
 
 /// Common contract for step actions (LSP & OCP).
@@ -39,22 +37,16 @@ class LocationStepAction extends SharingStepAction {
 
   @override
   Future<StepActionResult> execute(Ref ref) async {
-    final liveLocationNotifier = ref.read(liveLocationProvider.notifier);
-    final success = await liveLocationNotifier.startLiveLocationSharing();
+    final permissionService = ref.read(permissionServiceProvider);
+    final result = await permissionService.requestLocation();
 
-    if (success) {
+    if (result.isGranted) {
       return StepActionResult.success();
     }
 
-    final state = ref.read(liveLocationProvider);
-    // If settings are opened directly by location service, do not show redundant message
-    if (state.isServiceDisabled || state.isPermissionPermanentlyDenied) {
-      return const StepActionResult(isSuccess: false);
-    }
-
     return StepActionResult.failure(
-      state.errorMessage ?? 'Unable to access location.',
-      isPermanentlyDenied: state.isPermissionPermanentlyDenied,
+      result.message,
+      isPermanentlyDenied: result.isPermanentlyDenied,
     );
   }
 }

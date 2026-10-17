@@ -1,29 +1,52 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
-  static final _storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
   static const String _accessTokenKey = "accessToken";
   static const String _refreshTokenKey = "refreshToken";
 
   static Future<void> saveAccessToken(String token) async {
-    await _storage.write(key: _accessTokenKey, value: token);
+    try {
+      await _storage.write(key: _accessTokenKey, value: token);
+    } catch (e) {
+      debugPrint("TokenStorage.saveAccessToken error: $e");
+    }
   }
 
   static Future<void> saveRefreshToken(String token) async {
-    await _storage.write(key: _refreshTokenKey, value: token);
+    try {
+      await _storage.write(key: _refreshTokenKey, value: token);
+    } catch (e) {
+      debugPrint("TokenStorage.saveRefreshToken error: $e");
+    }
   }
 
   static Future<String?> getAccessToken() async {
-    return await _storage.read(key: _accessTokenKey);
+    try {
+      return await _storage.read(key: _accessTokenKey);
+    } catch (e) {
+      debugPrint("TokenStorage.getAccessToken error: $e");
+      return null;
+    }
   }
 
   static Future<String?> getRefreshToken() async {
-    return await _storage.read(key: _refreshTokenKey);
+    try {
+      return await _storage.read(key: _refreshTokenKey);
+    } catch (e) {
+      debugPrint("TokenStorage.getRefreshToken error: $e");
+      return null;
+    }
   }
 
   static Future<void> clearTokens() async {
-    await _storage.delete(key: _accessTokenKey);
-    await _storage.delete(key: _refreshTokenKey);
+    try {
+      await _storage.delete(key: _accessTokenKey);
+      await _storage.delete(key: _refreshTokenKey);
+    } catch (e) {
+      debugPrint("TokenStorage.clearTokens error: $e");
+    }
   }
 }
