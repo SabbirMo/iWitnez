@@ -12,6 +12,7 @@ import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/role_selector.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/create_account/model/create_account_state.dart';
@@ -72,13 +73,9 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     }
 
     if (!provider.termsAndConditions) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please accept the Terms of Service and Privacy Policy',
-          ),
-          backgroundColor: AppColors.accentRed,
-        ),
+      CustomSnackBar.showWarning(
+        context,
+        message: 'Please accept the Terms of Service and Privacy Policy',
       );
       return;
     }
@@ -117,9 +114,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
           ? ApiErrorHandler.getMessage(error)
           : 'Failed to create account. Please try again.';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: AppColors.accentRed),
-      );
+      CustomSnackBar.showError(context, message: message);
     }
   }
 
