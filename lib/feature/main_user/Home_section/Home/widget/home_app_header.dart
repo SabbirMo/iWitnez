@@ -14,12 +14,16 @@ class HomeAppHeader extends StatelessWidget {
     required this.userName,
     required this.subtitle,
     required this.hasUnreadNotification,
+    this.avatarUrl,
+    this.userFullName,
     this.onNotificationTap,
   });
 
   final String userName;
   final String subtitle;
   final bool hasUnreadNotification;
+  final String? avatarUrl;
+  final String? userFullName;
   final VoidCallback? onNotificationTap;
 
   @override
@@ -36,6 +40,7 @@ class HomeAppHeader extends StatelessWidget {
             child: Container(
               width: 52.w,
               height: 52.h,
+              clipBehavior: Clip.antiAlias,
               decoration: const ShapeDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFFFE4E6), Color(0xFFF5E8FF)],
@@ -44,18 +49,14 @@ class HomeAppHeader extends StatelessWidget {
                 ),
                 shape: OvalBorder(),
               ),
-              child: Icon(
-                Icons.person_rounded,
-                color: AppColors.buttonGradientStart,
-                size: 32.sp,
-              ),
+              child: _buildAvatarContent(),
             ),
           ),
           Positioned(
             left: 66.w,
             top: 10.h,
             child: Text(
-              'Hi $userName',
+              _formatGreeting(),
               style: GoogleFonts.inter(
                 color: AppColors.black,
                 fontSize: 24.sp,
@@ -115,5 +116,63 @@ class HomeAppHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatarContent() {
+    if (avatarUrl != null && avatarUrl!.trim().isNotEmpty) {
+      return Image.network(
+        avatarUrl!,
+        width: 52.w,
+        height: 52.h,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildInitials(),
+      );
+    }
+    return _buildInitials();
+  }
+
+  Widget _buildInitials() {
+    final initials = _computeInitials();
+    if (initials.isNotEmpty) {
+      return Center(
+        child: Text(
+          initials,
+          style: GoogleFonts.inter(
+            color: AppColors.buttonGradientStart,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+    }
+    return Icon(
+      Icons.person_rounded,
+      color: AppColors.buttonGradientStart,
+      size: 32.sp,
+    );
+  }
+
+  String _computeInitials() {
+    final nameToUse = (userFullName != null && userFullName!.trim().isNotEmpty)
+        ? userFullName!.trim()
+        : userName.trim();
+    if (nameToUse.isEmpty) return '';
+    final parts = nameToUse.split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      final first = parts[0].isNotEmpty ? parts[0][0] : '';
+      final second = parts[1].isNotEmpty ? parts[1][0] : '';
+      return '$first$second'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return '';
+  }
+
+  String _formatGreeting() {
+    final clean = userName.trim();
+    if (clean.toLowerCase().startsWith('hi ')) {
+      return clean;
+    }
+    return 'Hi $clean';
   }
 }

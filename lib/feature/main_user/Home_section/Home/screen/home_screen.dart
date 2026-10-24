@@ -13,7 +13,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(homeProvider);
+    final asyncHome = ref.watch(homeProvider);
+    final state = asyncHome.value ?? HomeState.initial();
     final bottomClearance =
         68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
@@ -21,54 +22,61 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFFAFAFC),
       body: SafeArea(
         bottom: false,
-        child: state.isLoading
+        child: asyncHome.isLoading && asyncHome.value == null
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                padding: EdgeInsets.fromLTRB(17.w, 10.h, 17.w, bottomClearance),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    HomeAppHeader(
-                      userName: state.greeting.userName,
-                      subtitle: state.greeting.subtitle,
-                      hasUnreadNotification:
-                          state.greeting.hasUnreadNotification,
-                      onNotificationTap: () =>
-                          _controller.onNotificationTap(context, ref),
-                    ),
-                    if (state.isProtected) const ProtectedBanner(),
-                    SizedBox(height: 16.h),
-                    LiveLocationCard(
-                      onViewFullMapTap: () =>
-                          _controller.onViewFullMapTap(context),
-                      onToggleSharing: () =>
-                          _controller.onToggleSharing(context),
-                    ),
-                    SizedBox(height: 20.h),
-                    const SectionHeader(title: 'Quick Actions'),
-                    SizedBox(height: 14.h),
-                    _buildQuickActionsRow(context, state),
-                    SizedBox(height: 30.h),
-                    SectionHeader(
-                      title: 'Trusted Circles',
-                      actionLabel: 'View all',
-                      onActionTap: () =>
-                          _controller.onViewAllTrustedCirclesTap(context),
-                    ),
-                    SizedBox(height: 16.h),
-                    _buildTrustedCirclesRow(context, state),
-                    SizedBox(height: 18.h),
-                    Center(
-                      child: AnimatedSosButton(
-                        onTap: () => _controller.onSosTap(context),
+            : RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(homeProvider.notifier).fetchHomeData(),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  padding:
+                      EdgeInsets.fromLTRB(17.w, 10.h, 17.w, bottomClearance),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      HomeAppHeader(
+                        userName: state.greeting.userName,
+                        subtitle: state.greeting.subtitle,
+                        avatarUrl: state.greeting.avatarUrl,
+                        userFullName: state.userProfile?.fullName,
+                        hasUnreadNotification:
+                            state.greeting.hasUnreadNotification,
+                        onNotificationTap: () =>
+                            _controller.onNotificationTap(context, ref),
                       ),
-                    ),
+                      if (state.isProtected) const ProtectedBanner(),
+                      SizedBox(height: 16.h),
+                      LiveLocationCard(
+                        onViewFullMapTap: () =>
+                            _controller.onViewFullMapTap(context),
+                        onToggleSharing: () =>
+                            _controller.onToggleSharing(context),
+                      ),
+                      SizedBox(height: 20.h),
+                      const SectionHeader(title: 'Quick Actions'),
+                      SizedBox(height: 14.h),
+                      _buildQuickActionsRow(context, state),
+                      SizedBox(height: 30.h),
+                      SectionHeader(
+                        title: 'Trusted Circles',
+                        actionLabel: 'View all',
+                        onActionTap: () =>
+                            _controller.onViewAllTrustedCirclesTap(context),
+                      ),
+                      SizedBox(height: 16.h),
+                      _buildTrustedCirclesRow(context, state),
+                      SizedBox(height: 18.h),
+                      Center(
+                        child: AnimatedSosButton(
+                          onTap: () => _controller.onSosTap(context),
+                        ),
+                      ),
                   ],
                 ),
               ),
+            ),
       ),
     );
   }

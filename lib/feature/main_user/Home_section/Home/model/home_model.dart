@@ -1,3 +1,5 @@
+import 'package:iwitnez/feature/main_user/Home_section/Home/model/user_profile_response_model.dart';
+
 enum TrustedCircleKind { family, friends, partner, work }
 enum QuickActionType { safety, checkIn, scheduledTimer }
 
@@ -5,16 +7,24 @@ class HomeGreeting {
   const HomeGreeting({
     required this.userName,
     required this.subtitle,
+    this.avatarUrl,
     this.hasUnreadNotification = false,
   });
 
   final String userName;
   final String subtitle;
+  final String? avatarUrl;
   final bool hasUnreadNotification;
 
-  HomeGreeting copyWith({bool? hasUnreadNotification}) => HomeGreeting(
-        userName: userName,
-        subtitle: subtitle,
+  HomeGreeting copyWith({
+    String? userName,
+    String? subtitle,
+    String? avatarUrl,
+    bool? hasUnreadNotification,
+  }) => HomeGreeting(
+        userName: userName ?? this.userName,
+        subtitle: subtitle ?? this.subtitle,
+        avatarUrl: avatarUrl ?? this.avatarUrl,
         hasUnreadNotification:
             hasUnreadNotification ?? this.hasUnreadNotification,
       );
@@ -43,6 +53,7 @@ class HomeState {
     required this.isLoading,
     required this.quickActions,
     required this.trustedCircles,
+    this.userProfile,
   });
 
   final HomeGreeting greeting;
@@ -50,11 +61,12 @@ class HomeState {
   final bool isLoading;
   final List<QuickActionItem> quickActions;
   final List<TrustedCircleSummary> trustedCircles;
+  final UserData? userProfile;
 
   factory HomeState.initial() => const HomeState(
         greeting: HomeGreeting(
           userName: 'Emma',
-          subtitle: 'Stay safe, stay connected',
+          subtitle: 'Stay Safe, Stay Connected',
           hasUnreadNotification: true,
         ),
         isProtected: true,
@@ -78,6 +90,7 @@ class HomeState {
     bool? isLoading,
     List<QuickActionItem>? quickActions,
     List<TrustedCircleSummary>? trustedCircles,
+    UserData? userProfile,
   }) {
     return HomeState(
       greeting: greeting ?? this.greeting,
@@ -85,6 +98,7 @@ class HomeState {
       isLoading: isLoading ?? this.isLoading,
       quickActions: quickActions ?? this.quickActions,
       trustedCircles: trustedCircles ?? this.trustedCircles,
+      userProfile: userProfile ?? this.userProfile,
     );
   }
 }
