@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
+import 'package:iwitnez/core/network/service/api_services.dart';
+import 'package:iwitnez/feature/main_user/Home_section/Home/model/trusted_circles_response_model.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_model.dart';
 
 class TrustedCircleNotifier extends Notifier<List<TrustedCircleItem>> {
   @override
   List<TrustedCircleItem> build() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchCircles();
+    });
     return _initialCircles;
   }
 
@@ -12,139 +18,76 @@ class TrustedCircleNotifier extends Notifier<List<TrustedCircleItem>> {
     TrustedCircleItem(
       id: 'family',
       title: 'Family',
-      memberCount: 3,
-      avatars: [
-        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      ],
+      memberCount: 0,
+      avatars: [],
       badgeBg: Color(0xFFF3E8FF),
       badgeIcon: Icons.groups_rounded,
       badgeIconColor: Color(0xFFA855F7),
-      members: [
-        CircleMember(
-          id: '1',
-          name: 'Dad',
-          phone: '+880 1712 345678',
-          email: 'dad@gmail.com',
-          relationship: 'Father',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
-        ),
-        CircleMember(
-          id: '2',
-          name: 'Mom',
-          phone: '01405366393',
-          email: 'momsgroy6393@gmail.com',
-          relationship: 'Sister',
-          emergencyAlerts: true,
-          avatarUrl:
-              'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-        ),
-        CircleMember(
-          id: '3',
-          name: 'Brother',
-          phone: '+880 1912 345680',
-          email: 'brother@gmail.com',
-          relationship: 'Brother',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-        ),
-      ],
+      members: [],
     ),
     TrustedCircleItem(
       id: 'friends',
       title: 'Friends',
-      memberCount: 3,
-      avatars: [
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
-      ],
+      memberCount: 0,
+      avatars: [],
       badgeBg: Color(0xFFDBEAFE),
       badgeIcon: Icons.people_alt_rounded,
       badgeIconColor: Color(0xFF3B82F6),
-      members: [
-        CircleMember(
-          id: '4',
-          name: 'Sarah Khan',
-          phone: '+880 1711 223344',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-        ),
-        CircleMember(
-          id: '5',
-          name: 'Amit Sharma',
-          phone: '+880 1811 223344',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-        ),
-        CircleMember(
-          id: '6',
-          name: 'Priya Patel',
-          phone: '+880 1911 223344',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
-        ),
-      ],
+      members: [],
     ),
     TrustedCircleItem(
       id: 'partner',
       title: 'Partner',
-      memberCount: 1,
-      avatars: [
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      ],
+      memberCount: 0,
+      avatars: [],
       badgeBg: Color(0xFFFCE7F3),
       badgeIcon: Icons.favorite_rounded,
       badgeIconColor: Color(0xFFEC4899),
-      members: [
-        CircleMember(
-          id: '7',
-          name: 'Emma',
-          phone: '+880 1712 998877',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-        ),
-      ],
+      members: [],
     ),
     TrustedCircleItem(
       id: 'work',
       title: 'Work',
-      memberCount: 2,
-      avatars: [
-        'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-      ],
+      memberCount: 0,
+      avatars: [],
       badgeBg: Color(0xFFDCFCE7),
       badgeIcon: Icons.business_center_rounded,
       badgeIconColor: Color(0xFF10B981),
-      members: [
-        CircleMember(
-          id: '8',
-          name: 'Alex Johnson',
-          phone: '+880 1611 334455',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
-        ),
-        CircleMember(
-          id: '9',
-          name: 'David Miller',
-          phone: '+880 1511 667788',
-          avatarUrl:
-              'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-        ),
-      ],
+      members: [],
     ),
   ];
+
+  void setCircles(List<TrustedCircleItem> circles) {
+    state = circles;
+  }
+
+  Future<void> fetchCircles() async {
+    try {
+      final response = await ApiServices().get(
+        ApiEndPoints.trustedCircles,
+        requireAuth: true,
+      );
+
+      final data = response.data?['data'];
+      if (data is Map<String, dynamic>) {
+        final parsed = TrustedCirclesResponseModel.fromJson(data);
+        state = parsed.toCircleItems();
+      }
+    } catch (_) {
+      // Retain existing state on error
+    }
+  }
 
   void removeMember(String circleTitle, String memberId) {
     state = state.map((circle) {
       if (circle.title.toLowerCase() == circleTitle.toLowerCase()) {
         final updatedMembers =
             circle.members.where((m) => m.id != memberId).toList();
-        final updatedAvatars =
-            updatedMembers.map((m) => m.avatarUrl).take(3).toList();
+        final updatedAvatars = updatedMembers
+            .map((m) => m.avatarUrl)
+            .where((url) => url.isNotEmpty)
+            .take(3)
+            .toList();
         return circle.copyWith(
           members: updatedMembers,
           memberCount: updatedMembers.length,
@@ -153,6 +96,15 @@ class TrustedCircleNotifier extends Notifier<List<TrustedCircleItem>> {
       }
       return circle;
     }).toList();
+
+    try {
+      if (memberId.isNotEmpty) {
+        ApiServices().delete(
+          '${ApiEndPoints.contacts}$memberId/',
+          requireAuth: true,
+        );
+      }
+    } catch (_) {}
   }
 
   void updateMember(String circleTitle, CircleMember updatedMember) {
@@ -164,8 +116,11 @@ class TrustedCircleNotifier extends Notifier<List<TrustedCircleItem>> {
           }
           return m;
         }).toList();
-        final updatedAvatars =
-            updatedMembers.map((m) => m.avatarUrl).take(3).toList();
+        final updatedAvatars = updatedMembers
+            .map((m) => m.avatarUrl)
+            .where((url) => url.isNotEmpty)
+            .take(3)
+            .toList();
         return circle.copyWith(
           members: updatedMembers,
           avatars: updatedAvatars,
@@ -179,8 +134,11 @@ class TrustedCircleNotifier extends Notifier<List<TrustedCircleItem>> {
     state = state.map((circle) {
       if (circle.title.toLowerCase() == circleTitle.toLowerCase()) {
         final updatedMembers = [...circle.members, newMember];
-        final updatedAvatars =
-            updatedMembers.map((m) => m.avatarUrl).take(3).toList();
+        final updatedAvatars = updatedMembers
+            .map((m) => m.avatarUrl)
+            .where((url) => url.isNotEmpty)
+            .take(3)
+            .toList();
         return circle.copyWith(
           members: updatedMembers,
           memberCount: updatedMembers.length,

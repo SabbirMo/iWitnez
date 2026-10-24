@@ -52,6 +52,8 @@ class HomeScreen extends ConsumerWidget {
                             '1200 Park Ave, New York, NY 10028, USA',
                         latitude: state.liveLocation?.latitude,
                         longitude: state.liveLocation?.longitude,
+                        peopleSharing:
+                            state.liveLocation?.peopleSharing ?? const [],
                         onViewFullMapTap: () =>
                             _controller.onViewFullMapTap(context),
                         onToggleSharing: () {
@@ -129,18 +131,22 @@ class HomeScreen extends ConsumerWidget {
       TrustedCircleKind.family => TrustedCircleCard.family(
         onTap: onTap,
         memberCount: summary.memberCount,
+        avatars: summary.avatars ?? const [],
       ),
       TrustedCircleKind.friends => TrustedCircleCard.friends(
         onTap: onTap,
         memberCount: summary.memberCount,
+        avatars: summary.avatars ?? const [],
       ),
       TrustedCircleKind.partner => TrustedCircleCard.partner(
         onTap: onTap,
         memberCount: summary.memberCount,
+        avatars: summary.avatars ?? const [],
       ),
       TrustedCircleKind.work => TrustedCircleCard.work(
         onTap: onTap,
         memberCount: summary.memberCount,
+        avatars: summary.avatars ?? const [],
       ),
     };
   }

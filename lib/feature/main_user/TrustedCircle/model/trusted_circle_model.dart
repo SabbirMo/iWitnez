@@ -15,9 +15,28 @@ class CircleMember {
     required this.phone,
     required this.avatarUrl,
     this.email = '',
-    this.relationship = 'Sister',
+    this.relationship = 'Contact',
     this.emergencyAlerts = true,
   });
+
+  factory CircleMember.fromJson(Map<String, dynamic> json) {
+    final rawAvatar = (json['avatar_url'] ?? json['avatar'])?.toString() ?? '';
+    final avatar = rawAvatar.startsWith('http://')
+        ? rawAvatar.replaceFirst('http://', 'https://')
+        : rawAvatar;
+    final rel =
+        (json['relationship_display'] ?? json['relationship'])?.toString();
+    return CircleMember(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      phone: (json['phone_number'] ?? json['phone'])?.toString() ?? '',
+      avatarUrl: avatar,
+      email: json['email']?.toString() ?? '',
+      relationship: (rel != null && rel.isNotEmpty) ? rel : 'Contact',
+      emergencyAlerts: json['emergency_alerts_enabled'] == true ||
+          json['emergency_alerts'] == true,
+    );
+  }
 
   CircleMember copyWith({
     String? id,
@@ -54,7 +73,7 @@ class TrustedCircleItem {
     this.id = '',
     required this.title,
     required this.memberCount,
-    required this.avatars,
+    this.avatars = const [],
     required this.badgeBg,
     required this.badgeIcon,
     required this.badgeIconColor,

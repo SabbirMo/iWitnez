@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
 import 'package:iwitnez/core/network/service/api_services.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
+import 'package:iwitnez/feature/main_user/Home_section/Home/model/trusted_circles_response_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/user_profile_response_model.dart';
 
 class HomeRepository {
@@ -57,6 +58,23 @@ class HomeRepository {
     }
   }
 
+  Future<TrustedCirclesResponseModel?> getTrustedCircles() async {
+    try {
+      final response = await _apiServices.get(
+        ApiEndPoints.trustedCircles,
+        requireAuth: true,
+      );
+
+      final data = response.data?['data'];
+      if (data is Map<String, dynamic>) {
+        return TrustedCirclesResponseModel.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> pingLocation({
     required double latitude,
     required double longitude,
@@ -68,9 +86,9 @@ class HomeRepository {
     await _apiServices.post(
       ApiEndPoints.pingLocation,
       data: {
-        'latitude': latitude.toString(),
-        'longitude': longitude.toString(),
-        'accuracy': accuracy ?? 0,
+        'latitude': latitude,
+        'longitude': longitude,
+        'accuracy': accuracy ?? 5.0,
         'speed': speed ?? 0,
         'heading': heading ?? 0,
         'address': address ?? '',

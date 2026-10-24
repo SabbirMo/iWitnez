@@ -9,15 +9,31 @@ import 'package:iwitnez/feature/main_user/TrustedCircle/widget/circle_safety_ban
 import 'package:iwitnez/feature/main_user/TrustedCircle/widget/trusted_circle_card.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-class TrustedCircleScreen extends ConsumerWidget {
+class TrustedCircleScreen extends ConsumerStatefulWidget {
   const TrustedCircleScreen({super.key});
+
+  @override
+  ConsumerState<TrustedCircleScreen> createState() =>
+      _TrustedCircleScreenState();
+}
+
+class _TrustedCircleScreenState extends ConsumerState<TrustedCircleScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(trustedCircleProvider.notifier).fetchCircles();
+      }
+    });
+  }
 
   void _onCircleTap(BuildContext context, TrustedCircleItem circle) {
     context.push(AppRouteNames.circleDetailsScreen, extra: circle);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final circles = ref.watch(trustedCircleProvider);
 
     return Scaffold(
@@ -68,31 +84,38 @@ class TrustedCircleScreen extends ConsumerWidget {
           SizedBox(width: 8.w),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Column(
-          children: [
-            SizedBox(height: 8.h),
-            Text(
-              'These are your trusted contacts who can view your live location and get alerts.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13.5.sp,
-                color: const Color(0xFF6B7280),
-                height: 1.4,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(trustedCircleProvider.notifier).fetchCircles();
+        },
+        color: const Color(0xFF9333EA),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Column(
+            children: [
+              SizedBox(height: 8.h),
+              Text(
+                'These are your trusted contacts who can view your live location and get alerts.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13.5.sp,
+                  color: const Color(0xFF6B7280),
+                  height: 1.4,
+                ),
               ),
-            ),
-            SizedBox(height: 20.h),
-            ...circles.map(
-              (circle) => TrustedCircleCard(
-                circle: circle,
-                onTap: () => _onCircleTap(context, circle),
+              SizedBox(height: 20.h),
+              ...circles.map(
+                (circle) => TrustedCircleCard(
+                  circle: circle,
+                  onTap: () => _onCircleTap(context, circle),
+                ),
               ),
-            ),
-            SizedBox(height: 8.h),
-            const CircleSafetyBanner(),
-            SizedBox(height: 24.h),
-          ],
+              SizedBox(height: 8.h),
+              const CircleSafetyBanner(),
+              SizedBox(height: 24.h),
+            ],
+          ),
         ),
       ),
     );

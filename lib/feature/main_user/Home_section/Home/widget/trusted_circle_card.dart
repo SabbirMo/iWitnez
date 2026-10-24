@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,6 +18,7 @@ class TrustedCircleCard extends StatelessWidget {
     required this.badgeCircleBg,
     required this.badgeIcon,
     required this.badgeIconColor,
+    this.avatars = const [],
     this.onTap,
   });
 
@@ -27,11 +29,13 @@ class TrustedCircleCard extends StatelessWidget {
   final Color badgeCircleBg;
   final IconData badgeIcon;
   final Color badgeIconColor;
+  final List<String>? avatars;
   final VoidCallback? onTap;
 
   factory TrustedCircleCard.family({
     VoidCallback? onTap,
-    int memberCount = 3,
+    int memberCount = 0,
+    List<String> avatars = const [],
   }) => TrustedCircleCard(
     kind: TrustedCircleKind.family,
     title: 'Family',
@@ -40,12 +44,14 @@ class TrustedCircleCard extends StatelessWidget {
     badgeCircleBg: AppColors.homeTrustedBadgeFamily,
     badgeIcon: Icons.group_add_rounded,
     badgeIconColor: AppColors.homeTrustedFamily,
+    avatars: avatars,
     onTap: onTap,
   );
 
   factory TrustedCircleCard.friends({
     VoidCallback? onTap,
-    int memberCount = 2,
+    int memberCount = 0,
+    List<String> avatars = const [],
   }) => TrustedCircleCard(
     kind: TrustedCircleKind.friends,
     title: 'Friends',
@@ -54,12 +60,14 @@ class TrustedCircleCard extends StatelessWidget {
     badgeCircleBg: AppColors.homeTrustedBadgeFriends,
     badgeIcon: Icons.person_add_alt_rounded,
     badgeIconColor: AppColors.homeTrustedFriends,
+    avatars: avatars,
     onTap: onTap,
   );
 
   factory TrustedCircleCard.partner({
     VoidCallback? onTap,
-    int memberCount = 1,
+    int memberCount = 0,
+    List<String> avatars = const [],
   }) => TrustedCircleCard(
     kind: TrustedCircleKind.partner,
     title: 'Partner',
@@ -68,138 +76,121 @@ class TrustedCircleCard extends StatelessWidget {
     badgeCircleBg: AppColors.homeTrustedBadgePartner,
     badgeIcon: Icons.favorite_rounded,
     badgeIconColor: AppColors.homeTrustedPartner,
+    avatars: avatars,
     onTap: onTap,
   );
 
-  factory TrustedCircleCard.work({VoidCallback? onTap, int memberCount = 3}) =>
-      TrustedCircleCard(
-        kind: TrustedCircleKind.work,
-        title: 'Work',
-        memberCount: memberCount,
-        memberColor: AppColors.homeTrustedWork,
-        badgeCircleBg: AppColors.homeTrustedBadgeWork,
-        badgeIcon: Icons.work_history_rounded,
-        badgeIconColor: AppColors.homeTrustedWork,
-        onTap: onTap,
-      );
+  factory TrustedCircleCard.work({
+    VoidCallback? onTap,
+    int memberCount = 0,
+    List<String> avatars = const [],
+  }) => TrustedCircleCard(
+    kind: TrustedCircleKind.work,
+    title: 'Work',
+    memberCount: memberCount,
+    memberColor: AppColors.homeTrustedWork,
+    badgeCircleBg: AppColors.homeTrustedBadgeWork,
+    badgeIcon: Icons.work_history_rounded,
+    badgeIconColor: AppColors.homeTrustedWork,
+    avatars: avatars,
+    onTap: onTap,
+  );
 
   @override
   Widget build(BuildContext context) {
-    const w = 80.16;
-    const h = 71.36;
-    final badgeSize = switch (kind) {
-      TrustedCircleKind.family => 19.60,
-      TrustedCircleKind.friends => 18.86,
-      TrustedCircleKind.partner => 19.10,
-      TrustedCircleKind.work => 19.34,
-    };
     const avatarSize = 23.46;
+    final safeAvatars = avatars ?? const [];
+    final effectiveDisplayCount = safeAvatars.isNotEmpty
+        ? safeAvatars.length.clamp(1, 3)
+        : (memberCount == 0 ? 0 : memberCount.clamp(1, 3));
 
-    return SizedBox(
-      width: w.w,
-      height: h.h,
-      child: Material(
+    return Container(
+      width: 80.w,
+      height: 72.h,
+      decoration: BoxDecoration(
         color: AppColors.white,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            width: 0.49.w,
-            color: AppColors.homeTrustedCardBorder,
-          ),
-          borderRadius: BorderRadius.circular(9.78.r),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(
+          width: 0.5.w,
+          color: AppColors.homeTrustedCardBorder,
         ),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.homeTrustedCardShadow,
+            blurRadius: 3,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10.r),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          splashFactory: InkRipple.splashFactory,
           splashColor: memberColor.withValues(alpha: 0.10),
-          child: Container(
-            decoration: ShapeDecoration(
-              color: AppColors.white,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  width: 0.49.w,
-                  color: AppColors.homeTrustedCardBorder,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: 6.w,
+                top: 10.h,
+                child: SizedBox(
+                  width: avatarSize.w * 2.1,
+                  height: avatarSize.h,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      if (effectiveDisplayCount == 0)
+                        _emptyAvatarCircle()
+                      else
+                        for (int i = 0; i < effectiveDisplayCount; i++)
+                          _avatarCircle(i * 12.0, i),
+                    ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(9.78.r),
               ),
-              shadows: const [
-                BoxShadow(
-                  color: AppColors.homeTrustedCardShadow,
-                  blurRadius: 2.93,
-                  offset: Offset(0, 0.98),
-                  spreadRadius: 0,
+              Positioned(
+                right: 0,
+                top: 0,
+                width: 19.w,
+                height: 19.h,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: badgeCircleBg,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(badgeIcon, color: badgeIconColor, size: 10.sp),
                 ),
-              ],
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  left: 5.87.w,
-                  top: 10.h,
-                  child: SizedBox(
-                    width: avatarSize.w * 2.1,
-                    height: avatarSize.h,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        _avatarCircle(0.0, 0),
-                        _avatarCircle(avatarSize - 8, 1),
-                        if (memberCount >= 3)
-                          _avatarCircle((avatarSize - 8) * 2, 2),
-                      ],
-                    ),
+              ),
+              Positioned(
+                left: 6.w,
+                bottom: 16.h,
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: AppColors.homeTrustedTitleColor,
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
                   ),
                 ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: badgeSize.w,
-                    height: badgeSize.h,
-                    decoration: ShapeDecoration(
-                      color: badgeCircleBg,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(badgeSize * 100.r),
-                      ),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        badgeIcon,
-                        color: badgeIconColor,
-                        size: 10.sp,
-                      ),
-                    ),
+              ),
+              Positioned(
+                left: 6.w,
+                bottom: 4.5.h,
+                child: Text(
+                  memberCount == 1 ? '1 Member' : '$memberCount Members',
+                  style: GoogleFonts.inter(
+                    color: memberColor,
+                    fontSize: 7.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
                   ),
                 ),
-                Positioned(
-                  left: 5.87.w,
-                  bottom: 16.h,
-                  child: Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      color: AppColors.homeTrustedTitleColor,
-                      fontSize: 8.82.sp,
-                      fontWeight: FontWeight.w700,
-                      height: 1.33,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 5.87.w,
-                  bottom: 4.5.h,
-                  child: Text(
-                    '$memberCount Members',
-                    style: GoogleFonts.inter(
-                      color: memberColor,
-                      fontSize: 6.62.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 1.50,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -207,54 +198,87 @@ class TrustedCircleCard extends StatelessWidget {
   }
 
   Widget _avatarCircle(double left, int index) {
-    final gradients = switch (kind) {
-      TrustedCircleKind.family => [
-        [const Color(0xFF0EA5E9), const Color(0xFFF97316)],
-        [const Color(0xFF38BDF8), const Color(0xFF4ADE80)],
-        [const Color(0xFFC084FC), const Color(0xFFF0ABFC)],
-      ],
-      TrustedCircleKind.friends => [
-        [const Color(0xFF22D3EE), const Color(0xFF7C3AED)],
-        [const Color(0xFFFB923C), const Color(0xFFF59E0B)],
-        [const Color(0xFFFDE68A), const Color(0xFF34D399)],
-      ],
-      TrustedCircleKind.partner => [
-        [const Color(0xFFFBCFE8), const Color(0xFFF472B6)],
-        [const Color(0xFFF87171), const Color(0xFFF43F5E)],
-        [const Color(0xFFFDBA74), const Color(0xFF86EFAC)],
-      ],
-      TrustedCircleKind.work => [
-        [const Color(0xFF60A5FA), const Color(0xFF34D399)],
-        [const Color(0xFFF59E0B), const Color(0xFFF472B6)],
-        [const Color(0xFFA78BFA), const Color(0xFF6EE7B7)],
-      ],
-    };
-    final colors = gradients[index % gradients.length];
-    final hasWhiteBorder = index > 0;
+    final safeAvatars = avatars ?? const [];
+    final avatarUrl = index < safeAvatars.length ? safeAvatars[index] : '';
 
     return Positioned(
       left: left.w,
       top: 0,
+      width: 23.5.r,
+      height: 23.5.r,
       child: Container(
-        width: 23.46.w,
-        height: 23.46.h,
-        decoration: ShapeDecoration(
-          gradient: LinearGradient(
-            colors: colors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          shape: OvalBorder(
-            side: hasWhiteBorder
-                ? BorderSide(width: 0.98.w, color: AppColors.white)
-                : BorderSide.none,
-          ),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: index > 0
+              ? Border.all(width: 1.w, color: AppColors.white)
+              : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
-        child: Icon(
-          Icons.person_rounded,
-          color: Colors.white.withValues(alpha: 0.95),
-          size: 13.sp,
-        ),
+        child: ClipOval(child: _buildAvatarImage(avatarUrl, index)),
+      ),
+    );
+  }
+
+  Widget _buildAvatarImage(String url, int index) {
+    final cleanUrl = url.startsWith('http://')
+        ? url.replaceFirst('http://', 'https://')
+        : url;
+    if (cleanUrl.startsWith('http')) {
+      return Image.network(
+        cleanUrl,
+        width: 23.5.r,
+        height: 23.5.r,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            _fallbackGradientAvatar(index),
+      );
+    } else if (cleanUrl.isNotEmpty &&
+        (cleanUrl.startsWith('/') || cleanUrl.startsWith('file:'))) {
+      final file = File(cleanUrl);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          width: 23.5.r,
+          height: 23.5.r,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _fallbackGradientAvatar(index),
+        );
+      }
+    }
+    return _fallbackGradientAvatar(index);
+  }
+
+  Widget _fallbackGradientAvatar(int index) {
+    return Container(
+      width: 23.5.r,
+      height: 23.5.r,
+      decoration: BoxDecoration(
+        color: badgeCircleBg.withValues(alpha: 0.8),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(Icons.person_rounded, color: badgeIconColor, size: 13.sp),
+    );
+  }
+
+  Widget _emptyAvatarCircle() {
+    return Container(
+      width: 23.5.r,
+      height: 23.5.r,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF1F5F9),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        Icons.person_outline_rounded,
+        color: Color(0xFF94A3B8),
+        size: 13.sp,
       ),
     );
   }

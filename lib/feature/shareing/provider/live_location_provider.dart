@@ -160,8 +160,8 @@ class LiveLocationNotifier extends Notifier<LiveLocationState> {
       await ApiServices().post(
         ApiEndPoints.pingLocation,
         data: {
-          'latitude': pos.latitude.toString(),
-          'longitude': pos.longitude.toString(),
+          'latitude': pos.latitude,
+          'longitude': pos.longitude,
           'accuracy': pos.accuracy,
           'speed': pos.speed,
           'heading': pos.heading,

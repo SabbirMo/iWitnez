@@ -13,4 +13,6 @@ class ApiEndPoints {
   static const String notifications = '/api/v1/notifications/';
   static const String liveLocation = '/api/v1/location/live/';
   static const String pingLocation = '/api/v1/location/ping/';
+  static const String contacts = '/api/v1/contacts/';
+  static const String trustedCircles = '/api/v1/contacts/circles/';
 }

@@ -103,77 +103,109 @@ class CircleDetailsScreen extends ConsumerWidget {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 8.h),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(trustedCircleProvider.notifier).fetchCircles();
+          },
+          color: const Color(0xFF9333EA),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 8.h),
 
-              // Overlapping Avatar Cluster with Badge
-              _buildTopAvatarCluster(activeCircle),
-              SizedBox(height: 16.h),
+                // Overlapping Avatar Cluster with Badge
+                _buildTopAvatarCluster(activeCircle),
+                SizedBox(height: 16.h),
 
-              // Title: "X Members"
-              Text(
-                '${activeCircle.members.length} Members',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF111827),
-                  letterSpacing: -0.2,
-                ),
-              ),
-              SizedBox(height: 6.h),
-
-              // Subtitle
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Text(
-                  'They can view your location and get alerts in case of emergency.',
-                  textAlign: TextAlign.center,
+                // Title: "X Members" or "1 Member"
+                Text(
+                  activeCircle.members.length == 1
+                      ? '1 Member'
+                      : '${activeCircle.members.length} Members',
                   style: GoogleFonts.inter(
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF6B7280),
-                    height: 1.4,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111827),
+                    letterSpacing: -0.2,
                   ),
                 ),
-              ),
+                SizedBox(height: 6.h),
 
-              SizedBox(height: 28.h),
+                // Subtitle
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Text(
+                    'They can view your location and get alerts in case of emergency.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF6B7280),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
 
-              // Member Cards List
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: activeCircle.members.length,
-                itemBuilder: (context, index) {
-                  final member = activeCircle.members[index];
-                  return CircleMemberCard(
-                    member: member,
-                    onEdit: () {
-                      context.push(
-                        AppRouteNames.addTrustedFieldWidget,
-                        extra: {
-                          'isEdit': true,
-                          'member': member,
-                          'circleTitle': activeCircle.title,
+                SizedBox(height: 28.h),
+
+                // Member Cards List or Empty State
+                if (activeCircle.members.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40.h),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.people_outline_rounded,
+                          size: 48.sp,
+                          color: const Color(0xFFCBD5E1),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          'No members in this circle yet',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.5.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: activeCircle.members.length,
+                    itemBuilder: (context, index) {
+                      final member = activeCircle.members[index];
+                      return CircleMemberCard(
+                        member: member,
+                        onEdit: () {
+                          context.push(
+                            AppRouteNames.addTrustedFieldWidget,
+                            extra: {
+                              'isEdit': true,
+                              'member': member,
+                              'circleTitle': activeCircle.title,
+                            },
+                          );
                         },
+                        onDelete: () => _confirmDeleteMember(
+                          context,
+                          ref,
+                          activeCircle.title,
+                          member,
+                        ),
                       );
                     },
-                    onDelete: () => _confirmDeleteMember(
-                      context,
-                      ref,
-                      activeCircle.title,
-                      member,
-                    ),
-                  );
-                },
-              ),
+                  ),
 
-              SizedBox(height: 24.h),
-            ],
+                SizedBox(height: 24.h),
+              ],
+            ),
           ),
         ),
       ),
@@ -215,9 +247,10 @@ class CircleDetailsScreen extends ConsumerWidget {
             for (int i = 0; i < count; i++)
               Positioned(
                 left: (i * overlap).w,
+                top: 2.h,
+                width: avatarSize.r,
+                height: avatarSize.r,
                 child: Container(
-                  width: avatarSize.r,
-                  height: avatarSize.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2.5.w),
@@ -239,9 +272,9 @@ class CircleDetailsScreen extends ConsumerWidget {
             Positioned(
               right: 0,
               bottom: 4.h,
+              width: 22.r,
+              height: 22.r,
               child: Container(
-                width: 22.r,
-                height: 22.r,
                 decoration: BoxDecoration(
                   color: circle.badgeBg,
                   shape: BoxShape.circle,
@@ -271,16 +304,19 @@ class CircleDetailsScreen extends ConsumerWidget {
 
   Widget _buildClusterAvatar(CircleMember member) {
     final avatarUrl = member.avatarUrl;
-    if (avatarUrl.isNotEmpty) {
-      if (avatarUrl.startsWith('http')) {
+    final cleanUrl = avatarUrl.startsWith('http://')
+        ? avatarUrl.replaceFirst('http://', 'https://')
+        : avatarUrl;
+    if (cleanUrl.isNotEmpty) {
+      if (cleanUrl.startsWith('http')) {
         return Image.network(
-          avatarUrl,
+          cleanUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
               _fallbackClusterLetter(member),
         );
-      } else {
-        final file = File(avatarUrl);
+      } else if (cleanUrl.startsWith('/') || cleanUrl.startsWith('file:')) {
+        final file = File(cleanUrl);
         if (file.existsSync()) {
           return Image.file(
             file,

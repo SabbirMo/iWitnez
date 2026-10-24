@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
 
 /// =====================================================================
 /// LIVE LOCATION / MAP CARD
@@ -15,6 +16,7 @@ class LiveLocationCard extends StatefulWidget {
     this.address = '1200 Park Ave, New York, NY 10028, USA',
     this.latitude,
     this.longitude,
+    this.peopleSharing = const [],
   });
 
   final VoidCallback? onViewFullMapTap;
@@ -23,6 +25,7 @@ class LiveLocationCard extends StatefulWidget {
   final String address;
   final double? latitude;
   final double? longitude;
+  final List<PeopleSharingModel> peopleSharing;
 
   @override
   State<LiveLocationCard> createState() => _LiveLocationCardState();
@@ -269,10 +272,8 @@ class _LiveLocationCardState extends State<LiveLocationCard>
                         ),
                       ),
 
-                      // User Location (pulsing halo + vibrant blue dot)
-                      Positioned(
-                        left: 36.w,
-                        bottom: 22.h,
+                      // User Location (pulsing halo + vibrant blue dot centered on map)
+                      Center(
                         child: AnimatedBuilder(
                           animation: _pulseAnimation,
                           builder: (context, child) {
@@ -331,41 +332,8 @@ class _LiveLocationCardState extends State<LiveLocationCard>
                         ),
                       ),
 
-                      // Avatar 1 (Woman - top left / middle)
-                      Positioned(
-                        left: 18.w,
-                        top: 14.h,
-                        child: _buildMapAvatar(
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-                          fallbackName: 'Sarah',
-                          fallbackColor: const Color(0xFFFDA4AF),
-                        ),
-                      ),
-
-                      // Avatar 2 (Young man - top right)
-                      Positioned(
-                        right: 36.w,
-                        top: 12.h,
-                        child: _buildMapAvatar(
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-                          fallbackName: 'Alex',
-                          fallbackColor: const Color(0xFF60A5FA),
-                        ),
-                      ),
-
-                      // Avatar 3 (Man with beard - middle right)
-                      Positioned(
-                        right: 12.w,
-                        top: 60.h,
-                        child: _buildMapAvatar(
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-                          fallbackName: 'John',
-                          fallbackColor: const Color(0xFFFB923C),
-                        ),
-                      ),
+                      // People Sharing Avatars (dynamically rendered from API or fallback)
+                      ..._buildSharingAvatars(),
                     ],
                   ),
                 ),
@@ -375,6 +343,76 @@ class _LiveLocationCardState extends State<LiveLocationCard>
         ),
       ),
     );
+  }
+
+  List<Widget> _buildSharingAvatars() {
+    final others = widget.peopleSharing.where((p) => !p.isSelf).toList();
+    if (others.isNotEmpty) {
+      final widgets = <Widget>[];
+      final positions = [
+        const [14.0, null, null, 14.0], // top, right, bottom, left
+        const [12.0, 16.0, null, null],
+        const [null, 14.0, 20.0, null],
+      ];
+      final colors = [
+        const Color(0xFFFDA4AF),
+        const Color(0xFF60A5FA),
+        const Color(0xFFFB923C),
+      ];
+
+      for (int i = 0; i < others.length && i < 3; i++) {
+        final person = others[i];
+        final pos = positions[i];
+        widgets.add(
+          Positioned(
+            top: pos[0]?.h,
+            right: pos[1]?.w,
+            bottom: pos[2]?.h,
+            left: pos[3]?.w,
+            child: _buildMapAvatar(
+              imageUrl: person.avatarUrl ?? '',
+              fallbackName: person.name ?? 'Contact',
+              fallbackColor: colors[i % colors.length],
+            ),
+          ),
+        );
+      }
+      return widgets;
+    }
+
+    // Default static mock avatars when no remote people sharing
+    return [
+      Positioned(
+        left: 18.w,
+        top: 14.h,
+        child: _buildMapAvatar(
+          imageUrl:
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+          fallbackName: 'Sarah',
+          fallbackColor: const Color(0xFFFDA4AF),
+        ),
+      ),
+      Positioned(
+        right: 36.w,
+        top: 12.h,
+        child: _buildMapAvatar(
+          imageUrl:
+              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+          fallbackName: 'Alex',
+          fallbackColor: const Color(0xFF60A5FA),
+        ),
+      ),
+      Positioned(
+        right: 12.w,
+        top: 60.h,
+        child: _buildMapAvatar(
+          imageUrl:
+              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+          fallbackName: 'John',
+          fallbackColor: const Color(0xFFFB923C),
+        ),
+      ),
+    ];
   }
 
   Widget _buildMapAvatar({
@@ -400,25 +438,20 @@ class _LiveLocationCardState extends State<LiveLocationCard>
             ],
           ),
           child: ClipOval(
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: fallbackColor,
-                  child: Center(
-                    child: Text(
-                      fallbackName.isNotEmpty ? fallbackName[0] : '?',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
+            child: () {
+              final cleanUrl = imageUrl.startsWith('http://')
+                  ? imageUrl.replaceFirst('http://', 'https://')
+                  : imageUrl;
+              if (cleanUrl.startsWith('http')) {
+                return Image.network(
+                  cleanUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildFallbackMapAvatar(fallbackName, fallbackColor),
                 );
-              },
-            ),
+              }
+              return _buildFallbackMapAvatar(fallbackName, fallbackColor);
+            }(),
           ),
         ),
         Positioned(
@@ -435,6 +468,22 @@ class _LiveLocationCardState extends State<LiveLocationCard>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFallbackMapAvatar(String fallbackName, Color fallbackColor) {
+    return Container(
+      color: fallbackColor,
+      child: Center(
+        child: Text(
+          fallbackName.isNotEmpty ? fallbackName[0] : '?',
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 }

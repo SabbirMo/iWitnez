@@ -2,6 +2,7 @@ import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/user_profile_response_model.dart';
 
 enum TrustedCircleKind { family, friends, partner, work }
+
 enum QuickActionType { safety, checkIn, scheduledTimer }
 
 class HomeGreeting {
@@ -23,12 +24,11 @@ class HomeGreeting {
     String? avatarUrl,
     bool? hasUnreadNotification,
   }) => HomeGreeting(
-        userName: userName ?? this.userName,
-        subtitle: subtitle ?? this.subtitle,
-        avatarUrl: avatarUrl ?? this.avatarUrl,
-        hasUnreadNotification:
-            hasUnreadNotification ?? this.hasUnreadNotification,
-      );
+    userName: userName ?? this.userName,
+    subtitle: subtitle ?? this.subtitle,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
+    hasUnreadNotification: hasUnreadNotification ?? this.hasUnreadNotification,
+  );
 }
 
 class QuickActionItem {
@@ -40,10 +40,12 @@ class TrustedCircleSummary {
   const TrustedCircleSummary({
     required this.kind,
     required this.memberCount,
+    this.avatars = const [],
   });
 
   final TrustedCircleKind kind;
   final int memberCount;
+  final List<String>? avatars;
 }
 
 /// Immutable snapshot of everything the Home screen needs to render.
@@ -67,29 +69,26 @@ class HomeState {
   final LiveLocationModel? liveLocation;
 
   factory HomeState.initial() => const HomeState(
-        greeting: HomeGreeting(
-          userName: 'Emma',
-          subtitle: 'Stay Safe, Stay Connected',
-          hasUnreadNotification: false,
-        ),
-        isProtected: true,
-        isLoading: false,
-        liveLocation: LiveLocationModel(
-          isSharingLive: true,
-          address: '1200 Park Ave, New York, NY 10028, USA',
-        ),
-        quickActions: [
-          QuickActionItem(type: QuickActionType.safety),
-          QuickActionItem(type: QuickActionType.checkIn),
-          QuickActionItem(type: QuickActionType.scheduledTimer),
-        ],
-        trustedCircles: [
-          TrustedCircleSummary(kind: TrustedCircleKind.family, memberCount: 3),
-          TrustedCircleSummary(kind: TrustedCircleKind.friends, memberCount: 2),
-          TrustedCircleSummary(kind: TrustedCircleKind.partner, memberCount: 1),
-          TrustedCircleSummary(kind: TrustedCircleKind.work, memberCount: 3),
-        ],
-      );
+    greeting: HomeGreeting(
+      userName: 'Emma',
+      subtitle: 'Stay Safe, Stay Connected',
+      hasUnreadNotification: false,
+    ),
+    isProtected: true,
+    isLoading: false,
+    liveLocation: LiveLocationModel(isSharingLive: true, address: ''),
+    quickActions: [
+      QuickActionItem(type: QuickActionType.safety),
+      QuickActionItem(type: QuickActionType.checkIn),
+      QuickActionItem(type: QuickActionType.scheduledTimer),
+    ],
+    trustedCircles: [
+      TrustedCircleSummary(kind: TrustedCircleKind.family, memberCount: 0),
+      TrustedCircleSummary(kind: TrustedCircleKind.friends, memberCount: 0),
+      TrustedCircleSummary(kind: TrustedCircleKind.partner, memberCount: 0),
+      TrustedCircleSummary(kind: TrustedCircleKind.work, memberCount: 0),
+    ],
+  );
 
   HomeState copyWith({
     HomeGreeting? greeting,

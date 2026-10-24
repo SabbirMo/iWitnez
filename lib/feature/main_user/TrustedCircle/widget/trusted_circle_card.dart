@@ -56,7 +56,9 @@ class TrustedCircleCard extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '${circle.memberCount} Members',
+                        circle.memberCount == 1
+                            ? '1 Member'
+                            : '${circle.memberCount} Members',
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,

@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwitnez/core/services/location_service.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/home_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
+import 'package:iwitnez/feature/main_user/Home_section/Home/model/trusted_circles_response_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/user_profile_response_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/repository/home_repository.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
 
 final homeProvider = AsyncNotifierProvider<HomeNotifier, HomeState>(
   HomeNotifier.new,
@@ -82,11 +85,13 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
         repository.getProfile(),
         repository.getUnreadNotificationCount(),
         repository.getLiveLocation(),
+        repository.getTrustedCircles(),
       ]);
 
       final userData = results[0] as UserData?;
       final unreadCount = results[1] as int;
       final liveLoc = results[2] as LiveLocationModel?;
+      final circles = results[3] as TrustedCirclesResponseModel?;
 
       if (liveLoc?.isSharingLive == true) {
         _startLocationTracking();
@@ -94,11 +99,20 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
         _stopLocationTracking();
       }
 
+      if (circles != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(trustedCircleProvider.notifier)
+              .setCircles(circles.toCircleItems());
+        });
+      }
+
       state = AsyncValue.data(
         current.copyWith(
           isProtected: userData?.isProtected ?? current.isProtected,
           userProfile: userData ?? current.userProfile,
           liveLocation: liveLoc ?? current.liveLocation,
+          trustedCircles: circles?.toSummaries() ?? current.trustedCircles,
           greeting: current.greeting.copyWith(
             userName: userData?.fullName ?? current.greeting.userName,
             subtitle: 'Stay Safe, Stay Connected',

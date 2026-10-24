@@ -110,15 +110,18 @@ class CircleMemberCard extends StatelessWidget {
 
   Widget _buildAvatar(CircleMember member) {
     final avatarUrl = member.avatarUrl;
-    if (avatarUrl.isNotEmpty) {
-      if (avatarUrl.startsWith('http')) {
+    final cleanUrl = avatarUrl.startsWith('http://')
+        ? avatarUrl.replaceFirst('http://', 'https://')
+        : avatarUrl;
+    if (cleanUrl.isNotEmpty) {
+      if (cleanUrl.startsWith('http')) {
         return Image.network(
-          avatarUrl,
+          cleanUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => _fallbackLetter(member),
         );
-      } else {
-        final file = File(avatarUrl);
+      } else if (cleanUrl.startsWith('/') || cleanUrl.startsWith('file:')) {
+        final file = File(cleanUrl);
         if (file.existsSync()) {
           return Image.file(
             file,
