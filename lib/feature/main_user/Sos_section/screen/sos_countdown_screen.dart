@@ -8,7 +8,16 @@ import '../widget/sos_countdown_widget.dart';
 import 'sos_active_camera_screen.dart';
 
 class SosCountdownScreen extends ConsumerStatefulWidget {
-  const SosCountdownScreen({super.key});
+  final double? latitude;
+  final double? longitude;
+  final String? address;
+
+  const SosCountdownScreen({
+    super.key,
+    this.latitude,
+    this.longitude,
+    this.address,
+  });
 
   @override
   ConsumerState<SosCountdownScreen> createState() => _SosCountdownScreenState();
@@ -16,6 +25,20 @@ class SosCountdownScreen extends ConsumerStatefulWidget {
 
 class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
   bool _isDispatched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(sosCountdownProvider.notifier).initiateSos(
+          latitude: widget.latitude,
+          longitude: widget.longitude,
+          address: widget.address,
+        );
+      }
+    });
+  }
 
   void _dispatchSos() {
     if (_isDispatched) return;
@@ -58,7 +81,7 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
         // Only cancel if user actually pressed back without dispatching SOS
         if (didPop && !_isDispatched) {
           try {
-            notifier.cancelAlert();
+            notifier.cancelAlert(reason: 'False alarm / Accidental tap');
           } catch (_) {}
         }
       },
@@ -102,13 +125,14 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    notifier.cancelAlert();
+                    notifier.cancelAlert(reason: 'False alarm / Accidental tap');
                     if (context.mounted) {
                       context.pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('SOS Alert Cancelled'),
                           duration: Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
                         ),
                       );
                     }

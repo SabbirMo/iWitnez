@@ -77,7 +77,12 @@ class HomeScreen extends ConsumerWidget {
                       SizedBox(height: 18.h),
                       Center(
                         child: AnimatedSosButton(
-                          onTap: () => _controller.onSosTap(context),
+                          onTap: () => _controller.onSosTap(
+                            context,
+                            latitude: state.liveLocation?.latitude,
+                            longitude: state.liveLocation?.longitude,
+                            address: state.liveLocation?.address,
+                          ),
                         ),
                       ),
                   ],

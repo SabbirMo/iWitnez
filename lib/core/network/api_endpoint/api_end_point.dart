@@ -15,4 +15,9 @@ class ApiEndPoints {
   static const String pingLocation = '/api/v1/location/ping/';
   static const String contacts = '/api/v1/contacts/';
   static const String trustedCircles = '/api/v1/contacts/circles/';
+
+  // Emergency SOS Endpoints
+  static const String sosStart = '/api/v1/emergency/sos/start/';
+  static String sosActivate(String id) => '/api/v1/emergency/sos/$id/activate/';
+  static String sosCancel(String id) => '/api/v1/emergency/sos/$id/cancel/';
 }

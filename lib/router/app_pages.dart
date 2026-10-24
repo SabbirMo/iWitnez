@@ -226,8 +226,16 @@ final appPages = Provider<GoRouter>(
       ),
       GoRoute(
         path: AppRouteNames.sosCountdownScreen,
-        pageBuilder: (context, state) =>
-            CupertinoPage(child: const SosCountdownScreen()),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return CupertinoPage(
+            child: SosCountdownScreen(
+              latitude: extra?['latitude'] as double?,
+              longitude: extra?['longitude'] as double?,
+              address: extra?['address'] as String?,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppRouteNames.sosActiveCameraScreen,

@@ -50,12 +50,28 @@ class HomeController {
     context.push(AppRouteNames.trustedCircleScreen);
   }
 
-  void onSosTap(BuildContext context) {
+  void onSosTap(
+    BuildContext context, {
+    double? latitude,
+    double? longitude,
+    String? address,
+  }) {
+    final extra = {
+      'latitude': latitude,
+      'longitude': longitude,
+      'address': address,
+    };
     try {
-      context.push(AppRouteNames.sosCountdownScreen);
+      context.push(AppRouteNames.sosCountdownScreen, extra: extra);
     } catch (_) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const SosCountdownScreen()),
+        MaterialPageRoute(
+          builder: (_) => SosCountdownScreen(
+            latitude: latitude,
+            longitude: longitude,
+            address: address,
+          ),
+        ),
       );
     }
   }

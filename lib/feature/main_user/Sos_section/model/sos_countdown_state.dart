@@ -3,12 +3,26 @@ class SosCountdownState {
   final int totalSeconds;
   final bool isAlertSent;
   final bool isCancelled;
+  final String? alertId;
+  final bool isStarting;
+  final bool isActivating;
+  final bool isCancelling;
+  final double? latitude;
+  final double? longitude;
+  final String address;
 
   const SosCountdownState({
     this.secondsRemaining = 10,
     this.totalSeconds = 10,
     this.isAlertSent = false,
     this.isCancelled = false,
+    this.alertId,
+    this.isStarting = false,
+    this.isActivating = false,
+    this.isCancelling = false,
+    this.latitude,
+    this.longitude,
+    this.address = '1200 Park Ave, New York, NY 10028, USA',
   });
 
   String get formattedTime {
@@ -22,12 +36,26 @@ class SosCountdownState {
     int? totalSeconds,
     bool? isAlertSent,
     bool? isCancelled,
+    String? alertId,
+    bool? isStarting,
+    bool? isActivating,
+    bool? isCancelling,
+    double? latitude,
+    double? longitude,
+    String? address,
   }) {
     return SosCountdownState(
       secondsRemaining: secondsRemaining ?? this.secondsRemaining,
       totalSeconds: totalSeconds ?? this.totalSeconds,
       isAlertSent: isAlertSent ?? this.isAlertSent,
       isCancelled: isCancelled ?? this.isCancelled,
+      alertId: alertId ?? this.alertId,
+      isStarting: isStarting ?? this.isStarting,
+      isActivating: isActivating ?? this.isActivating,
+      isCancelling: isCancelling ?? this.isCancelling,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      address: address ?? this.address,
     );
   }
 }
