@@ -22,9 +22,7 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFFAFAFC),
       body: SafeArea(
         bottom: false,
-        child: asyncHome.isLoading && asyncHome.value == null
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+        child: RefreshIndicator(
                 onRefresh: () =>
                     ref.read(homeProvider.notifier).fetchHomeData(),
                 child: SingleChildScrollView(
@@ -49,10 +47,17 @@ class HomeScreen extends ConsumerWidget {
                       if (state.isProtected) const ProtectedBanner(),
                       SizedBox(height: 16.h),
                       LiveLocationCard(
+                        isSharing: state.liveLocation?.isSharingLive ?? false,
+                        address: state.liveLocation?.address ??
+                            '1200 Park Ave, New York, NY 10028, USA',
+                        latitude: state.liveLocation?.latitude,
+                        longitude: state.liveLocation?.longitude,
                         onViewFullMapTap: () =>
                             _controller.onViewFullMapTap(context),
-                        onToggleSharing: () =>
-                            _controller.onToggleSharing(context),
+                        onToggleSharing: () {
+                          ref.read(homeProvider.notifier).toggleSharing();
+                          _controller.onToggleSharing(context);
+                        },
                       ),
                       SizedBox(height: 20.h),
                       const SectionHeader(title: 'Quick Actions'),

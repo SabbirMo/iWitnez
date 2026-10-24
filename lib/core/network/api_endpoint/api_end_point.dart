@@ -11,4 +11,6 @@ class ApiEndPoints {
   static const String resetPassword = '/api/v1/auth/password/reset/';
   static const String getProfile = '/api/v1/auth/me/';
   static const String notifications = '/api/v1/notifications/';
+  static const String liveLocation = '/api/v1/location/live/';
+  static const String pingLocation = '/api/v1/location/ping/';
 }

@@ -12,13 +12,17 @@ class LiveLocationCard extends StatefulWidget {
     this.onViewFullMapTap,
     this.onToggleSharing,
     this.isSharing = true,
-    this.address = '1200 Park Ave,\nNew York, NY 10028, USA',
+    this.address = '1200 Park Ave, New York, NY 10028, USA',
+    this.latitude,
+    this.longitude,
   });
 
   final VoidCallback? onViewFullMapTap;
   final VoidCallback? onToggleSharing;
   final bool isSharing;
   final String address;
+  final double? latitude;
+  final double? longitude;
 
   @override
   State<LiveLocationCard> createState() => _LiveLocationCardState();
@@ -207,13 +211,15 @@ class _LiveLocationCardState extends State<LiveLocationCard>
 
                       // Address
                       Text(
-                        '1200 Park Ave, New York, Ny 10028, USA',
+                        widget.address,
                         style: GoogleFonts.inter(
                           color: const Color(0xFF111827),
                           fontSize: 8.5.sp,
                           fontWeight: FontWeight.w700,
                           height: 1.25,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

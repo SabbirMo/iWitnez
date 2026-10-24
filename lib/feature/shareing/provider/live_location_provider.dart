@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
+import 'package:iwitnez/core/network/service/api_services.dart';
 import 'package:iwitnez/core/services/location_service.dart';
 
 class LiveLocationState {
@@ -108,6 +110,7 @@ class LiveLocationNotifier extends Notifier<LiveLocationState> {
       debugPrint('   Longitude: ${initialPos.longitude}');
       debugPrint('   Accuracy : ${initialPos.accuracy.toStringAsFixed(2)} m');
       debugPrint('====================================================');
+      _pingLocation(initialPos);
     }
 
     // Cancel existing stream if any
@@ -124,6 +127,7 @@ class LiveLocationNotifier extends Notifier<LiveLocationState> {
             debugPrint(
               '📡 [LiveLocation Stream] Lat: ${position.latitude}, Lng: ${position.longitude}',
             );
+            _pingLocation(position);
             state = state.copyWith(currentPosition: position, isSharing: true);
           },
           onError: (error) {
@@ -149,6 +153,23 @@ class LiveLocationNotifier extends Notifier<LiveLocationState> {
     await _positionSubscription?.cancel();
     _positionSubscription = null;
     state = state.copyWith(isSharing: false);
+  }
+
+  Future<void> _pingLocation(Position pos) async {
+    try {
+      await ApiServices().post(
+        ApiEndPoints.pingLocation,
+        data: {
+          'latitude': pos.latitude.toString(),
+          'longitude': pos.longitude.toString(),
+          'accuracy': pos.accuracy,
+          'speed': pos.speed,
+          'heading': pos.heading,
+          'address': '',
+        },
+        requireAuth: true,
+      );
+    } catch (_) {}
   }
 
   Future<bool> openAppSettings() async {

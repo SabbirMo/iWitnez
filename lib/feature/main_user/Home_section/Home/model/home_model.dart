@@ -1,3 +1,4 @@
+import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/user_profile_response_model.dart';
 
 enum TrustedCircleKind { family, friends, partner, work }
@@ -54,6 +55,7 @@ class HomeState {
     required this.quickActions,
     required this.trustedCircles,
     this.userProfile,
+    this.liveLocation,
   });
 
   final HomeGreeting greeting;
@@ -62,6 +64,7 @@ class HomeState {
   final List<QuickActionItem> quickActions;
   final List<TrustedCircleSummary> trustedCircles;
   final UserData? userProfile;
+  final LiveLocationModel? liveLocation;
 
   factory HomeState.initial() => const HomeState(
         greeting: HomeGreeting(
@@ -71,6 +74,10 @@ class HomeState {
         ),
         isProtected: true,
         isLoading: false,
+        liveLocation: LiveLocationModel(
+          isSharingLive: true,
+          address: '1200 Park Ave, New York, NY 10028, USA',
+        ),
         quickActions: [
           QuickActionItem(type: QuickActionType.safety),
           QuickActionItem(type: QuickActionType.checkIn),
@@ -91,6 +98,7 @@ class HomeState {
     List<QuickActionItem>? quickActions,
     List<TrustedCircleSummary>? trustedCircles,
     UserData? userProfile,
+    LiveLocationModel? liveLocation,
   }) {
     return HomeState(
       greeting: greeting ?? this.greeting,
@@ -99,6 +107,7 @@ class HomeState {
       quickActions: quickActions ?? this.quickActions,
       trustedCircles: trustedCircles ?? this.trustedCircles,
       userProfile: userProfile ?? this.userProfile,
+      liveLocation: liveLocation ?? this.liveLocation,
     );
   }
 }
