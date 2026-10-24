@@ -7,16 +7,16 @@ import 'package:iwitnez/router/app_route_names.dart';
 class ChatController {
   ChatController();
 
-  void openChat(BuildContext context, ChatEntry entry, ChatProvider provider) {
+  void openChat(BuildContext context, ConversationModel entry, ChatProvider provider) {
     provider.markAsRead(entry);
 
     context.push(
       AppRouteNames.chatDetailsScreen,
       extra: {
-        'chatId': entry.name,
+        'chatId': entry.id,
         'contactName': entry.name,
         'avatarUrl': entry.avatarUrl,
-        'isOnline': true,
+        'isOnline': entry.isOnline,
       },
     );
   }

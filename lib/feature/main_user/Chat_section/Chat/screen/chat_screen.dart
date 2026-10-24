@@ -42,8 +42,9 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Text(
                 AppString.chat,
-                style: CustomTextStyle.bold30(AppColors.textDark)
-                    .copyWith(fontSize: 24.sp),
+                style: CustomTextStyle.bold30(
+                  AppColors.textDark,
+                ).copyWith(fontSize: 24.sp),
               ),
             ),
             Padding(
@@ -55,8 +56,9 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Text(
                 'Recent',
-                style: CustomTextStyle.regular16(AppColors.textDark)
-                    .copyWith(fontWeight: FontWeight.w700, fontSize: 13.sp),
+                style: CustomTextStyle.regular16(
+                  AppColors.textDark,
+                ).copyWith(fontWeight: FontWeight.w700, fontSize: 13.sp),
               ),
             ),
             SizedBox(height: 4.h),
@@ -64,34 +66,57 @@ class _ChatScreenState extends State<ChatScreen> {
               child: ListenableBuilder(
                 listenable: _provider,
                 builder: (context, _) {
-                  if (_provider.isLoading) {
+                  if (_provider.isLoading && _provider.chats.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (_provider.chats.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No chats found',
-                        style: CustomTextStyle.regular14(AppColors.textMuted),
+                    return RefreshIndicator(
+                      onRefresh: () => _provider.fetchChats(),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: 120.h),
+                          Center(
+                            child: Text(
+                              _provider.searchQuery.isNotEmpty
+                                  ? 'No messages found for "${_provider.searchQuery}"'
+                                  : 'No conversations found',
+                              style: CustomTextStyle.regular14(
+                                AppColors.textMuted,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }
-                  return ListView.separated(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w)
-                        .copyWith(bottom: 68.h + MediaQuery.of(context).padding.bottom),
-                    itemCount: _provider.chats.length,
-                    separatorBuilder: (_, _) => Divider(
-                      height: 1,
-                      thickness: 0.6,
-                      color: Colors.grey.shade200,
+                  return RefreshIndicator(
+                    onRefresh: () => _provider.fetchChats(
+                      search: _provider.searchQuery.isEmpty
+                          ? null
+                          : _provider.searchQuery,
+                      showLoading: false,
                     ),
-                    itemBuilder: (context, index) {
-                      final chat = _provider.chats[index];
-                      return ChatTile(
-                        entry: chat,
-                        onTap: () =>
-                            _controller.openChat(context, chat, _provider),
-                      );
-                    },
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w).copyWith(
+                        bottom: 68.h + MediaQuery.of(context).padding.bottom,
+                      ),
+                      itemCount: _provider.chats.length,
+                      separatorBuilder: (_, _) => Divider(
+                        height: 1,
+                        thickness: 0.6,
+                        color: Colors.grey.shade200,
+                      ),
+                      itemBuilder: (context, index) {
+                        final chat = _provider.chats[index];
+                        return ChatTile(
+                          entry: chat,
+                          onTap: () =>
+                              _controller.openChat(context, chat, _provider),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

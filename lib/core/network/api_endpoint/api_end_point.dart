@@ -16,6 +16,15 @@ class ApiEndPoints {
   static const String contacts = '/api/v1/contacts/';
   static const String trustedCircles = '/api/v1/contacts/circles/';
 
+  // Chat Endpoints
+  static const String chatConversations = '/api/v1/chat/conversations/';
+  static String chatMessages(String conversationId) =>
+      '/api/v1/chat/conversations/$conversationId/messages/';
+  static String chatMarkRead(String conversationId) =>
+      '/api/v1/chat/conversations/$conversationId/read/';
+  static String chatDirect(String targetUserId) =>
+      '/api/v1/chat/conversations/direct/$targetUserId/';
+
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';
   static String sosActivate(String id) => '/api/v1/emergency/sos/$id/activate/';

@@ -5,10 +5,38 @@ import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/model/chat_model.dart';
 
 /// Rounded pill search field, matches the "Search messages" design.
-class ChatSearchField extends StatelessWidget {
-  const ChatSearchField({super.key, this.onChanged});
+class ChatSearchField extends StatefulWidget {
+  const ChatSearchField({super.key, this.onChanged, this.controller});
 
   final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
+
+  @override
+  State<ChatSearchField> createState() => _ChatSearchFieldState();
+}
+
+class _ChatSearchFieldState extends State<ChatSearchField> {
+  late final TextEditingController _controller;
+  bool _isInternalController = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller != null) {
+      _controller = widget.controller!;
+    } else {
+      _controller = TextEditingController();
+      _isInternalController = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_isInternalController) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,15 +53,40 @@ class ChatSearchField extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: TextField(
-              onChanged: onChanged,
+              controller: _controller,
+              onChanged: widget.onChanged,
               style: CustomTextStyle.regular14(AppColors.textDark),
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
                 hintText: 'Search messages',
                 hintStyle: CustomTextStyle.regular14(AppColors.textMuted),
+                errorBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
               ),
             ),
+          ),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _controller,
+            builder: (context, value, _) {
+              if (value.text.isEmpty) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: () {
+                  _controller.clear();
+                  widget.onChanged?.call('');
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(left: 4.w),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: AppColors.textMuted,
+                    size: 18.sp,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -41,15 +94,16 @@ class ChatSearchField extends StatelessWidget {
   }
 }
 
-/// One row of the chat list: avatar, name, last message, time, unread badge.
+/// One row of the conversation list:
+/// Contact Avatar: item['other_participant']['avatar_url']
+/// Contact Name: item['other_participant']['full_name']
+/// Last Message Preview: item['last_message'] != null ? item['last_message']['text'] : ""
+/// Timestamp: item['last_message']['formatted_time']
+/// Unread Count Badge: purple circular badge if > 0, hidden if 0.
 class ChatTile extends StatelessWidget {
-  const ChatTile({
-    super.key,
-    required this.entry,
-    this.onTap,
-  });
+  const ChatTile({super.key, required this.entry, this.onTap});
 
-  final ChatEntry entry;
+  final ConversationModel entry;
   final VoidCallback? onTap;
 
   @override
@@ -63,11 +117,7 @@ class ChatTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 26.r,
-              backgroundImage: NetworkImage(entry.avatarUrl),
-              backgroundColor: Colors.grey.shade200,
-            ),
+            _buildAvatar(),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
@@ -75,12 +125,15 @@ class ChatTile extends StatelessWidget {
                 children: [
                   Text(
                     entry.name,
-                    style: CustomTextStyle.regular16(AppColors.textDark)
-                        .copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: CustomTextStyle.regular16(
+                      AppColors.textDark,
+                    ).copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    entry.lastMessage,
+                    entry.lastMessagePreview,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: CustomTextStyle.regular14(AppColors.textMuted),
@@ -92,32 +145,86 @@ class ChatTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  entry.time,
-                  style: CustomTextStyle.regular14(AppColors.textMuted)
-                      .copyWith(fontSize: 12.sp),
-                ),
-                SizedBox(height: 8.h),
+                if (entry.formattedTime.isNotEmpty)
+                  Text(
+                    entry.formattedTime,
+                    style: CustomTextStyle.regular14(
+                      AppColors.textMuted,
+                    ).copyWith(fontSize: 12.sp),
+                  ),
+                SizedBox(height: 6.h),
                 if (hasUnread)
                   Container(
-                    width: 20.w,
-                    height: 20.h,
+                    constraints: BoxConstraints(
+                      minWidth: 20.r,
+                      minHeight: 20.r,
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 5.w),
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
-                      color: Colors.indigo,
+                      color: Color(0xFF2E3FA5),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       '${entry.unreadCount}',
-                      style: CustomTextStyle.regular14(Colors.white)
-                          .copyWith(fontSize: 11.sp, fontWeight: FontWeight.w700),
+                      style: CustomTextStyle.regular14(
+                        Colors.white,
+                      ).copyWith(fontSize: 11.sp, fontWeight: FontWeight.w700),
                     ),
                   )
                 else
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 20.r),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar() {
+    final avatarUrl = entry.avatarUrl.trim();
+    final cleanUrl = avatarUrl.startsWith('http://')
+        ? avatarUrl.replaceFirst('http://', 'https://')
+        : avatarUrl;
+
+    return Container(
+      width: 52.r,
+      height: 52.r,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey.shade200,
+      ),
+      child: ClipOval(
+        child: cleanUrl.startsWith('http')
+            ? Image.network(
+                cleanUrl,
+                width: 52.r,
+                height: 52.r,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => _fallbackAvatar(),
+              )
+            : _fallbackAvatar(),
+      ),
+    );
+  }
+
+  Widget _fallbackAvatar() {
+    final initial = entry.name.trim().isNotEmpty
+        ? entry.name.trim()[0].toUpperCase()
+        : '?';
+
+    return Container(
+      width: 52.r,
+      height: 52.r,
+      color: const Color(0xFFEDE9FE),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: const Color(0xFF6D28D9),
+          fontSize: 20.sp,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

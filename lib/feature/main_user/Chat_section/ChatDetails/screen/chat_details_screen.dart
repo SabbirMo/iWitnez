@@ -105,7 +105,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                       message: message,
                       avatarUrl: message.isMe ? null : widget.avatarUrl,
                       onLocationTap: message.type == MessageType.liveLocation
-                          ? () => _controller.openLiveLocation(context)
+                          ? () => _controller.openLiveLocation(context, message)
                           : null,
                     );
                   },

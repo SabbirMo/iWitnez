@@ -1,52 +1,125 @@
 import 'package:flutter/foundation.dart';
+import 'package:iwitnez/core/services/location_service.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
+import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/repository/chat_details_repository.dart';
 
 class ChatDetailsProvider extends ChangeNotifier {
-  List<ChatMessage> _messages = _dummyMessages;
+  ChatDetailsProvider({ChatDetailsRepository? repository})
+      : _repository = repository ?? ChatDetailsRepository();
+
+  final ChatDetailsRepository _repository;
+
+  List<ChatMessage> _messages = [];
   bool _isLoading = false;
+  String? _currentChatId;
 
   List<ChatMessage> get messages => _messages;
   bool get isLoading => _isLoading;
+  String? get currentChatId => _currentChatId;
 
+  /// 1. Fetch Message History: `GET /api/v1/chat/conversations/<conversation_id>/messages/`
+  /// 2. Mark Conversation Messages as Read: `POST /api/v1/chat/conversations/<conversation_id>/read/`
   Future<void> fetchMessages(String chatId) async {
+    _currentChatId = chatId;
     _isLoading = true;
     notifyListeners();
 
-    // TODO: replace with real API/local-db call using chatId
-    await Future.delayed(const Duration(milliseconds: 300));
-    _messages = _dummyMessages;
+    // Fire read receipt so unread count clears for this conversation
+    _repository.markAsRead(chatId);
 
-    _isLoading = false;
-    notifyListeners();
+    try {
+      final fetched = await _repository.getMessages(chatId);
+      _messages = fetched;
+    } catch (e) {
+      debugPrint('Error fetching messages: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  void sendMessage(String text) {
-    if (text.trim().isEmpty) return;
-    _messages = [
-      ..._messages,
-      ChatMessage(
-        text: text.trim(),
-        time: _nowFormatted(),
-        isMe: true,
-        status: MessageStatus.sent,
-      ),
-    ];
+  /// 3. Send Text Message: `POST /api/v1/chat/conversations/<conversation_id>/messages/`
+  Future<void> sendMessage(String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+
+    final optimistic = ChatMessage(
+      text: trimmed,
+      time: _nowFormatted(),
+      isMe: true,
+      status: MessageStatus.sent,
+    );
+
+    _messages = [..._messages, optimistic];
     notifyListeners();
+
+    if (_currentChatId != null && _currentChatId!.isNotEmpty) {
+      final sent = await _repository.sendTextMessage(
+        _currentChatId!,
+        text: trimmed,
+      );
+      if (sent != null) {
+        final index = _messages.lastIndexOf(optimistic);
+        if (index != -1) {
+          _messages[index] = sent;
+          notifyListeners();
+        }
+      }
+    }
   }
 
-  void shareLiveLocation() {
-    _messages = [
-      ..._messages,
-      ChatMessage(
-        text: 'Live Location',
-        time: _nowFormatted(),
-        isMe: true,
-        type: MessageType.liveLocation,
-        locationLabel: 'View on map',
-        status: MessageStatus.sent,
-      ),
-    ];
+  /// 3. Share Live Location Pin in Chat: `POST /api/v1/chat/conversations/<conversation_id>/messages/`
+  Future<void> shareLiveLocation({
+    double? latitude,
+    double? longitude,
+    String? address,
+  }) async {
+    double lat = latitude ?? 0;
+    double lng = longitude ?? 0;
+    String locAddress = address ?? 'Here is my location';
+
+    if (latitude == null || longitude == null) {
+      final locResult = await const LocationService().getCurrentLocation();
+      if (locResult.isSuccess && locResult.position != null) {
+        lat = locResult.position!.latitude;
+        lng = locResult.position!.longitude;
+        locAddress =
+            address ??
+            'Lat: ${lat.toStringAsFixed(4)}, Lng: ${lng.toStringAsFixed(4)}';
+      }
+    }
+
+    final optimistic = ChatMessage(
+      text: 'Here is my location',
+      time: _nowFormatted(),
+      isMe: true,
+      type: MessageType.liveLocation,
+      locationLabel: locAddress,
+      latitude: lat != 0 ? lat : null,
+      longitude: lng != 0 ? lng : null,
+      locationAddress: locAddress,
+      status: MessageStatus.sent,
+    );
+
+    _messages = [..._messages, optimistic];
     notifyListeners();
+
+    if (_currentChatId != null && _currentChatId!.isNotEmpty) {
+      final sent = await _repository.sendLocationMessage(
+        _currentChatId!,
+        text: 'Here is my location',
+        latitude: lat,
+        longitude: lng,
+        locationAddress: locAddress,
+      );
+      if (sent != null) {
+        final index = _messages.lastIndexOf(optimistic);
+        if (index != -1) {
+          _messages[index] = sent;
+          notifyListeners();
+        }
+      }
+    }
   }
 
   void sendImage(String filePath) {
@@ -71,34 +144,4 @@ class ChatDetailsProvider extends ChangeNotifier {
     final period = now.hour >= 12 ? 'PM' : 'AM';
     return '$hour:$minute $period';
   }
-
-  static final List<ChatMessage> _dummyMessages = [
-    const ChatMessage(text: 'Hi! How are you?', time: '9:12 AM', isMe: false),
-    const ChatMessage(text: 'Where are you now?', time: '9:12 AM', isMe: false),
-    const ChatMessage(
-      text: "Hi! I'm good 😊",
-      time: '9:13 AM',
-      isMe: true,
-      status: MessageStatus.read,
-    ),
-    const ChatMessage(
-      text: "I'm at the cafe.",
-      time: '9:13 AM',
-      isMe: true,
-      status: MessageStatus.read,
-    ),
-    const ChatMessage(
-      text: 'Live Location',
-      time: '9:14 AM',
-      isMe: true,
-      type: MessageType.liveLocation,
-      locationLabel: 'View on map',
-      status: MessageStatus.read,
-    ),
-    const ChatMessage(
-      text: 'Great! Take care ❤️',
-      time: '9:15 AM',
-      isMe: false,
-    ),
-  ];
 }
