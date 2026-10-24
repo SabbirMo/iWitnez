@@ -36,8 +36,15 @@ class AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final request = err.requestOptions;
 
+    final path = request.path;
+    final isAuthEndpoint =
+        path.contains(ApiEndPoints.logout) ||
+        path.contains(ApiEndPoints.refreshToken) ||
+        path.contains(ApiEndPoints.login);
+
     if (err.response?.statusCode != 401 ||
-        request.extra['auth_retry'] == true) {
+        request.extra['auth_retry'] == true ||
+        isAuthEndpoint) {
       handler.next(err);
       return;
     }

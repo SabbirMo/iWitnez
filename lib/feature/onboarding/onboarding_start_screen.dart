@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/constants/user_role/user_role.dart';
+import 'package:iwitnez/core/utils/token_storage.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/core/widgets/pulse_circle.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
@@ -121,8 +123,31 @@ class _OnboardingStartScreenState extends ConsumerState<OnboardingStartScreen>
                   _animations.buttonTransition(
                     child: CustomButton(
                       text: "Get Start",
-                      onTap: () {
-                        context.pushReplacement(AppRouteNames.onBoardingScreen);
+                      onTap: () async {
+                        final hasToken = await TokenStorage.hasValidToken();
+                        if (!context.mounted) return;
+
+                        if (hasToken) {
+                          final savedRole = await TokenStorage.getUserRole();
+                          if (!context.mounted) return;
+
+                          final isTrusted = savedRole == 'trusted_contact';
+                          final role = isTrusted
+                              ? UserRole.trustedContact
+                              : UserRole.mainUser;
+
+                          ref.read(userRoleProvider.notifier).set(role);
+
+                          if (isTrusted) {
+                            context.go(AppRouteNames.trustedHome);
+                          } else {
+                            context.go(AppRouteNames.mainUserHome);
+                          }
+                        } else {
+                          context.pushReplacement(
+                            AppRouteNames.onBoardingScreen,
+                          );
+                        }
                       },
                     ),
                   ),

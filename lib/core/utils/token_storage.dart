@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -68,5 +69,34 @@ class TokenStorage {
     } catch (e) {
       debugPrint("TokenStorage.clearTokens error: $e");
     }
+  }
+
+  static Future<bool> hasValidToken() async {
+    final token = await getAccessToken();
+    if (token == null || token.trim().isEmpty) {
+      return false;
+    }
+
+    try {
+      final parts = token.split('.');
+      if (parts.length == 3) {
+        final normalized = base64Url.normalize(parts[1]);
+        final decoded = utf8.decode(base64Url.decode(normalized));
+        final Map<String, dynamic> payload = json.decode(decoded);
+        if (payload['exp'] is int) {
+          final exp = payload['exp'] as int;
+          final expDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+          if (DateTime.now().isAfter(expDate)) {
+            // Access token has expired; check if refresh token exists to renew it
+            final refreshToken = await getRefreshToken();
+            return refreshToken != null && refreshToken.trim().isNotEmpty;
+          }
+        }
+      }
+    } catch (_) {
+      // If token decoding fails (e.g. non-JWT token), assume valid based on existence
+    }
+
+    return true;
   }
 }
