@@ -67,7 +67,7 @@ class HomeState {
         greeting: HomeGreeting(
           userName: 'Emma',
           subtitle: 'Stay Safe, Stay Connected',
-          hasUnreadNotification: true,
+          hasUnreadNotification: false,
         ),
         isProtected: true,
         isLoading: false,

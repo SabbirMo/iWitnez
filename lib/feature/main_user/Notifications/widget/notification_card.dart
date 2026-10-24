@@ -16,7 +16,7 @@ class NotificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             spreadRadius: 2,
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -30,7 +30,7 @@ class NotificationCard extends StatelessWidget {
             height: 48,
             width: 48,
             decoration: BoxDecoration(
-              color: notification.color.withOpacity(0.15),
+              color: notification.color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(notification.icon, color: notification.color, size: 24),

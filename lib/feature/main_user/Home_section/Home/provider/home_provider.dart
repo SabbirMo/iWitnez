@@ -14,13 +14,16 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
 
     try {
       final userData = await repository.getProfile();
+      final unreadCount = await repository.getUnreadNotificationCount();
+
       return initial.copyWith(
         isProtected: userData.isProtected,
         userProfile: userData,
         greeting: initial.greeting.copyWith(
-          userName: userData.firstName,
+          userName: userData.fullName,
           subtitle: 'Stay Safe, Stay Connected',
           avatarUrl: userData.avatarUrl,
+          hasUnreadNotification: unreadCount > 0,
         ),
       );
     } catch (_) {
@@ -33,15 +36,18 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(homeRepositoryProvider);
       final current = state.value ?? HomeState.initial();
+
       final userData = await repository.getProfile();
+      final unreadCount = await repository.getUnreadNotificationCount();
 
       return current.copyWith(
         isProtected: userData.isProtected,
         userProfile: userData,
         greeting: current.greeting.copyWith(
-          userName: userData.firstName,
+          userName: userData.fullName,
           subtitle: 'Stay Safe, Stay Connected',
           avatarUrl: userData.avatarUrl,
+          hasUnreadNotification: unreadCount > 0,
         ),
       );
     });

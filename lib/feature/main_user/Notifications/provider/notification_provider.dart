@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:iwitnez/feature/main_user/Notifications/repository/notification_repository.dart';
 import '../controller/notification_controller.dart';
 
-// Provider definition moved to its own file
 final notificationControllerProvider =
     StateNotifierProvider<NotificationController, NotificationState>((ref) {
-      return NotificationController();
-    });
+  final repository = ref.read(notificationRepositoryProvider);
+  return NotificationController(repository);
+});

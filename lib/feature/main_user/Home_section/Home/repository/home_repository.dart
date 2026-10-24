@@ -16,6 +16,20 @@ class HomeRepository {
 
     return UserData.fromJson(response.data['data']);
   }
+
+  Future<int> getUnreadNotificationCount() async {
+    try {
+      final response = await _apiServices.get(
+        ApiEndPoints.notifications,
+        requireAuth: true,
+      );
+
+      final data = response.data?['data'];
+      return (data?['unread_count'] as num?)?.toInt() ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
 }
 
 final homeRepositoryProvider = Provider<HomeRepository>((ref) {

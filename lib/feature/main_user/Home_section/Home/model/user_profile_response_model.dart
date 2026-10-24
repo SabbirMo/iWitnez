@@ -15,9 +15,4 @@ class UserData {
       isProtected: safety is Map && safety['sos_alerts_enabled'] == true,
     );
   }
-
-  String get firstName {
-    if (fullName == null || fullName!.trim().isEmpty) return 'Emma';
-    return fullName!.trim().split(' ').first;
-  }
 }

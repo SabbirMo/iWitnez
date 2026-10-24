@@ -173,6 +173,7 @@ class HomeAppHeader extends StatelessWidget {
     if (clean.toLowerCase().startsWith('hi ')) {
       return clean;
     }
-    return 'Hi $clean';
+    final firstName = clean.split(RegExp(r'\s+')).first;
+    return 'Hi $firstName';
   }
 }
