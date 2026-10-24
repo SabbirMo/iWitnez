@@ -96,6 +96,22 @@ class TrustedCircleCard extends StatelessWidget {
     onTap: onTap,
   );
 
+  factory TrustedCircleCard.other({
+    VoidCallback? onTap,
+    int memberCount = 0,
+    List<String> avatars = const [],
+  }) => TrustedCircleCard(
+    kind: TrustedCircleKind.other,
+    title: 'Other',
+    memberCount: memberCount,
+    memberColor: const Color(0xFFD97706),
+    badgeCircleBg: const Color(0xFFFEF3C7),
+    badgeIcon: Icons.more_horiz_rounded,
+    badgeIconColor: const Color(0xFFD97706),
+    avatars: avatars,
+    onTap: onTap,
+  );
+
   @override
   Widget build(BuildContext context) {
     const avatarSize = 23.46;

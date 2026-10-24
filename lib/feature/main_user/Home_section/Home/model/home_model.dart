@@ -1,7 +1,7 @@
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/user_profile_response_model.dart';
 
-enum TrustedCircleKind { family, friends, partner, work }
+enum TrustedCircleKind { family, friends, partner, work, other }
 
 enum QuickActionType { safety, checkIn, scheduledTimer }
 

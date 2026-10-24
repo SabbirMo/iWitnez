@@ -55,6 +55,16 @@ class TrustedCircleNotifier extends Notifier<List<TrustedCircleItem>> {
       badgeIconColor: Color(0xFF10B981),
       members: [],
     ),
+    TrustedCircleItem(
+      id: 'other',
+      title: 'Other',
+      memberCount: 0,
+      avatars: [],
+      badgeBg: Color(0xFFFEF3C7),
+      badgeIcon: Icons.more_horiz_rounded,
+      badgeIconColor: Color(0xFFD97706),
+      members: [],
+    ),
   ];
 
   void setCircles(List<TrustedCircleItem> circles) {

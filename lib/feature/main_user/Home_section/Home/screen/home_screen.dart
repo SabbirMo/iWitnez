@@ -153,6 +153,11 @@ class HomeScreen extends ConsumerWidget {
         memberCount: summary.memberCount,
         avatars: summary.avatars ?? const [],
       ),
+      TrustedCircleKind.other => TrustedCircleCard.other(
+        onTap: onTap,
+        memberCount: summary.memberCount,
+        avatars: summary.avatars ?? const [],
+      ),
     };
   }
 }

@@ -46,6 +46,7 @@ class TrustedCirclesResponseModel {
   final CircleDetail friends;
   final CircleDetail partner;
   final CircleDetail work;
+  final CircleDetail other;
 
   const TrustedCirclesResponseModel({
     required this.totalMembers,
@@ -53,6 +54,7 @@ class TrustedCirclesResponseModel {
     required this.friends,
     required this.partner,
     required this.work,
+    required this.other,
   });
 
   factory TrustedCirclesResponseModel.fromJson(Map<String, dynamic> json) {
@@ -75,6 +77,10 @@ class TrustedCirclesResponseModel {
       work: CircleDetail.fromJson(
         circles['work'] as Map<String, dynamic>?,
         'Work',
+      ),
+      other: CircleDetail.fromJson(
+        circles['other'] as Map<String, dynamic>?,
+        'Other',
       ),
     );
   }
@@ -177,6 +183,20 @@ class TrustedCirclesResponseModel {
         badgeIcon: Icons.business_center_rounded,
         badgeIconColor: const Color(0xFF10B981),
         members: work.members,
+      ),
+      TrustedCircleItem(
+        id: 'other',
+        title: other.label.isNotEmpty ? other.label : 'Other',
+        memberCount: other.count,
+        avatars: other.members
+            .map((m) => m.avatarUrl)
+            .where((u) => u.isNotEmpty)
+            .take(3)
+            .toList(),
+        badgeBg: const Color(0xFFFEF3C7),
+        badgeIcon: Icons.more_horiz_rounded,
+        badgeIconColor: const Color(0xFFD97706),
+        members: other.members,
       ),
     ];
   }
