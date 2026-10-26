@@ -7,10 +7,14 @@ import 'package:iwitnez/router/app_route_names.dart';
 class ChatController {
   ChatController();
 
-  void openChat(BuildContext context, ConversationModel entry, ChatProvider provider) {
+  Future<void> openChat(
+    BuildContext context,
+    ConversationModel entry,
+    ChatProvider provider,
+  ) async {
     provider.markAsRead(entry);
 
-    context.push(
+    await context.push(
       AppRouteNames.chatDetailsScreen,
       extra: {
         'chatId': entry.id,
@@ -19,5 +23,11 @@ class ChatController {
         'isOnline': entry.isOnline,
       },
     );
+
+    // When returning from ChatDetailsScreen, refresh the conversations
+    // so the latest message and timestamp are always in sync with backend
+    if (context.mounted) {
+      provider.fetchChats(showLoading: false);
+    }
   }
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/controller/chat_details_controller.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/provider/chat_details_provider.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/widget/chat_details_widget.dart';
 
-class ChatDetailsScreen extends StatefulWidget {
+class ChatDetailsScreen extends ConsumerStatefulWidget {
   const ChatDetailsScreen({
     super.key,
     required this.chatId,
@@ -20,41 +21,57 @@ class ChatDetailsScreen extends StatefulWidget {
   final bool isOnline;
 
   @override
-  State<ChatDetailsScreen> createState() => _ChatDetailsScreenState();
+  ConsumerState<ChatDetailsScreen> createState() => _ChatDetailsScreenState();
 }
 
-class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
-  final ChatDetailsProvider _provider = ChatDetailsProvider();
+class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen>
+    with WidgetsBindingObserver {
   final ChatDetailsController _controller = ChatDetailsController();
   final ScrollController _scrollController = ScrollController();
+  int _lastMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _provider.fetchMessages(widget.chatId);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(chatDetailsProvider(widget.chatId).notifier).markAsRead();
+    }
   }
 
   @override
   void dispose() {
-    _provider.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _scrollToBottom() {
+  void _scrollToBottom([bool animated = true]) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
+        final target = _scrollController.position.maxScrollExtent;
+        if (animated) {
+          _scrollController.animateTo(
+            target,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          );
+        } else {
+          _scrollController.jumpTo(target);
+        }
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final chatAsync = ref.watch(chatDetailsProvider(widget.chatId));
+    final notifier = ref.read(chatDetailsProvider(widget.chatId).notifier);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: ChatDetailsAppBar(
@@ -81,14 +98,23 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListenableBuilder(
-              listenable: _provider,
-              builder: (context, _) {
-                if (_provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+            child: chatAsync.when(
+              loading: () =>
+                  const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(
+                child: Text(
+                  'Failed to load messages',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ),
+              data: (chatState) {
+                final messages = chatState.messages;
+
+                if (messages.length != _lastMessageCount) {
+                  _lastMessageCount = messages.length;
+                  _scrollToBottom();
                 }
-                final messages = _provider.messages;
-                _scrollToBottom();
+
                 return ListView.builder(
                   controller: _scrollController,
                   padding: EdgeInsets.symmetric(
@@ -101,9 +127,14 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                       return const DateSeparatorChip(label: 'Today');
                     }
                     final message = messages[index - 1];
+                    final fallbackAvatar = (message.senderAvatarUrl != null &&
+                            message.senderAvatarUrl!.isNotEmpty)
+                        ? message.senderAvatarUrl!
+                        : widget.avatarUrl;
+
                     return ChatMessageBubble(
                       message: message,
-                      avatarUrl: message.isMe ? null : widget.avatarUrl,
+                      avatarUrl: message.isMe ? null : fallbackAvatar,
                       onLocationTap: message.type == MessageType.liveLocation
                           ? () => _controller.openLiveLocation(context, message)
                           : null,
@@ -113,10 +144,34 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
               },
             ),
           ),
+          // "Sarah is typing..." indicator above the bottom input bar
+          if (chatAsync.value?.isOtherUserTyping == true)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(left: 20.w, bottom: 6.h, top: 2.h),
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${chatAsync.value?.typingUserName ?? widget.contactName} is typing...',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: const Color(0xFF6C4DF6),
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  const TypingIndicatorDots(),
+                ],
+              ),
+            ),
           ChatInputBar(
-            onSend: _provider.sendMessage,
+            onSend: notifier.sendMessage,
+            onTypingChanged: notifier.sendTyping,
             onAttachmentTap: () =>
-                _controller.pickAttachment(context, _provider),
+                _controller.pickAttachment(context, notifier),
           ),
         ],
       ),

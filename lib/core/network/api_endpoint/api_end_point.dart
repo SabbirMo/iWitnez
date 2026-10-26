@@ -1,3 +1,5 @@
+import 'package:iwitnez/core/network/base_url/api_base_url.dart';
+
 class ApiEndPoints {
   // authentication Endpoints
   static const String login = '/api/v1/auth/login/';
@@ -24,6 +26,8 @@ class ApiEndPoints {
       '/api/v1/chat/conversations/$conversationId/read/';
   static String chatDirect(String targetUserId) =>
       '/api/v1/chat/conversations/direct/$targetUserId/';
+  static String chatWebSocketUrl(String conversationId, String token) =>
+      '${ApiBaseUrl.wsBaseUrl}/ws/chat/$conversationId/?token=$token';
 
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';

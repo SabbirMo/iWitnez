@@ -1,74 +1,285 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/services/location_service.dart';
+import 'package:iwitnez/core/utils/token_storage.dart';
+import 'package:iwitnez/feature/main_user/Chat_section/Chat/provider/chat_provider.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/repository/chat_details_repository.dart';
+import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/service/chat_websocket_service.dart';
 
-class ChatDetailsProvider extends ChangeNotifier {
-  ChatDetailsProvider({ChatDetailsRepository? repository})
-      : _repository = repository ?? ChatDetailsRepository();
+class ChatDetailsState {
+  const ChatDetailsState({
+    this.messages = const [],
+    this.isOtherUserTyping = false,
+    this.typingUserName,
+  });
 
-  final ChatDetailsRepository _repository;
+  final List<ChatMessage> messages;
+  final bool isOtherUserTyping;
+  final String? typingUserName;
 
-  List<ChatMessage> _messages = [];
-  bool _isLoading = false;
-  String? _currentChatId;
+  ChatDetailsState copyWith({
+    List<ChatMessage>? messages,
+    bool? isOtherUserTyping,
+    String? typingUserName,
+  }) {
+    return ChatDetailsState(
+      messages: messages ?? this.messages,
+      isOtherUserTyping: isOtherUserTyping ?? this.isOtherUserTyping,
+      typingUserName: typingUserName ?? this.typingUserName,
+    );
+  }
+}
 
-  List<ChatMessage> get messages => _messages;
-  bool get isLoading => _isLoading;
-  String? get currentChatId => _currentChatId;
+class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
+  ChatDetailsNotifier(this.chatId);
 
-  /// 1. Fetch Message History: `GET /api/v1/chat/conversations/<conversation_id>/messages/`
-  /// 2. Mark Conversation Messages as Read: `POST /api/v1/chat/conversations/<conversation_id>/read/`
-  Future<void> fetchMessages(String chatId) async {
-    _currentChatId = chatId;
-    _isLoading = true;
-    notifyListeners();
+  final String chatId;
+  late final ChatDetailsRepository _repository;
+  late final ChatWebSocketService _wsService;
 
-    // Fire read receipt so unread count clears for this conversation
+  Timer? _otherTypingResetTimer;
+  bool _isSendingTyping = false;
+  Timer? _myTypingDebounceTimer;
+  bool _isDisposed = false;
+  StreamSubscription? _msgSub;
+  StreamSubscription? _typingSub;
+  StreamSubscription? _readSub;
+  StreamSubscription? _connSub;
+
+  @override
+  FutureOr<ChatDetailsState> build() async {
+    _isDisposed = false;
+    _repository = ref.read(chatDetailsRepositoryProvider);
+    _wsService = ChatWebSocketService();
+
+    // Auto-cleanup WebSocket and timers when leaving this conversation screen
+    ref.onDispose(() {
+      _isDisposed = true;
+      _otherTypingResetTimer?.cancel();
+      _myTypingDebounceTimer?.cancel();
+      _msgSub?.cancel();
+      _typingSub?.cancel();
+      _readSub?.cancel();
+      _connSub?.cancel();
+      _wsService.dispose();
+    });
+
+    // 1. Fire initial read receipt via REST
     _repository.markAsRead(chatId);
 
+    // 2. Fetch initial message history from REST API first
+    List<ChatMessage> initialMessages = const [];
     try {
-      final fetched = await _repository.getMessages(chatId);
-      _messages = fetched;
+      initialMessages = await _repository.getMessages(chatId);
     } catch (e) {
-      debugPrint('Error fetching messages: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      debugPrint('[ChatDetailsNotifier] Error fetching messages: $e');
+    }
+
+    // 3. Connect WebSocket ONLY AFTER initial state is ready
+    if (!_isDisposed) {
+      unawaited(_initWebSocket());
+    }
+
+    return ChatDetailsState(messages: initialMessages);
+  }
+
+  Future<void> _initWebSocket() async {
+    if (_isDisposed) return;
+    final token = await TokenStorage.getAccessToken();
+    if (_isDisposed) return;
+    if (token == null || token.isEmpty) {
+      debugPrint('[ChatDetailsNotifier] No access token found for WebSocket');
+      return;
+    }
+
+    _msgSub = _wsService.onNewMessage.listen((incoming) {
+      if (_isDisposed) return;
+      _handleIncomingMessage(incoming);
+    });
+
+    _typingSub = _wsService.onTypingStatus.listen((json) {
+      if (_isDisposed) return;
+      final senderName = json['sender_name']?.toString() ?? '';
+      final isTyping = json['is_typing'] == true;
+      _handleTypingStatus(senderName: senderName, isTyping: isTyping);
+    });
+
+    _readSub = _wsService.onMessagesRead.listen((_) {
+      if (_isDisposed) return;
+      _handleMessagesRead();
+    });
+
+    _connSub = _wsService.onConnectionEstablished.listen((_) {
+      if (_isDisposed) return;
+      debugPrint('[ChatDetailsNotifier] WS connection confirmed for $chatId');
+    });
+
+    await _wsService.connect(conversationId: chatId, jwtToken: token);
+  }
+
+  void _handleIncomingMessage(ChatMessage incoming) {
+    if (_isDisposed) return;
+    final current = state.value;
+    if (current == null) return;
+
+    // Stop showing typing indicator if message arrived
+    _otherTypingResetTimer?.cancel();
+
+    List<ChatMessage> updatedMessages = [...current.messages];
+
+    // Check if message with same ID already exists
+    if (incoming.id != null && incoming.id!.isNotEmpty) {
+      final existingIndex = updatedMessages.indexWhere(
+        (m) => m.id == incoming.id,
+      );
+      if (existingIndex != -1) {
+        updatedMessages[existingIndex] = incoming;
+        _notifyChatListUpdated(incoming);
+        state = AsyncData(
+          current.copyWith(messages: updatedMessages, isOtherUserTyping: false),
+        );
+        return;
+      }
+    }
+
+    // Check if this incoming message matches our pending optimistic outgoing message
+    if (incoming.isMe) {
+      final pendingIndex = updatedMessages.lastIndexWhere(
+        (m) =>
+            m.isMe &&
+            (m.id == null || m.id!.isEmpty) &&
+            m.text == incoming.text &&
+            m.type == incoming.type,
+      );
+
+      if (pendingIndex != -1) {
+        updatedMessages[pendingIndex] = incoming;
+        _notifyChatListUpdated(incoming);
+        state = AsyncData(
+          current.copyWith(messages: updatedMessages, isOtherUserTyping: false),
+        );
+        return;
+      }
+    }
+
+    // Otherwise append new message
+    updatedMessages.add(incoming);
+    _notifyChatListUpdated(incoming);
+
+    if (!incoming.isMe) {
+      markAsRead();
+    }
+
+    state = AsyncData(
+      current.copyWith(messages: updatedMessages, isOtherUserTyping: false),
+    );
+  }
+
+  void _notifyChatListUpdated(ChatMessage message) {
+    ChatProvider.notifyNewMessage(
+      chatId: chatId,
+      text: message.text,
+      formattedTime: message.time.isNotEmpty ? message.time : _nowFormatted(),
+      messageType: message.type == MessageType.liveLocation
+          ? 'location'
+          : (message.type == MessageType.image ? 'image' : 'text'),
+      isOutgoing: message.isMe,
+    );
+  }
+
+  void _handleTypingStatus({
+    required String senderName,
+    required bool isTyping,
+  }) {
+    if (_isDisposed) return;
+    final current = state.value;
+    if (current == null) return;
+
+    _otherTypingResetTimer?.cancel();
+
+    state = AsyncData(
+      current.copyWith(
+        isOtherUserTyping: isTyping,
+        typingUserName: senderName.isNotEmpty ? senderName : null,
+      ),
+    );
+
+    if (isTyping) {
+      _otherTypingResetTimer = Timer(const Duration(milliseconds: 3500), () {
+        if (_isDisposed) return;
+        final val = state.value;
+        if (val != null) {
+          state = AsyncData(val.copyWith(isOtherUserTyping: false));
+        }
+      });
     }
   }
 
-  /// 3. Send Text Message: `POST /api/v1/chat/conversations/<conversation_id>/messages/`
+  void _handleMessagesRead() {
+    if (_isDisposed) return;
+    final current = state.value;
+    if (current == null) return;
+
+    bool hasChanges = false;
+    final updatedList = current.messages.map((message) {
+      if (message.isMe && message.status != MessageStatus.read) {
+        hasChanges = true;
+        return message.copyWith(status: MessageStatus.read);
+      }
+      return message;
+    }).toList();
+
+    if (hasChanges && !_isDisposed) {
+      state = AsyncData(current.copyWith(messages: updatedList));
+    }
+  }
+
+  /// Action 1: Send Text Message
+  /// Optimistic UI update + WebSocket dispatch + REST fallback
   Future<void> sendMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
 
+    sendTyping(false);
+
+    final current = state.value ?? const ChatDetailsState();
+    final time = _nowFormatted();
     final optimistic = ChatMessage(
       text: trimmed,
-      time: _nowFormatted(),
+      time: time,
       isMe: true,
       status: MessageStatus.sent,
     );
 
-    _messages = [..._messages, optimistic];
-    notifyListeners();
+    final updated = [...current.messages, optimistic];
+    state = AsyncData(current.copyWith(messages: updated));
 
-    if (_currentChatId != null && _currentChatId!.isNotEmpty) {
-      final sent = await _repository.sendTextMessage(
-        _currentChatId!,
-        text: trimmed,
-      );
+    _notifyChatListUpdated(optimistic);
+
+    // Send over WebSocket
+    final wsSent = _wsService.sendTextMessage(trimmed);
+    if (!wsSent) {
+      // Fallback to REST API
+      final sent = await _repository.sendTextMessage(chatId, text: trimmed);
       if (sent != null) {
-        final index = _messages.lastIndexOf(optimistic);
-        if (index != -1) {
-          _messages[index] = sent;
-          notifyListeners();
+        final cur = state.value;
+        if (cur != null) {
+          final msgs = [...cur.messages];
+          final idx = msgs.lastIndexOf(optimistic);
+          if (idx != -1) {
+            msgs[idx] = sent;
+            _notifyChatListUpdated(sent);
+            state = AsyncData(cur.copyWith(messages: msgs));
+          }
         }
       }
     }
   }
 
-  /// 3. Share Live Location Pin in Chat: `POST /api/v1/chat/conversations/<conversation_id>/messages/`
+  /// Action 2: Send Live Location Bubble (Map Pin Card)
+  /// Optimistic UI update + WebSocket dispatch + REST fallback
   Future<void> shareLiveLocation({
     double? latitude,
     double? longitude,
@@ -89,9 +300,10 @@ class ChatDetailsProvider extends ChangeNotifier {
       }
     }
 
+    final time = _nowFormatted();
     final optimistic = ChatMessage(
-      text: 'Here is my location',
-      time: _nowFormatted(),
+      text: 'Live Location',
+      time: time,
       isMe: true,
       type: MessageType.liveLocation,
       locationLabel: locAddress,
@@ -101,40 +313,85 @@ class ChatDetailsProvider extends ChangeNotifier {
       status: MessageStatus.sent,
     );
 
-    _messages = [..._messages, optimistic];
-    notifyListeners();
+    final current = state.value ?? const ChatDetailsState();
+    state = AsyncData(
+      current.copyWith(messages: [...current.messages, optimistic]),
+    );
 
-    if (_currentChatId != null && _currentChatId!.isNotEmpty) {
+    _notifyChatListUpdated(optimistic);
+
+    final wsSent = _wsService.sendLocationBubble(
+      latitude: lat,
+      longitude: lng,
+      address: locAddress,
+    );
+
+    if (!wsSent) {
       final sent = await _repository.sendLocationMessage(
-        _currentChatId!,
-        text: 'Here is my location',
+        chatId,
+        text: 'Live Location',
         latitude: lat,
         longitude: lng,
         locationAddress: locAddress,
       );
       if (sent != null) {
-        final index = _messages.lastIndexOf(optimistic);
-        if (index != -1) {
-          _messages[index] = sent;
-          notifyListeners();
+        final cur = state.value;
+        if (cur != null) {
+          final msgs = [...cur.messages];
+          final idx = msgs.lastIndexOf(optimistic);
+          if (idx != -1) {
+            msgs[idx] = sent;
+            _notifyChatListUpdated(sent);
+            state = AsyncData(cur.copyWith(messages: msgs));
+          }
         }
       }
     }
   }
 
+  /// Action 3: Send Typing Status
+  void sendTyping(bool isTyping) {
+    if (isTyping) {
+      if (!_isSendingTyping) {
+        _isSendingTyping = true;
+        _wsService.sendTyping(true);
+      }
+      _myTypingDebounceTimer?.cancel();
+      _myTypingDebounceTimer = Timer(const Duration(seconds: 2), () {
+        _isSendingTyping = false;
+        _wsService.sendTyping(false);
+      });
+    } else {
+      _myTypingDebounceTimer?.cancel();
+      if (_isSendingTyping) {
+        _isSendingTyping = false;
+        _wsService.sendTyping(false);
+      }
+    }
+  }
+
+  /// Action 4: Mark Messages as Read
+  void markAsRead() {
+    _wsService.sendMarkRead();
+    _repository.markAsRead(chatId);
+  }
+
   void sendImage(String filePath) {
-    _messages = [
-      ..._messages,
-      ChatMessage(
-        text: 'Photo',
-        time: _nowFormatted(),
-        isMe: true,
-        type: MessageType.image,
-        mediaPath: filePath,
-        status: MessageStatus.sent,
-      ),
-    ];
-    notifyListeners();
+    final current = state.value ?? const ChatDetailsState();
+    final time = _nowFormatted();
+    final newMsg = ChatMessage(
+      text: 'Photo',
+      time: time,
+      isMe: true,
+      type: MessageType.image,
+      mediaPath: filePath,
+      status: MessageStatus.sent,
+    );
+
+    state = AsyncData(
+      current.copyWith(messages: [...current.messages, newMsg]),
+    );
+    _notifyChatListUpdated(newMsg);
   }
 
   String _nowFormatted() {
@@ -145,3 +402,8 @@ class ChatDetailsProvider extends ChangeNotifier {
     return '$hour:$minute $period';
   }
 }
+
+final chatDetailsProvider = AsyncNotifierProvider.autoDispose
+    .family<ChatDetailsNotifier, ChatDetailsState, String>(
+      ChatDetailsNotifier.new,
+    );

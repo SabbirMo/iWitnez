@@ -101,7 +101,7 @@ class ChatDetailsController {
   /// Displays attachment picker with options: Live Location, Gallery, Camera
   Future<void> pickAttachment(
     BuildContext context,
-    ChatDetailsProvider provider,
+    ChatDetailsNotifier notifier,
   ) async {
     showModalBottomSheet(
       context: context,
@@ -151,7 +151,7 @@ class ChatDetailsController {
                   ),
                   onTap: () {
                     Navigator.pop(bottomSheetContext);
-                    provider.shareLiveLocation();
+                    notifier.shareLiveLocation();
                   },
                 ),
                 Divider(height: 16.h, thickness: 0.6, color: Colors.grey.shade200),
@@ -176,7 +176,7 @@ class ChatDetailsController {
                   ),
                   onTap: () async {
                     Navigator.pop(bottomSheetContext);
-                    await _pickFromGallery(provider);
+                    await _pickFromGallery(notifier);
                   },
                 ),
                 Divider(height: 16.h, thickness: 0.6, color: Colors.grey.shade200),
@@ -201,7 +201,7 @@ class ChatDetailsController {
                   ),
                   onTap: () async {
                     Navigator.pop(bottomSheetContext);
-                    await _pickFromCamera(provider);
+                    await _pickFromCamera(notifier);
                   },
                 ),
               ],
@@ -212,7 +212,7 @@ class ChatDetailsController {
     );
   }
 
-  Future<void> _pickFromGallery(ChatDetailsProvider provider) async {
+  Future<void> _pickFromGallery(ChatDetailsNotifier notifier) async {
     try {
       final ImagePicker picker = ImagePicker();
       List<XFile> files = [];
@@ -228,7 +228,7 @@ class ChatDetailsController {
 
       if (files.isNotEmpty) {
         for (final file in files) {
-          provider.sendImage(file.path);
+          notifier.sendImage(file.path);
         }
       }
     } catch (e) {
@@ -236,7 +236,7 @@ class ChatDetailsController {
     }
   }
 
-  Future<void> _pickFromCamera(ChatDetailsProvider provider) async {
+  Future<void> _pickFromCamera(ChatDetailsNotifier notifier) async {
     try {
       final ImagePicker picker = ImagePicker();
       final photo = await picker.pickImage(
@@ -244,7 +244,7 @@ class ChatDetailsController {
         imageQuality: 85,
       );
       if (photo != null) {
-        provider.sendImage(photo.path);
+        notifier.sendImage(photo.path);
       }
     } catch (e) {
       debugPrint('Error taking photo: $e');

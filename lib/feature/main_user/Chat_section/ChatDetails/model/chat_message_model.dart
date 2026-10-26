@@ -15,6 +15,10 @@ class ChatMessage {
     this.longitude,
     this.locationAddress,
     this.mediaPath,
+    this.senderId,
+    this.senderName,
+    this.senderAvatarUrl,
+    this.conversationId,
   });
 
   final String? id;
@@ -28,6 +32,46 @@ class ChatMessage {
   final double? longitude;
   final String? locationAddress;
   final String? mediaPath; // file path or network url
+  final String? senderId;
+  final String? senderName;
+  final String? senderAvatarUrl;
+  final String? conversationId;
+
+  ChatMessage copyWith({
+    String? id,
+    String? text,
+    String? time,
+    bool? isMe,
+    MessageType? type,
+    MessageStatus? status,
+    String? locationLabel,
+    double? latitude,
+    double? longitude,
+    String? locationAddress,
+    String? mediaPath,
+    String? senderId,
+    String? senderName,
+    String? senderAvatarUrl,
+    String? conversationId,
+  }) {
+    return ChatMessage(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      time: time ?? this.time,
+      isMe: isMe ?? this.isMe,
+      type: type ?? this.type,
+      status: status ?? this.status,
+      locationLabel: locationLabel ?? this.locationLabel,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      locationAddress: locationAddress ?? this.locationAddress,
+      mediaPath: mediaPath ?? this.mediaPath,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      senderAvatarUrl: senderAvatarUrl ?? this.senderAvatarUrl,
+      conversationId: conversationId ?? this.conversationId,
+    );
+  }
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     final rawType = json['message_type']?.toString().toLowerCase() ??
@@ -40,7 +84,8 @@ class ChatMessage {
       type = MessageType.image;
     }
 
-    final isRead = json['is_read'] == true;
+    final isRead = json['is_read'] == true ||
+        json['status']?.toString().toLowerCase() == 'read';
     final isMe = json['is_outgoing'] == true || json['is_me'] == true;
 
     final locationAddress = json['location_address']?.toString() ??
@@ -87,6 +132,10 @@ class ChatMessage {
       mediaPath: json['media_url']?.toString() ??
           json['media_path']?.toString() ??
           json['mediaPath']?.toString(),
+      senderId: json['sender_id']?.toString(),
+      senderName: json['sender_name']?.toString(),
+      senderAvatarUrl: json['sender_avatar_url']?.toString(),
+      conversationId: json['conversation_id']?.toString(),
     );
   }
 
@@ -104,6 +153,10 @@ class ChatMessage {
       if (longitude != null) 'longitude': longitude,
       if (locationAddress != null) 'location_address': locationAddress,
       if (mediaPath != null) 'media_url': mediaPath,
+      if (senderId != null) 'sender_id': senderId,
+      if (senderName != null) 'sender_name': senderName,
+      if (senderAvatarUrl != null) 'sender_avatar_url': senderAvatarUrl,
+      if (conversationId != null) 'conversation_id': conversationId,
     };
   }
 }

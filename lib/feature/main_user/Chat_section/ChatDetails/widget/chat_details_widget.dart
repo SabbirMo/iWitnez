@@ -61,10 +61,26 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 18.r,
-                          backgroundImage: NetworkImage(avatarUrl),
-                          backgroundColor: Colors.grey.shade200,
+                        Container(
+                          width: 36.r,
+                          height: 36.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey.shade200,
+                          ),
+                          child: ClipOval(
+                            child: avatarUrl.isNotEmpty && avatarUrl.startsWith('http')
+                                ? Image.network(
+                                    avatarUrl.startsWith('http://')
+                                        ? avatarUrl.replaceFirst('http://', 'https://')
+                                        : avatarUrl,
+                                    width: 36.r,
+                                    height: 36.r,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => _fallbackInitial(name),
+                                  )
+                                : _fallbackInitial(name),
+                          ),
                         ),
                         SizedBox(width: 10.w),
                         Expanded(
@@ -161,7 +177,25 @@ class DateSeparatorChip extends StatelessWidget {
   }
 }
 
+Widget _fallbackInitial(String text, [double size = 16]) {
+  final initial = text.trim().isNotEmpty ? text.trim()[0].toUpperCase() : '?';
+  return Container(
+    color: const Color(0xFFEDE9FE),
+    alignment: Alignment.center,
+    child: Text(
+      initial,
+      style: TextStyle(
+        color: const Color(0xFF6D28D9),
+        fontSize: size.sp,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+}
+
 /// A single chat bubble — text or live-location card, aligned by sender.
+/// If outgoing: rendered on the right (purple bubble).
+/// If incoming: rendered on the left (white/grey bubble with participant avatar).
 class ChatMessageBubble extends StatelessWidget {
   const ChatMessageBubble({
     super.key,
@@ -187,21 +221,42 @@ class ChatMessageBubble extends StatelessWidget {
       MessageType.text => _TextBubble(message: message, isMe: isMe),
     };
 
+    final cleanAvatar = (avatarUrl != null && avatarUrl!.isNotEmpty)
+        ? (avatarUrl!.startsWith('http://')
+            ? avatarUrl!.replaceFirst('http://', 'https://')
+            : avatarUrl!)
+        : '';
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         mainAxisAlignment: isMe
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
-            CircleAvatar(
-              radius: 14.r,
-              backgroundImage: avatarUrl != null
-                  ? NetworkImage(avatarUrl!)
-                  : null,
-              backgroundColor: Colors.grey.shade200,
+            Container(
+              width: 28.r,
+              height: 28.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade200,
+              ),
+              child: ClipOval(
+                child: cleanAvatar.startsWith('http')
+                    ? Image.network(
+                        cleanAvatar,
+                        width: 28.r,
+                        height: 28.r,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _fallbackInitial(
+                          message.senderName ?? 'User',
+                          12,
+                        ),
+                      )
+                    : _fallbackInitial(message.senderName ?? 'User', 12),
+              ),
             ),
             SizedBox(width: 8.w),
           ],
@@ -282,9 +337,13 @@ class _ImageBubble extends StatelessWidget {
                 if (isMe) ...[
                   SizedBox(width: 3.w),
                   Icon(
-                    Icons.check_rounded,
-                    size: 13.sp,
-                    color: Colors.white.withValues(alpha: 0.85),
+                    message.status == MessageStatus.read
+                        ? Icons.done_all_rounded
+                        : Icons.check_rounded,
+                    size: 14.sp,
+                    color: message.status == MessageStatus.read
+                        ? const Color(0xFF67E8F9)
+                        : Colors.white.withValues(alpha: 0.85),
                   ),
                 ],
               ],
@@ -348,9 +407,13 @@ class _TextBubble extends StatelessWidget {
               if (isMe) ...[
                 SizedBox(width: 3.w),
                 Icon(
-                  Icons.check_rounded,
-                  size: 13.sp,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  message.status == MessageStatus.read
+                      ? Icons.done_all_rounded
+                      : Icons.check_rounded,
+                  size: 14.sp,
+                  color: message.status == MessageStatus.read
+                      ? const Color(0xFF67E8F9)
+                      : Colors.white.withValues(alpha: 0.85),
                 ),
               ],
             ],
@@ -369,6 +432,8 @@ class _LiveLocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMe = message.isMe;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
@@ -376,11 +441,13 @@ class _LiveLocationCard extends StatelessWidget {
         width: 230.w,
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: _kAccentPurple,
+          color: isMe ? _kAccentPurple : Colors.white,
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: _kAccentPurple.withValues(alpha: 0.25),
+              color: isMe
+                  ? _kAccentPurple.withValues(alpha: 0.25)
+                  : Colors.black.withValues(alpha: 0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -396,12 +463,14 @@ class _LiveLocationCard extends StatelessWidget {
                   width: 36.w,
                   height: 36.h,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.22),
+                    color: isMe
+                        ? Colors.white.withValues(alpha: 0.22)
+                        : const Color(0xFFEDE9FE),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.location_on_rounded,
-                    color: Colors.white,
+                    color: isMe ? Colors.white : _kAccentPurple,
                     size: 18.sp,
                   ),
                 ),
@@ -413,16 +482,21 @@ class _LiveLocationCard extends StatelessWidget {
                     children: [
                       Text(
                         message.text,
-                        style: CustomTextStyle.regular16(Colors.white).copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
-                        ),
+                        style:
+                            CustomTextStyle.regular16(
+                              isMe ? Colors.white : AppColors.textDark,
+                            ).copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp,
+                            ),
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         message.locationLabel ?? '',
                         style: CustomTextStyle.regular14(
-                          Colors.white.withValues(alpha: 0.85),
+                          isMe
+                              ? Colors.white.withValues(alpha: 0.85)
+                              : const Color(0xFF6B7280),
                         ).copyWith(fontSize: 11.sp),
                       ),
                     ],
@@ -440,15 +514,23 @@ class _LiveLocationCard extends StatelessWidget {
                     message.time,
                     style: TextStyle(
                       fontSize: 10.sp,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: isMe
+                          ? Colors.white.withValues(alpha: 0.85)
+                          : const Color(0xFF9CA3AF),
                     ),
                   ),
-                  SizedBox(width: 3.w),
-                  Icon(
-                    Icons.check_rounded,
-                    size: 13.sp,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
+                  if (isMe) ...[
+                    SizedBox(width: 3.w),
+                    Icon(
+                      message.status == MessageStatus.read
+                          ? Icons.done_all_rounded
+                          : Icons.check_rounded,
+                      size: 14.sp,
+                      color: message.status == MessageStatus.read
+                          ? const Color(0xFF67E8F9)
+                          : Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -459,12 +541,75 @@ class _LiveLocationCard extends StatelessWidget {
   }
 }
 
+/// Animated 3-dot typing indicator widget
+class TypingIndicatorDots extends StatefulWidget {
+  const TypingIndicatorDots({super.key, this.color = const Color(0xFF6C4DF6)});
+
+  final Color color;
+
+  @override
+  State<TypingIndicatorDots> createState() => _TypingIndicatorDotsState();
+}
+
+class _TypingIndicatorDotsState extends State<TypingIndicatorDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animController,
+      builder: (context, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            final delay = index * 0.2;
+            final val = (_animController.value - delay) % 1.0;
+            final double bounce = (val < 0.5 ? val * 2 : (1.0 - val) * 2);
+            return Container(
+              margin: EdgeInsets.symmetric(horizontal: 1.5.w),
+              width: 5.r,
+              height: 5.r,
+              transform: Matrix4.translationValues(0, -3.0 * bounce, 0),
+              decoration: BoxDecoration(
+                color: widget.color.withValues(alpha: 0.4 + 0.6 * bounce),
+                shape: BoxShape.circle,
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
+
 /// Bottom input bar: attachment, text field, emoji, send button.
 class ChatInputBar extends StatefulWidget {
-  const ChatInputBar({super.key, required this.onSend, this.onAttachmentTap});
+  const ChatInputBar({
+    super.key,
+    required this.onSend,
+    this.onAttachmentTap,
+    this.onTypingChanged,
+  });
 
   final ValueChanged<String> onSend;
   final VoidCallback? onAttachmentTap;
+  final ValueChanged<bool>? onTypingChanged;
 
   @override
   State<ChatInputBar> createState() => _ChatInputBarState();
@@ -478,6 +623,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   void _handleSend() {
     final text = _controller.text;
     if (text.trim().isEmpty) return;
+    widget.onTypingChanged?.call(false);
     widget.onSend(text);
     _controller.clear();
   }
@@ -575,6 +721,13 @@ class _ChatInputBarState extends State<ChatInputBar> {
                               onTap: () {
                                 if (_showEmojiPicker) {
                                   setState(() => _showEmojiPicker = false);
+                                }
+                              },
+                              onChanged: (val) {
+                                if (val.trim().isNotEmpty) {
+                                  widget.onTypingChanged?.call(true);
+                                } else {
+                                  widget.onTypingChanged?.call(false);
                                 }
                               },
                               onSubmitted: (_) => _handleSend(),
