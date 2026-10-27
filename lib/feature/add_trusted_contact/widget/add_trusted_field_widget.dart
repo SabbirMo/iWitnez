@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,11 +10,12 @@ import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_model.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
-import 'package:iwitnez/feature/main_user/TrustedCircle/widget/remove_member_bottom_sheet.dart';
 import 'package:iwitnez/feature/add_trusted_contact/model/trusted_contact_model.dart';
 import 'package:iwitnez/feature/add_trusted_contact/provider/add_trusted_contact_provider.dart';
 import 'package:iwitnez/feature/add_trusted_contact/widget/add_contact_widget.dart';
@@ -42,6 +44,9 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
   late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
   final ImagePicker _picker = ImagePicker();
+  bool _isSaving = false;
+
+  bool get _isEditMode => widget.contact != null || widget.isEditMember;
 
   @override
   void initState() {
@@ -73,6 +78,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                 relationship: widget.circleMember!.relationship.isNotEmpty
                     ? widget.circleMember!.relationship
                     : 'Sister',
+                circle: widget.circleTitle?.toLowerCase() ?? 'family',
                 emergencyAlerts: widget.circleMember!.emergencyAlerts,
                 avatarUrl: widget.circleMember!.avatarUrl,
               ),
@@ -111,36 +117,155 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
     }
   }
 
-  void _handleRemoveMember() {
-    final member = widget.circleMember;
-    final circleTitle = widget.circleTitle ?? 'Family';
-    if (member == null) return;
+  void _handleRemoveContact() {
+    final contactId = widget.contact?.id ?? widget.circleMember?.id;
+    final contactName =
+        widget.contact?.fullName ?? widget.circleMember?.name ?? 'this contact';
+    if (contactId == null || contactId.isEmpty) return;
 
-    RemoveMemberBottomSheet.show(
+    showModalBottomSheet(
       context: context,
-      member: member,
-      circleTitle: circleTitle,
-      onConfirmRemove: () {
-        ref
-            .read(trustedCircleProvider.notifier)
-            .removeMember(circleTitle, member.id);
-        if (mounted && context.canPop()) {
-          context.pop();
-        }
-      },
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'Remove Trusted Contact',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'Are you sure you want to remove $contactName from your trusted contacts?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
+                        side: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        try {
+                          await ref
+                              .read(trustedContactsProvider.notifier)
+                              .deleteContact(contactId);
+
+                          if (widget.circleMember != null) {
+                            final circleTitle = widget.circleTitle ?? 'Family';
+                            ref
+                                .read(trustedCircleProvider.notifier)
+                                .removeMember(circleTitle, contactId);
+                          }
+
+                          if (mounted) {
+                            CustomSnackBar.showSuccess(
+                              context,
+                              message:
+                                  'Trusted contact was successfully removed.',
+                            );
+                            ref
+                                .read(addTrustedContactProvider.notifier)
+                                .resetForm();
+                            if (context.canPop()) {
+                              context.pop();
+                            }
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            final msg = e is ApiError
+                                ? e.message
+                                : 'Failed to remove contact.';
+                            CustomSnackBar.showError(context, message: msg);
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Remove',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  void _handleSaveContact() {
+  Future<void> _handleSaveContact() async {
+    if (_isSaving) return;
+
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final email = _emailController.text.trim();
 
     if (name.isEmpty) {
+      CustomSnackBar.showError(context, message: 'Please enter contact name.');
       return;
     }
 
     if (phone.isEmpty) {
+      CustomSnackBar.showError(context, message: 'Please enter phone number.');
       return;
     }
 
@@ -149,6 +274,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
         state.avatarUrl ??
         widget.circleMember?.avatarUrl ??
         widget.contact?.avatarUrl;
+
     final chosenRelationship = state.relationship.isNotEmpty
         ? state.relationship
         : (widget.circleMember?.relationship.isNotEmpty == true
@@ -157,74 +283,160 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                     ? widget.contact!.relationship
                     : 'Sister'));
 
-    if (widget.isEditMember && widget.circleMember != null) {
-      final circleTitle = widget.circleTitle ?? 'Family';
-      final updatedMember = widget.circleMember!.copyWith(
-        name: name,
-        phone: phone,
-        email: email,
-        relationship: chosenRelationship,
-        emergencyAlerts: state.emergencyAlerts,
-        avatarUrl: chosenAvatar,
-      );
+    final chosenCircle = state.circle.isNotEmpty
+        ? state.circle
+        : (widget.contact?.circle.isNotEmpty == true
+              ? widget.contact!.circle
+              : (widget.circleTitle != null
+                    ? widget.circleTitle!.toLowerCase()
+                    : TrustedContactModel.defaultCircleFor(
+                        chosenRelationship,
+                      )));
 
-      ref
-          .read(trustedCircleProvider.notifier)
-          .updateMember(circleTitle, updatedMember);
-
-      ref.read(addTrustedContactProvider.notifier).resetForm();
-
-      if (context.canPop()) {
-        context.pop();
-      }
-      return;
-    }
-
-    final newMemberId =
-        widget.contact?.id ??
-        state.id ??
-        DateTime.now().millisecondsSinceEpoch.toString();
-
-    final avatarToSave = chosenAvatar != null && chosenAvatar.isNotEmpty
+    final localAvatarPath =
+        (chosenAvatar != null &&
+            !chosenAvatar.startsWith('http') &&
+            File(chosenAvatar).existsSync())
         ? chosenAvatar
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+        : null;
 
-    // 1. Add to Trusted Circle (e.g. Family or active circle)
-    final targetCircleTitle = widget.circleTitle ?? 'Family';
-    final newCircleMember = CircleMember(
-      id: newMemberId,
-      name: name,
-      phone: phone,
-      email: email,
-      relationship: chosenRelationship,
-      emergencyAlerts: state.emergencyAlerts,
-      avatarUrl: avatarToSave,
-    );
+    setState(() => _isSaving = true);
 
-    ref
-        .read(trustedCircleProvider.notifier)
-        .addMember(targetCircleTitle, newCircleMember);
+    try {
+      if (widget.contact != null && widget.contact!.id != null) {
+        // Edit Mode: PATCH /api/v1/contacts/<contact_id>/
+        final updatePayload = <String, dynamic>{
+          'name': name,
+          'phone_number': phone,
+          'email': email,
+          'relationship': chosenRelationship.toLowerCase().trim(),
+          'circle': chosenCircle.toLowerCase().trim(),
+          'emergency_alerts_enabled': state.emergencyAlerts,
+        };
 
-    // 2. Also save or update in shared provider list
-    final savedContact = TrustedContactModel(
-      id: newMemberId,
-      fullName: name,
-      email: email,
-      phoneNumber: phone,
-      relationship: chosenRelationship,
-      emergencyAlerts: state.emergencyAlerts,
-      avatarUrl: avatarToSave,
-    );
+        await ref
+            .read(trustedContactsProvider.notifier)
+            .updateContact(
+              widget.contact!.id!,
+              updatePayload,
+              avatarFilePath: localAvatarPath,
+            );
 
-    ref
-        .read(trustedContactsProvider.notifier)
-        .saveOrUpdateContact(savedContact);
+        if (mounted) {
+          CustomSnackBar.showSuccess(
+            context,
+            message: 'Contact updated successfully.',
+          );
+          ref.read(addTrustedContactProvider.notifier).resetForm();
+          if (context.canPop()) {
+            context.pop();
+          }
+        }
+      } else if (widget.isEditMember && widget.circleMember != null) {
+        // Update Circle Member & Contact API
+        final circleTitle = widget.circleTitle ?? 'Family';
+        final updatePayload = <String, dynamic>{
+          'name': name,
+          'phone_number': phone,
+          'email': email,
+          'relationship': chosenRelationship.toLowerCase().trim(),
+          'circle': circleTitle.toLowerCase().trim(),
+          'emergency_alerts_enabled': state.emergencyAlerts,
+        };
 
-    // Reset form state
-    ref.read(addTrustedContactProvider.notifier).resetForm();
+        if (widget.circleMember!.id.isNotEmpty) {
+          await ref
+              .read(trustedContactsProvider.notifier)
+              .updateContact(
+                widget.circleMember!.id,
+                updatePayload,
+                avatarFilePath: localAvatarPath,
+              );
+        }
 
-    if (context.canPop()) {
-      context.pop();
+        final updatedMember = widget.circleMember!.copyWith(
+          name: name,
+          phone: phone,
+          email: email,
+          relationship: chosenRelationship,
+          emergencyAlerts: state.emergencyAlerts,
+          avatarUrl: chosenAvatar,
+        );
+
+        ref
+            .read(trustedCircleProvider.notifier)
+            .updateMember(circleTitle, updatedMember);
+
+        if (mounted) {
+          CustomSnackBar.showSuccess(
+            context,
+            message: 'Member updated successfully.',
+          );
+          ref.read(addTrustedContactProvider.notifier).resetForm();
+          if (context.canPop()) {
+            context.pop();
+          }
+        }
+      } else {
+        // Add Mode: POST /api/v1/contacts/
+        final newContact = TrustedContactModel(
+          fullName: name,
+          phoneNumber: phone,
+          email: email,
+          relationship: chosenRelationship,
+          circle: chosenCircle,
+          emergencyAlerts: state.emergencyAlerts,
+          avatarUrl: chosenAvatar,
+        );
+
+        final created = await ref
+            .read(trustedContactsProvider.notifier)
+            .addContact(newContact, avatarFilePath: localAvatarPath);
+
+        // Also add to circle
+        final targetCircleTitle =
+            widget.circleTitle ??
+            (chosenCircle.isNotEmpty
+                ? '${chosenCircle[0].toUpperCase()}${chosenCircle.substring(1)}'
+                : 'Family');
+
+        ref
+            .read(trustedCircleProvider.notifier)
+            .addMember(
+              targetCircleTitle,
+              CircleMember(
+                id:
+                    created?.id ??
+                    DateTime.now().millisecondsSinceEpoch.toString(),
+                name: name,
+                phone: phone,
+                email: email,
+                relationship: chosenRelationship,
+                emergencyAlerts: state.emergencyAlerts,
+                avatarUrl: created?.avatarUrl ?? chosenAvatar ?? '',
+              ),
+            );
+
+        if (mounted) {
+          CustomSnackBar.showSuccess(
+            context,
+            message: 'Trusted contact added successfully.',
+          );
+          ref.read(addTrustedContactProvider.notifier).resetForm();
+          if (context.canPop()) {
+            context.pop();
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        final msg = e is ApiError ? e.message : 'Failed to save contact.';
+        CustomSnackBar.showError(context, message: msg);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -254,9 +466,9 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
             }
           },
         ),
-        title: widget.isEditMember
+        title: _isEditMode
             ? Text(
-                'Edit Member',
+                widget.isEditMember ? 'Edit Member' : 'Edit Contact',
                 style: GoogleFonts.inter(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -265,21 +477,6 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                 ),
               )
             : null,
-        actions: [
-          if (widget.isEditMember)
-            TextButton(
-              onPressed: _handleSaveContact,
-              child: Text(
-                'Save',
-                style: GoogleFonts.inter(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.buttonGradientStart,
-                ),
-              ),
-            ),
-          SizedBox(width: 8.w),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -287,7 +484,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             children: [
-              if (!widget.isEditMember) ...[
+              if (!_isEditMode) ...[
                 Text(
                   AppString.addTrustedContactTitle,
                   textAlign: TextAlign.center,
@@ -306,7 +503,10 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
 
               // Avatar picker with purple border and gallery image picker
               _AvatarPicker(
-                avatarUrl: state.avatarUrl ?? widget.circleMember?.avatarUrl,
+                avatarUrl:
+                    state.avatarUrl ??
+                    widget.contact?.avatarUrl ??
+                    widget.circleMember?.avatarUrl,
                 onTap: _pickImageFromGallery,
               ),
 
@@ -343,7 +543,9 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                   RelationshipFieldWidget(
                     selectedRelationship: state.relationship.isNotEmpty
                         ? state.relationship
-                        : (widget.circleMember?.relationship ?? 'Sister'),
+                        : (widget.contact?.relationship ??
+                              widget.circleMember?.relationship ??
+                              'Sister'),
                     onRelationshipChanged: notifier.updateRelationship,
                   ),
 
@@ -357,10 +559,19 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
 
                   SizedBox(height: 28.h),
 
-                  // Button: either "Remove Member" (edit mode) or "Save Contact" (add mode)
-                  if (widget.isEditMember)
+                  // Button: "Update Contact" / "Save Contact"
+                  CustomButton(
+                    text: _isEditMode ? "Update Contact" : "Save Contact",
+                    icon: Icons.person_add_alt_1_outlined,
+                    isLeadingIcon: true,
+                    isLoading: _isSaving,
+                    onTap: _handleSaveContact,
+                  ),
+
+                  if (_isEditMode) ...[
+                    SizedBox(height: 12.h),
                     InkWell(
-                      onTap: _handleRemoveMember,
+                      onTap: _handleRemoveContact,
                       borderRadius: BorderRadius.circular(50.r),
                       child: Container(
                         height: 52.h,
@@ -386,7 +597,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              "Remove Member",
+                              "Remove Contact",
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
@@ -396,14 +607,8 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                           ],
                         ),
                       ),
-                    )
-                  else
-                    CustomButton(
-                      text: "Save Contact",
-                      icon: Icons.person_add_alt_1_outlined,
-                      isLeadingIcon: true,
-                      onTap: _handleSaveContact,
                     ),
+                  ],
                 ],
               ),
 

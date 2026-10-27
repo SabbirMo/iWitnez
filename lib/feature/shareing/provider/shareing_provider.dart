@@ -102,6 +102,9 @@ class ShareingProvider extends Notifier<SharingState> {
           result.errorMessage!.isNotEmpty) {
         onError?.call(result.errorMessage!, result.isPermanentlyDenied);
       }
+    } catch (e) {
+      debugPrint('[ShareingProvider] Error executing step: $e');
+      onError?.call('An unexpected error occurred. Please try again.', false);
     } finally {
       state = state.copyWith(isLoading: false);
     }

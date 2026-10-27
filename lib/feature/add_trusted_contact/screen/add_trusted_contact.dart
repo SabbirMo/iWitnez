@@ -25,6 +25,14 @@ class _AddTrustedContactScreenState
   late final StartAnimations _animations = StartAnimations(this);
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(trustedContactsProvider.notifier).fetchContacts();
+    });
+  }
+
+  @override
   void reassemble() {
     super.reassemble();
     _animations.reassemble();
@@ -79,8 +87,16 @@ class _AddTrustedContactScreenState
 
               SizedBox(height: 24.h),
 
-              // If no contacts added yet: show initial Add Contact card and Skip
-              if (contacts.isEmpty) ...[
+              // If loading initial contacts
+              if (contacts.isLoading && contacts.isEmpty) ...[
+                SizedBox(height: 40.h),
+                const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.buttonGradientStart,
+                  ),
+                ),
+                SizedBox(height: 40.h),
+              ] else if (contacts.isEmpty) ...[
                 _animations.buttonTransition(
                   child: AddContactWidget(
                     title: "Add Contact",

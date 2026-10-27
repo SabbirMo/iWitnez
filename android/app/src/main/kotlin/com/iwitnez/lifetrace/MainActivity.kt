@@ -1,4 +1,4 @@
-package com.example.iwitnez
+package com.iwitnez.lifetrace
 
 import io.flutter.embedding.android.FlutterActivity
 
