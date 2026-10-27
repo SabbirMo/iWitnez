@@ -13,12 +13,18 @@ class ChatDetailsScreen extends ConsumerStatefulWidget {
     required this.contactName,
     required this.avatarUrl,
     this.isOnline = false,
+    this.receiverId,
+    this.contactPhone,
+    this.contactId,
   });
 
   final String chatId;
   final String contactName;
   final String avatarUrl;
   final bool isOnline;
+  final String? receiverId;
+  final String? contactPhone;
+  final String? contactId;
 
   @override
   ConsumerState<ChatDetailsScreen> createState() => _ChatDetailsScreenState();
@@ -67,10 +73,25 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen>
     });
   }
 
+  String _getResolvedReceiverId(ChatDetailsState? state) {
+    if (widget.receiverId != null && widget.receiverId!.isNotEmpty) {
+      return widget.receiverId!;
+    }
+    if (state != null) {
+      for (final m in state.messages) {
+        if (!m.isMe && m.senderId != null && m.senderId!.isNotEmpty) {
+          return m.senderId!;
+        }
+      }
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatAsync = ref.watch(chatDetailsProvider(widget.chatId));
     final notifier = ref.read(chatDetailsProvider(widget.chatId).notifier);
+    final resolvedReceiverId = _getResolvedReceiverId(chatAsync.asData?.value);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
@@ -83,16 +104,23 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen>
           name: widget.contactName,
           avatarUrl: widget.avatarUrl,
           isOnline: widget.isOnline,
+          receiverId: resolvedReceiverId,
+          contactPhone: widget.contactPhone,
+          contactId: widget.contactId,
         ),
         onVoiceCall: () => _controller.startVoiceCall(
           context,
           widget.contactName,
           widget.avatarUrl,
+          resolvedReceiverId,
+          widget.contactPhone,
         ),
         onVideoCall: () => _controller.startVideoCall(
           context,
           widget.contactName,
           widget.avatarUrl,
+          resolvedReceiverId,
+          widget.contactPhone,
         ),
       ),
       body: Column(

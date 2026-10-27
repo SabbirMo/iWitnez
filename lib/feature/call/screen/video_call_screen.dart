@@ -39,25 +39,33 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         final isIncomingRinging =
             widget.arguments.direction == CallDirection.incoming && !isConnected;
 
-        return Scaffold(
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF181C3B),
-                  Color(0xFF131735),
-                  Color(0xFF0E122A),
-                ],
+        return PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) {
+              _provider.endCall();
+            }
+          },
+          child: Scaffold(
+            body: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF181C3B),
+                    Color(0xFF131735),
+                    Color(0xFF0E122A),
+                  ],
+                ),
               ),
-            ),
-            child: SafeArea(
-              child: isConnected
-                  ? _buildConnectedCallView(context)
-                  : _buildIncomingOrDialingView(context, isIncomingRinging),
+              child: SafeArea(
+                child: isConnected
+                    ? _buildConnectedCallView(context)
+                    : _buildIncomingOrDialingView(context, isIncomingRinging),
+              ),
             ),
           ),
         );

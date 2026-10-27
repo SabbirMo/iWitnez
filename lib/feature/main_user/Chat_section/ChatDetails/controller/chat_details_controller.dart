@@ -20,6 +20,9 @@ class ChatDetailsController {
     bool isOnline = true,
     String relationship = 'Sister',
     String trustedCircle = 'Family',
+    String? receiverId,
+    String? contactPhone,
+    String? contactId,
   }) {
     context.push(
       AppRouteNames.chatProfileDetailsScreen,
@@ -30,6 +33,12 @@ class ChatDetailsController {
         'isOnline': isOnline,
         'relationship': relationship,
         'trustedCircle': trustedCircle,
+        'receiverId': receiverId,
+        'linkedUser': receiverId,
+        'contactPhone': contactPhone,
+        'phoneNumber': contactPhone,
+        'contactId': contactId,
+        'id': contactId,
       },
     );
   }
@@ -38,11 +47,15 @@ class ChatDetailsController {
     BuildContext context,
     String contactName, [
     String? avatarUrl,
+    String? receiverId,
+    String? contactPhone,
   ]) {
     CallFlowController.startAudioCall(
       context,
       name: contactName,
       avatarUrl: avatarUrl ?? 'https://i.pravatar.cc/150?img=5',
+      receiverId: receiverId,
+      contactPhone: contactPhone,
     );
   }
 
@@ -50,11 +63,15 @@ class ChatDetailsController {
     BuildContext context,
     String contactName, [
     String? avatarUrl,
+    String? receiverId,
+    String? contactPhone,
   ]) {
     CallFlowController.startVideoCall(
       context,
       name: contactName,
       avatarUrl: avatarUrl ?? 'https://i.pravatar.cc/150?img=5',
+      receiverId: receiverId,
+      contactPhone: contactPhone,
     );
   }
 

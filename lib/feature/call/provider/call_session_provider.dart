@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:iwitnez/feature/call/model/call_session_model.dart';
+import 'package:iwitnez/feature/call/repository/call_repository.dart';
 
 class CallSessionProvider extends ChangeNotifier {
   CallSessionProvider({required this.arguments}) {
@@ -16,6 +17,9 @@ class CallSessionProvider extends ChangeNotifier {
   }
 
   final CallArguments arguments;
+  final CallRepository _callRepo = CallRepository();
+  String? _callId;
+  String? get callId => _callId;
 
   late CallStatus _status;
   bool _isMuted = false;
@@ -40,7 +44,21 @@ class CallSessionProvider extends ChangeNotifier {
     return '$minutes:$seconds';
   }
 
-  void _startOutgoingCallFlow() {
+  void _startOutgoingCallFlow() async {
+    if (arguments.receiverId != null && arguments.receiverId!.isNotEmpty) {
+      final callTypeStr =
+          arguments.callType == CallType.video ? 'video' : 'audio';
+      final res = await _callRepo.initiateCall(
+        callType: callTypeStr,
+        receiverId: arguments.receiverId!,
+        contactName: arguments.contactName,
+        contactPhone: arguments.contactPhone,
+      );
+      if (res != null) {
+        _callId = res.id;
+      }
+    }
+
     _statusTransitionTimer?.cancel();
     _statusTransitionTimer = Timer(const Duration(seconds: 2), () {
       if (_status != CallStatus.ended) {
@@ -90,6 +108,11 @@ class CallSessionProvider extends ChangeNotifier {
     _statusTransitionTimer?.cancel();
     _durationTimer?.cancel();
     _status = CallStatus.ended;
+
+    if (_callId != null && _callId!.isNotEmpty) {
+      _callRepo.endCall(_callId!);
+    }
+
     notifyListeners();
   }
 

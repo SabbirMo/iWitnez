@@ -21,6 +21,8 @@ class ChatController {
         'contactName': entry.name,
         'avatarUrl': entry.avatarUrl,
         'isOnline': entry.isOnline,
+        'receiverId': entry.otherParticipant.id,
+        'contactPhone': entry.otherParticipant.phoneNumber,
       },
     );
 

@@ -202,6 +202,9 @@ final appPages = Provider<GoRouter>(
               contactName: extra?['contactName'] ?? '',
               avatarUrl: extra?['avatarUrl'] ?? '',
               isOnline: extra?['isOnline'] ?? false,
+              receiverId: extra?['receiverId'] ?? extra?['linkedUser'],
+              contactPhone: extra?['contactPhone'] ?? extra?['phoneNumber'],
+              contactId: extra?['contactId'] ?? extra?['id'],
             ),
           );
         },

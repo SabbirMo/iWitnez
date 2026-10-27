@@ -21,10 +21,16 @@ class CallArguments {
     required this.avatarUrl,
     required this.callType,
     this.direction = CallDirection.outgoing,
+    this.receiverId,
+    this.contactPhone,
+    this.callId,
   });
 
   final String contactName;
   final String avatarUrl;
   final CallType callType;
   final CallDirection direction;
+  final String? receiverId;
+  final String? contactPhone;
+  final String? callId;
 }

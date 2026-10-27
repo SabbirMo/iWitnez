@@ -29,6 +29,16 @@ class ApiEndPoints {
   static String chatWebSocketUrl(String conversationId, String token) =>
       '${ApiBaseUrl.wsBaseUrl}/ws/chat/$conversationId/?token=$token';
 
+  // Call Signaling Endpoints
+  static const String callsInitiate = '/api/v1/calls/initiate/';
+  static String callRespond(String callId) => '/api/v1/calls/$callId/respond/';
+  static String callEnd(String callId) => '/api/v1/calls/$callId/end/';
+
+  // Contact Profile & Actions
+  static String contactDetails(String contactId) => '/api/v1/contacts/$contactId/';
+  static String contactMove(String contactId) => '/api/v1/contacts/$contactId/move/';
+  static const String locationManageSharing = '/api/v1/location/manage-sharing/';
+
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';
   static String sosActivate(String id) => '/api/v1/emergency/sos/$id/activate/';

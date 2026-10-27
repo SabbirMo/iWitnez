@@ -10,6 +10,8 @@ class CallFlowController {
     BuildContext context, {
     required String name,
     required String avatarUrl,
+    String? receiverId,
+    String? contactPhone,
   }) {
     context.push(
       AppRouteNames.audioCallScreen,
@@ -18,6 +20,8 @@ class CallFlowController {
         avatarUrl: avatarUrl,
         callType: CallType.voice,
         direction: CallDirection.outgoing,
+        receiverId: receiverId,
+        contactPhone: contactPhone,
       ),
     );
   }
@@ -26,6 +30,8 @@ class CallFlowController {
     BuildContext context, {
     required String name,
     required String avatarUrl,
+    String? receiverId,
+    String? contactPhone,
     bool isIncoming = false,
   }) {
     context.push(
@@ -35,6 +41,8 @@ class CallFlowController {
         avatarUrl: avatarUrl,
         callType: CallType.video,
         direction: isIncoming ? CallDirection.incoming : CallDirection.outgoing,
+        receiverId: receiverId,
+        contactPhone: contactPhone,
       ),
     );
   }
@@ -45,3 +53,4 @@ class CallFlowController {
     }
   }
 }
+
