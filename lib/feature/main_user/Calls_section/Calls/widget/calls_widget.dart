@@ -155,12 +155,32 @@ class CallLogTile extends StatelessWidget {
     this.onVideoCall,
   });
 
-  final CallLogEntry entry;
+  final CallRecordItem entry;
   final VoidCallback? onTap;
   final VoidCallback? onVoiceCall;
   final VoidCallback? onVideoCall;
 
-  bool get _isMissed => entry.direction == CallDirection.missed;
+  bool get _isMissed => entry.isMissed;
+
+  Widget _buildAvatarFallback() {
+    final initial = entry.contactName.trim().isNotEmpty
+        ? entry.contactName.trim()[0].toUpperCase()
+        : '';
+    return Container(
+      color: const Color(0xFFF1EDFF),
+      alignment: Alignment.center,
+      child: initial.isNotEmpty
+          ? Text(
+              initial,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+                color: _kPurple,
+              ),
+            )
+          : Icon(Icons.person, color: _kPurple, size: 24.sp),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,15 +191,23 @@ class CallLogTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Row(
           children: [
-            // Contact Avatar
-            CircleAvatar(
-              radius: 22.r,
-              backgroundColor: const Color(0xFFF1EDFF),
-              backgroundImage: NetworkImage(entry.avatarUrl),
-              onBackgroundImageError: (exception, stackTrace) {},
-              child: entry.avatarUrl.isEmpty
-                  ? Icon(Icons.person, color: _kPurple, size: 24.sp)
-                  : null,
+            // Contact Avatar with network error and empty fallback
+            Container(
+              width: 44.r,
+              height: 44.r,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF1EDFF),
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: entry.contactAvatarUrl.isNotEmpty
+                    ? Image.network(
+                        entry.contactAvatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _buildAvatarFallback(),
+                      )
+                    : _buildAvatarFallback(),
+              ),
             ),
             SizedBox(width: 12.w),
 
@@ -190,7 +218,7 @@ class CallLogTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    entry.name,
+                    entry.contactName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -205,15 +233,17 @@ class CallLogTile extends StatelessWidget {
                       Icon(
                         _isMissed
                             ? Icons.call_received_rounded
-                            : Icons.call_made_rounded,
+                            : (entry.isOutgoing
+                                ? Icons.call_made_rounded
+                                : Icons.call_received_rounded),
                         size: 13.sp,
                         color: _isMissed ? _kRed : _kGreen,
                       ),
                       SizedBox(width: 4.w),
                       Text(
                         _isMissed
-                            ? 'Missed ${entry.type == CallType.video ? 'video' : 'audio'} call'
-                            : '${entry.type == CallType.video ? 'Video' : 'Audio'} call',
+                            ? 'Missed ${entry.isVideo ? 'video' : 'audio'} call'
+                            : '${entry.isVideo ? 'Video' : 'Audio'} call',
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: _kTextMuted,
@@ -243,7 +273,7 @@ class CallLogTile extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  entry.date,
+                  entry.displayDate,
                   style: TextStyle(
                     fontSize: 11.5.sp,
                     color: _kTextMuted,
@@ -252,7 +282,7 @@ class CallLogTile extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  entry.time,
+                  entry.displayTime,
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: _kTextMuted,

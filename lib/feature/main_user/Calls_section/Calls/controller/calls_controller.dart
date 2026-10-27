@@ -54,19 +54,23 @@ class CallsController {
     showCallOptions(context, entry);
   }
 
-  void startVoiceCall(BuildContext context, CallLogEntry entry) {
+  void startVoiceCall(BuildContext context, CallRecordItem entry) {
     CallFlowController.startAudioCall(
       context,
-      name: entry.name,
-      avatarUrl: entry.avatarUrl,
+      name: entry.contactName,
+      avatarUrl: entry.contactAvatarUrl,
+      contactPhone: entry.contactPhone,
+      receiverId: entry.id,
     );
   }
 
-  void startVideoCall(BuildContext context, CallLogEntry entry) {
+  void startVideoCall(BuildContext context, CallRecordItem entry) {
     CallFlowController.startVideoCall(
       context,
-      name: entry.name,
-      avatarUrl: entry.avatarUrl,
+      name: entry.contactName,
+      avatarUrl: entry.contactAvatarUrl,
+      contactPhone: entry.contactPhone,
+      receiverId: entry.id,
     );
   }
 

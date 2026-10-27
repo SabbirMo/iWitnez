@@ -55,7 +55,7 @@ class _CallsScreenState extends State<CallsScreen> {
 
               SizedBox(height: 16.h),
 
-              // Search Call field
+              // Search Call field (300ms debounce implemented in provider)
               CallSearchField(onChanged: _provider.search),
 
               SizedBox(height: 14.h),
@@ -71,47 +71,75 @@ class _CallsScreenState extends State<CallsScreen> {
                 },
               ),
 
-              SizedBox(height: 14.h),
+              SizedBox(height: 16.h),
+
+              // Section Header: "Recent calls" or "Missed calls" + "See all"
+              ListenableBuilder(
+                listenable: _provider,
+                builder: (context, _) {
+                  return CallsSectionHeader(
+                    title: _provider.sectionTitle,
+                    onSeeAllTap: () {
+                      if (_provider.currentTab != CallFilterTab.all) {
+                        _provider.setTab(CallFilterTab.all);
+                      } else {
+                        _provider.fetchCalls();
+                      }
+                    },
+                  );
+                },
+              ),
+
+              SizedBox(height: 8.h),
 
               // Call logs list
               Expanded(
                 child: ListenableBuilder(
                   listenable: _provider,
                   builder: (context, _) {
-                    if (_provider.isLoading) {
+                    if (_provider.isLoading && _provider.calls.isEmpty) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final calls = _provider.calls;
                     if (calls.isEmpty) {
                       return Center(
                         child: Text(
-                          'No calls found',
+                          _provider.currentTab == CallFilterTab.missed
+                              ? 'No missed calls'
+                              : 'No calls found',
                           style: CustomTextStyle.regular14(AppColors.textMuted),
                         ),
                       );
                     }
-                    return ListView.separated(
-                      padding: EdgeInsets.only(
-                        bottom: 68.h + MediaQuery.of(context).padding.bottom,
+                    return RefreshIndicator(
+                      onRefresh: _provider.fetchCalls,
+                      color: AppColors.callsPurple,
+                      child: ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        padding: EdgeInsets.only(
+                          bottom: 68.h + MediaQuery.of(context).padding.bottom,
+                        ),
+                        itemCount: calls.length,
+                        separatorBuilder: (context, index) => Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          color: Colors.grey.shade100,
+                        ),
+                        itemBuilder: (context, index) {
+                          final call = calls[index];
+                          return CallLogTile(
+                            entry: call,
+                            onTap: () =>
+                                _controller.openCallDetail(context, call),
+                            onVoiceCall: () =>
+                                _controller.startVoiceCall(context, call),
+                            onVideoCall: () =>
+                                _controller.startVideoCall(context, call),
+                          );
+                        },
                       ),
-                      itemCount: calls.length,
-                      separatorBuilder: (context, index) => Divider(
-                        height: 1,
-                        thickness: 0.5,
-                        color: Colors.grey.shade100,
-                      ),
-                      itemBuilder: (context, index) {
-                        final call = calls[index];
-                        return CallLogTile(
-                          entry: call,
-                          onTap: () =>
-                              _controller.openCallDetail(context, call),
-                          onVoiceCall: () =>
-                              _controller.startVoiceCall(context, call),
-                          onVideoCall: () =>
-                              _controller.startVideoCall(context, call),
-                        );
-                      },
                     );
                   },
                 ),

@@ -30,6 +30,7 @@ class ApiEndPoints {
       '${ApiBaseUrl.wsBaseUrl}/ws/chat/$conversationId/?token=$token';
 
   // Call Signaling Endpoints
+  static const String calls = '/api/v1/calls/';
   static const String callsInitiate = '/api/v1/calls/initiate/';
   static String callRespond(String callId) => '/api/v1/calls/$callId/respond/';
   static String callEnd(String callId) => '/api/v1/calls/$callId/end/';

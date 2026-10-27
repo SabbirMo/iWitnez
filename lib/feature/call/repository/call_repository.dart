@@ -12,18 +12,19 @@ class CallRepository {
 
   /// 1. Initiate Audio or Video Call:
   /// POST /api/v1/calls/initiate/
-  /// Payload: { "call_type": "audio"|"video", "receiver_id": "...", "contact_name": "...", "contact_phone": "..." }
+  /// Payload: { "call_type": "audio"|"video", "contact_name": "...", "contact_phone": "...", "receiver_id": "..." }
   Future<CallInitiateModel?> initiateCall({
     required String callType,
-    required String receiverId,
+    String? receiverId,
     required String contactName,
     String? contactPhone,
   }) async {
     try {
       final body = {
         'call_type': callType,
-        'receiver_id': receiverId,
         'contact_name': contactName,
+        if (receiverId != null && receiverId.isNotEmpty)
+          'receiver_id': receiverId,
         if (contactPhone != null && contactPhone.isNotEmpty)
           'contact_phone': contactPhone,
       };
@@ -69,12 +70,15 @@ class CallRepository {
 
   /// 3. End Call:
   /// `POST /api/v1/calls/<id>/end/`
-  Future<bool> endCall(String callId) async {
+  /// Body: { "duration_seconds": 125 }
+  Future<bool> endCall(String callId, {int durationSeconds = 0}) async {
     try {
-      debugPrint('[CallRepo] Ending call $callId');
+      debugPrint(
+        '[CallRepo] Ending call $callId with duration: $durationSeconds',
+      );
       await _apiServices.post(
         ApiEndPoints.callEnd(callId),
-        data: {},
+        data: {'duration_seconds': durationSeconds},
         requireAuth: true,
       );
       return true;

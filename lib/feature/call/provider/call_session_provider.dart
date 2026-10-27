@@ -45,18 +45,16 @@ class CallSessionProvider extends ChangeNotifier {
   }
 
   void _startOutgoingCallFlow() async {
-    if (arguments.receiverId != null && arguments.receiverId!.isNotEmpty) {
-      final callTypeStr =
-          arguments.callType == CallType.video ? 'video' : 'audio';
-      final res = await _callRepo.initiateCall(
-        callType: callTypeStr,
-        receiverId: arguments.receiverId!,
-        contactName: arguments.contactName,
-        contactPhone: arguments.contactPhone,
-      );
-      if (res != null) {
-        _callId = res.id;
-      }
+    final callTypeStr =
+        arguments.callType == CallType.video ? 'video' : 'audio';
+    final res = await _callRepo.initiateCall(
+      callType: callTypeStr,
+      receiverId: arguments.receiverId,
+      contactName: arguments.contactName,
+      contactPhone: arguments.contactPhone,
+    );
+    if (res != null) {
+      _callId = res.id;
     }
 
     _statusTransitionTimer?.cancel();
@@ -110,7 +108,7 @@ class CallSessionProvider extends ChangeNotifier {
     _status = CallStatus.ended;
 
     if (_callId != null && _callId!.isNotEmpty) {
-      _callRepo.endCall(_callId!);
+      _callRepo.endCall(_callId!, durationSeconds: _durationSeconds);
     }
 
     notifyListeners();
