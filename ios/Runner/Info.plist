@@ -33,9 +33,9 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app requires continuous access to your location to keep your trusted contacts updated.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to your camera to capture photo and video evidence during emergencies.</string>
+	<string>iWitnez requires camera access for video calls with your trusted contacts.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires access to your microphone to record audio evidence during emergencies.</string>
+	<string>iWitnez requires microphone access for audio and video calls.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

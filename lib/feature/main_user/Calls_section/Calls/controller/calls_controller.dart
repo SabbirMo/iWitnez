@@ -15,13 +15,13 @@ class CallsController {
       isScrollControlled: true,
       builder: (bottomSheetContext) => MessengerCallBottomSheet(
         entry: entry,
-        onAudioCall: () {
+        onAudioCall: () async {
           Navigator.pop(bottomSheetContext);
-          startVoiceCall(context, entry);
+          await startVoiceCall(context, entry);
         },
-        onVideoCall: () {
+        onVideoCall: () async {
           Navigator.pop(bottomSheetContext);
-          startVideoCall(context, entry);
+          await startVideoCall(context, entry);
         },
         onMessage: () {
           Navigator.pop(bottomSheetContext);
@@ -54,8 +54,8 @@ class CallsController {
     showCallOptions(context, entry);
   }
 
-  void startVoiceCall(BuildContext context, CallRecordItem entry) {
-    CallFlowController.startAudioCall(
+  Future<void> startVoiceCall(BuildContext context, CallRecordItem entry) async {
+    await CallFlowController.startAudioCall(
       context,
       name: entry.contactName,
       avatarUrl: entry.contactAvatarUrl,
@@ -64,8 +64,8 @@ class CallsController {
     );
   }
 
-  void startVideoCall(BuildContext context, CallRecordItem entry) {
-    CallFlowController.startVideoCall(
+  Future<void> startVideoCall(BuildContext context, CallRecordItem entry) async {
+    await CallFlowController.startVideoCall(
       context,
       name: entry.contactName,
       avatarUrl: entry.contactAvatarUrl,

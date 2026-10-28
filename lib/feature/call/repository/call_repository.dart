@@ -8,7 +8,7 @@ class CallRepository {
   final ApiServices _apiServices;
 
   CallRepository([ApiServices? apiServices])
-    : _apiServices = apiServices ?? ApiServices();
+      : _apiServices = apiServices ?? ApiServices();
 
   /// 1. Initiate Audio or Video Call:
   /// POST /api/v1/calls/initiate/
@@ -52,24 +52,60 @@ class CallRepository {
   }
 
   /// 2. Respond to incoming call:
-  /// `POST /api/v1/calls/<id>/respond/`
+  /// POST /api/v1/calls/<id>/respond/
   /// Payload: { "action": "accept"|"decline" }
-  Future<bool> respondCall(String callId, {required String action}) async {
+  Future<CallInitiateModel?> respondCall(
+    String callId, {
+    required String action,
+  }) async {
     try {
-      await _apiServices.post(
+      debugPrint('[CallRepo] Responding to call $callId with action: $action');
+      final response = await _apiServices.post(
         ApiEndPoints.callRespond(callId),
         data: {'action': action},
         requireAuth: true,
       );
-      return true;
+
+      final dynamic data = response.data is Map
+          ? (response.data['data'] ?? response.data)
+          : null;
+
+      if (data is Map<String, dynamic>) {
+        return CallInitiateModel.fromJson(data);
+      }
+      return null;
     } catch (e) {
       debugPrint('[CallRepo] Error responding to call $callId: $e');
-      return false;
+      return null;
     }
   }
 
-  /// 3. End Call:
-  /// `POST /api/v1/calls/<id>/end/`
+  /// 3. Refresh / Fetch Token:
+  /// GET /api/v1/calls/<call_id>/token/
+  Future<Map<String, dynamic>?> fetchToken(String callId) async {
+    try {
+      debugPrint('[CallRepo] Refreshing token for call: $callId');
+      final response = await _apiServices.get(
+        ApiEndPoints.callToken(callId),
+        requireAuth: true,
+      );
+
+      final dynamic data = response.data is Map
+          ? (response.data['data'] ?? response.data)
+          : null;
+
+      if (data is Map<String, dynamic>) {
+        return data;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[CallRepo] Error fetching call token: $e');
+      return null;
+    }
+  }
+
+  /// 4. End Call:
+  /// POST /api/v1/calls/<id>/end/
   /// Body: { "duration_seconds": 125 }
   Future<bool> endCall(String callId, {int durationSeconds = 0}) async {
     try {
@@ -88,8 +124,8 @@ class CallRepository {
     }
   }
 
-  /// 4. Fetch Contact Profile Details:
-  /// `GET /api/v1/contacts/<contact_id>/`
+  /// 5. Fetch Contact Profile Details:
+  /// GET /api/v1/contacts/<contact_id>/
   Future<ContactProfileModel?> getContactProfile(String contactId) async {
     try {
       final response = await _apiServices.get(
@@ -111,8 +147,8 @@ class CallRepository {
     }
   }
 
-  /// 5. Change Member's Circle ("Family >" row):
-  /// `POST /api/v1/contacts/<contact_id>/move/`
+  /// 6. Change Member's Circle ("Family >" row):
+  /// POST /api/v1/contacts/<contact_id>/move/
   /// Body: { "circle": "family"|"friends"|"partner"|"work"|"other" }
   Future<bool> moveCircle({
     required String contactId,
@@ -136,7 +172,7 @@ class CallRepository {
     }
   }
 
-  /// 6. Location Sharing Toggle:
+  /// 7. Location Sharing Toggle:
   /// POST /api/v1/location/manage-sharing/
   /// Body: { "contact_id": "...", "is_sharing_enabled": true }
   Future<bool> manageLocationSharing({
@@ -163,7 +199,7 @@ class CallRepository {
     }
   }
 
-  /// 7. Helper to resolve contact_id from contacts list by receiverId or name
+  /// 8. Helper to resolve contact_id from contacts list by receiverId or name
   Future<String?> findContactId({String? receiverId, String? name}) async {
     try {
       final response = await _apiServices.get(

@@ -6,14 +6,21 @@ import 'package:iwitnez/router/app_route_names.dart';
 class CallFlowController {
   CallFlowController._();
 
-  static void startAudioCall(
+  /// Global notifier triggered whenever a call ends (incoming or outgoing)
+  static final ValueNotifier<int> callEndedNotifier = ValueNotifier<int>(0);
+
+  static void notifyCallEnded() {
+    callEndedNotifier.value++;
+  }
+
+  static Future<void> startAudioCall(
     BuildContext context, {
     required String name,
     required String avatarUrl,
     String? receiverId,
     String? contactPhone,
-  }) {
-    context.push(
+  }) async {
+    await context.push(
       AppRouteNames.audioCallScreen,
       extra: CallArguments(
         contactName: name,
@@ -24,17 +31,18 @@ class CallFlowController {
         contactPhone: contactPhone,
       ),
     );
+    notifyCallEnded();
   }
 
-  static void startVideoCall(
+  static Future<void> startVideoCall(
     BuildContext context, {
     required String name,
     required String avatarUrl,
     String? receiverId,
     String? contactPhone,
     bool isIncoming = false,
-  }) {
-    context.push(
+  }) async {
+    await context.push(
       AppRouteNames.videoCallScreen,
       extra: CallArguments(
         contactName: name,
@@ -45,12 +53,13 @@ class CallFlowController {
         contactPhone: contactPhone,
       ),
     );
+    notifyCallEnded();
   }
 
   static void endCall(BuildContext context) {
+    notifyCallEnded();
     if (context.canPop()) {
       context.pop();
     }
   }
 }
-

@@ -24,6 +24,9 @@ class CallArguments {
     this.receiverId,
     this.contactPhone,
     this.callId,
+    this.agoraAppId,
+    this.agoraChannelName,
+    this.agoraRtcToken,
   });
 
   final String contactName;
@@ -33,4 +36,7 @@ class CallArguments {
   final String? receiverId;
   final String? contactPhone;
   final String? callId;
+  final String? agoraAppId;
+  final String? agoraChannelName;
+  final String? agoraRtcToken;
 }

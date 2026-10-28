@@ -25,6 +25,71 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint(
     '[FCM Background] Handling message: ${message.messageId}, type: ${message.data['type']}',
   );
+
+  final type = message.data['type']?.toString().toLowerCase();
+  if (type == 'incoming_call') {
+    await _showBackgroundCallNotification(message);
+  }
+}
+
+@pragma('vm:entry-point')
+Future<void> _showBackgroundCallNotification(RemoteMessage message) async {
+  try {
+    final fln = FlutterLocalNotificationsPlugin();
+    const androidInitSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
+    const initSettings = InitializationSettings(android: androidInitSettings);
+    await fln.initialize(settings: initSettings);
+
+    const callChannel = AndroidNotificationChannel(
+      'incoming_calls_channel',
+      'Incoming Calls',
+      description: 'Channel for incoming audio and video calls',
+      importance: Importance.max,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound('call_ring'),
+      enableVibration: true,
+    );
+
+    await fln
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(callChannel);
+
+    final callerName =
+        message.data['caller_name']?.toString() ?? 'Incoming Call';
+    final callType = message.data['call_type']?.toString().toLowerCase();
+    final isVideo = callType == 'video';
+
+    final androidDetails = AndroidNotificationDetails(
+      callChannel.id,
+      callChannel.name,
+      channelDescription: callChannel.description,
+      importance: Importance.max,
+      priority: Priority.max,
+      category: AndroidNotificationCategory.call,
+      fullScreenIntent: true,
+      playSound: true,
+      sound: const RawResourceAndroidNotificationSound('call_ring'),
+      enableVibration: true,
+      ongoing: true,
+      autoCancel: false,
+      audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
+      visibility: NotificationVisibility.public,
+    );
+
+    await fln.show(
+      id: 8888,
+      title: callerName,
+      body: isVideo ? 'Incoming Video Call...' : 'Incoming Audio Call...',
+      notificationDetails: NotificationDetails(android: androidDetails),
+      payload: jsonEncode(message.data),
+    );
+  } catch (e) {
+    debugPrint('[FCM Background] Error showing call notification: $e');
+  }
 }
 
 class FcmService {
@@ -54,6 +119,17 @@ class FcmService {
             'This channel is used for important notifications and alerts.',
         importance: Importance.max,
         playSound: true,
+        enableVibration: true,
+      );
+
+  static const AndroidNotificationChannel _callChannel =
+      AndroidNotificationChannel(
+        'incoming_calls_channel',
+        'Incoming Calls',
+        description: 'Channel for incoming audio and video calls',
+        importance: Importance.max,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('call_ring'),
         enableVibration: true,
       );
 
@@ -97,11 +173,12 @@ class FcmService {
         },
       );
 
-      await _localNotifications
+      final androidPlugin = _localNotifications
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.createNotificationChannel(_highImportanceChannel);
+          >();
+      await androidPlugin?.createNotificationChannel(_highImportanceChannel);
+      await androidPlugin?.createNotificationChannel(_callChannel);
     } catch (e) {
       debugPrint('[FCM] Error initializing flutter_local_notifications: $e');
     }
@@ -488,9 +565,18 @@ class FcmService {
 
   /// 2. 📞 Incoming Audio/Video Call (type: "incoming_call")
   /// Action: Open full-screen Incoming Call screen with Accept / Decline buttons.
-  void _navigateToIncomingCall(Map<String, dynamic> data) {
-    final context = rootNavigatorKey.currentContext;
-    if (context == null) return;
+  void _navigateToIncomingCall(Map<String, dynamic> data, {int attempt = 0}) {
+    // Dismiss ongoing incoming call notification banner
+    try {
+      unawaited(_localNotifications.cancel(id: 8888));
+    } catch (_) {}
+
+    if (attempt > 15) {
+      debugPrint(
+        '[FCM Navigation] Max incoming call navigation attempts reached.',
+      );
+      return;
+    }
 
     final callId = data['call_id']?.toString() ?? '';
     final callerName = data['caller_name']?.toString() ?? 'Caller';
@@ -503,17 +589,49 @@ class FcmService {
       callType: isVideo ? CallType.video : CallType.voice,
       direction: CallDirection.incoming,
       callId: callId,
+      agoraAppId:
+          data['agora_app_id']?.toString() ??
+          '57a5f1d2e0dc4d8e985065d9c86afb0f',
+      agoraChannelName: data['agora_channel_name']?.toString(),
+      agoraRtcToken: data['agora_rtc_token']?.toString(),
     );
 
-    try {
-      if (isVideo) {
-        context.push(AppRouteNames.videoCallScreen, extra: args);
-      } else {
-        context.push(AppRouteNames.audioCallScreen, extra: args);
+    // 1. Try globalAppRouter first
+    final router = globalAppRouter;
+    if (router != null) {
+      try {
+        debugPrint('[FCM Navigation] Navigating to call via globalAppRouter');
+        if (isVideo) {
+          router.push(AppRouteNames.videoCallScreen, extra: args);
+        } else {
+          router.push(AppRouteNames.audioCallScreen, extra: args);
+        }
+        return;
+      } catch (e) {
+        debugPrint('[FCM Navigation] globalAppRouter call push failed: $e');
       }
-    } catch (e) {
-      debugPrint('[FCM Navigation] Incoming call navigation error: $e');
     }
+
+    // 2. Try rootNavigatorKey context
+    final context = rootNavigatorKey.currentContext;
+    if (context != null && context.mounted) {
+      try {
+        debugPrint('[FCM Navigation] Navigating to call via context.push');
+        if (isVideo) {
+          context.push(AppRouteNames.videoCallScreen, extra: args);
+        } else {
+          context.push(AppRouteNames.audioCallScreen, extra: args);
+        }
+        return;
+      } catch (e) {
+        debugPrint('[FCM Navigation] context call push failed: $e');
+      }
+    }
+
+    // 3. Retry after delay if router/context is not ready yet
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _navigateToIncomingCall(data, attempt: attempt + 1);
+    });
   }
 
   /// 3. 💬 New Chat Message (type: "chat_message")

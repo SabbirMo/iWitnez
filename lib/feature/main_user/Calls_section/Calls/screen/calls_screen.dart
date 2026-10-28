@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/feature/call/controller/call_flow_controller.dart';
 import 'package:iwitnez/feature/main_user/Calls_section/Calls/controller/calls_controller.dart';
 import 'package:iwitnez/feature/main_user/Calls_section/Calls/provider/calls_provider.dart';
 import 'package:iwitnez/feature/main_user/Calls_section/Calls/widget/calls_widget.dart';
@@ -22,10 +23,23 @@ class _CallsScreenState extends State<CallsScreen> {
   void initState() {
     super.initState();
     _provider.fetchCalls();
+    CallFlowController.callEndedNotifier.addListener(_onCallEnded);
+  }
+
+  void _onCallEnded() {
+    if (mounted) {
+      // Small 400ms delay to allow backend to persist call record before fetching
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          _provider.fetchCalls();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    CallFlowController.callEndedNotifier.removeListener(_onCallEnded);
     _provider.dispose();
     super.dispose();
   }
@@ -133,10 +147,18 @@ class _CallsScreenState extends State<CallsScreen> {
                             entry: call,
                             onTap: () =>
                                 _controller.openCallDetail(context, call),
-                            onVoiceCall: () =>
-                                _controller.startVoiceCall(context, call),
-                            onVideoCall: () =>
-                                _controller.startVideoCall(context, call),
+                            onVoiceCall: () async {
+                              await _controller.startVoiceCall(context, call);
+                              if (mounted) {
+                                _provider.fetchCalls();
+                              }
+                            },
+                            onVideoCall: () async {
+                              await _controller.startVideoCall(context, call);
+                              if (mounted) {
+                                _provider.fetchCalls();
+                              }
+                            },
                           );
                         },
                       ),

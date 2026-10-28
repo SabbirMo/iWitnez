@@ -14,6 +14,9 @@ class CallRecordItem {
   final bool isOutgoing;
   final DateTime? startedAt;
   final DateTime? endedAt;
+  final String? agoraAppId;
+  final String? agoraChannelName;
+  final String? agoraRtcToken;
 
   const CallRecordItem({
     required this.id,
@@ -27,6 +30,9 @@ class CallRecordItem {
     this.isOutgoing = true,
     this.startedAt,
     this.endedAt,
+    this.agoraAppId,
+    this.agoraChannelName,
+    this.agoraRtcToken,
   });
 
   bool get isMissed => status.toLowerCase() == 'missed';
@@ -121,6 +127,9 @@ class CallRecordItem {
       endedAt: json['ended_at'] != null
           ? DateTime.tryParse(json['ended_at'].toString())
           : null,
+      agoraAppId: json['agora_app_id']?.toString(),
+      agoraChannelName: json['agora_channel_name']?.toString(),
+      agoraRtcToken: json['agora_rtc_token']?.toString(),
     );
   }
 

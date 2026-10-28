@@ -38,6 +38,7 @@ class ApiEndPoints {
   static const String calls = '/api/v1/calls/';
   static const String callsInitiate = '/api/v1/calls/initiate/';
   static String callRespond(String callId) => '/api/v1/calls/$callId/respond/';
+  static String callToken(String callId) => '/api/v1/calls/$callId/token/';
   static String callEnd(String callId) => '/api/v1/calls/$callId/end/';
 
   // Contact Profile & Actions
