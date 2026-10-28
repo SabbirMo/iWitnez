@@ -11,23 +11,27 @@ class HomeGreeting {
     required this.subtitle,
     this.avatarUrl,
     this.hasUnreadNotification = false,
+    this.unreadCount = 0,
   });
 
   final String userName;
   final String subtitle;
   final String? avatarUrl;
   final bool hasUnreadNotification;
+  final int unreadCount;
 
   HomeGreeting copyWith({
     String? userName,
     String? subtitle,
     String? avatarUrl,
     bool? hasUnreadNotification,
+    int? unreadCount,
   }) => HomeGreeting(
     userName: userName ?? this.userName,
     subtitle: subtitle ?? this.subtitle,
     avatarUrl: avatarUrl ?? this.avatarUrl,
     hasUnreadNotification: hasUnreadNotification ?? this.hasUnreadNotification,
+    unreadCount: unreadCount ?? this.unreadCount,
   );
 }
 
@@ -70,7 +74,7 @@ class HomeState {
 
   factory HomeState.initial() => const HomeState(
     greeting: HomeGreeting(
-      userName: 'Emma',
+      userName: ' ',
       subtitle: 'Stay Safe, Stay Connected',
       hasUnreadNotification: false,
     ),

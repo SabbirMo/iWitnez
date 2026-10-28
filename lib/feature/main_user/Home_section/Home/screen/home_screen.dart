@@ -41,6 +41,7 @@ class HomeScreen extends ConsumerWidget {
                         userFullName: state.userProfile?.fullName,
                         hasUnreadNotification:
                             state.greeting.hasUnreadNotification,
+                        unreadCount: state.greeting.unreadCount,
                         onNotificationTap: () =>
                             _controller.onNotificationTap(context, ref),
                       ),

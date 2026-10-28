@@ -58,5 +58,7 @@ class AppRouteNames {
   static final String getDirectionsScreen = "/getDirectionsScreen";
   static final String trustedNotificationScreen = "/trustedNotificationScreen";
   static final String trustedJourneyEtaScreen = "/trustedJourneyEtaScreen";
-  static final String trustedCheckInStatusScreen = "/trustedCheckInStatusScreen";
+  static final String trustedCheckInStatusScreen =
+      "/trustedCheckInStatusScreen";
+  static final String activeSosMap = "/emergency/alerts/active";
 }

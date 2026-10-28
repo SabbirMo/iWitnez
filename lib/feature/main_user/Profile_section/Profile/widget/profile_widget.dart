@@ -84,11 +84,13 @@ class ProfileMenuTile extends StatelessWidget {
     required this.item,
     this.onTap,
     this.showDivider = true,
+    this.trailing,
   });
 
   final ProfileMenuItem item;
   final VoidCallback? onTap;
   final bool showDivider;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +126,9 @@ class ProfileMenuTile extends StatelessWidget {
                         .copyWith(fontSize: 14.sp, fontWeight: FontWeight.w500),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textMuted, size: 20.sp),
+                trailing ??
+                    Icon(Icons.chevron_right_rounded,
+                        color: AppColors.textMuted, size: 20.sp),
               ],
             ),
           ),

@@ -1,20 +1,32 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/theme/app_theme.dart';
 import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/firebase_options.dart';
 import 'package:iwitnez/router/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  // Initialize FCM service and listeners
+  try {
+    await FcmService.instance.initialize();
+  } catch (e) {
+    debugPrint('FCM initialization error in main: $e');
+  }
+
   runApp(ProviderScope(child: const MyApp()));
 }
 

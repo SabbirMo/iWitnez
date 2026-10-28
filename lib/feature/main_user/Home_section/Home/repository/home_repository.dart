@@ -86,8 +86,8 @@ class HomeRepository {
     await _apiServices.post(
       ApiEndPoints.pingLocation,
       data: {
-        'latitude': latitude,
-        'longitude': longitude,
+        'latitude': double.tryParse(latitude.toStringAsFixed(6)) ?? latitude,
+        'longitude': double.tryParse(longitude.toStringAsFixed(6)) ?? longitude,
         'accuracy': accuracy ?? 5.0,
         'speed': speed ?? 0,
         'heading': heading ?? 0,

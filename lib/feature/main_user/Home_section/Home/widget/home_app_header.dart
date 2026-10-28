@@ -14,6 +14,7 @@ class HomeAppHeader extends StatelessWidget {
     required this.userName,
     required this.subtitle,
     required this.hasUnreadNotification,
+    this.unreadCount = 0,
     this.avatarUrl,
     this.userFullName,
     this.onNotificationTap,
@@ -22,6 +23,7 @@ class HomeAppHeader extends StatelessWidget {
   final String userName;
   final String subtitle;
   final bool hasUnreadNotification;
+  final int unreadCount;
   final String? avatarUrl;
   final String? userFullName;
   final VoidCallback? onNotificationTap;
@@ -95,7 +97,37 @@ class HomeAppHeader extends StatelessWidget {
                       top: 0,
                       child: SvgPicture.asset(ImageAssets.notificatioBell),
                     ),
-                    if (hasUnreadNotification)
+                    if (hasUnreadNotification && unreadCount > 0)
+                      Positioned(
+                        right: 10.w,
+                        top: -6.h,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 4.w,
+                            vertical: 1.h,
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 16.w,
+                            minHeight: 16.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF9023FF),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            unreadCount > 99 ? '99+' : '$unreadCount',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.bold,
+                              height: 1.1,
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (hasUnreadNotification)
                       Positioned(
                         right: 18,
                         top: -8,

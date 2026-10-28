@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/core/widgets/pulse_circle.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
@@ -131,6 +132,14 @@ class _SplashScreenState extends State<SplashScreen>
     _navigationTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
         context.pushReplacement(AppRouteNames.onBoardingStartScreen);
+        if (FcmService.hasPendingNotificationTap) {
+          FcmService.hasPendingNotificationTap = false;
+          Future.delayed(const Duration(milliseconds: 300), () {
+            FcmService.instance.handleNotificationPayload(
+              FcmService.pendingInitialPayload,
+            );
+          });
+        }
       }
     });
 

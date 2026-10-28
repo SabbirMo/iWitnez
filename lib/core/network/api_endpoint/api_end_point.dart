@@ -14,6 +14,10 @@ class ApiEndPoints {
   static const String getProfile = '/api/v1/auth/me/';
   static const String deviceSettings = '/api/v1/auth/device-settings/';
   static const String notifications = '/api/v1/notifications/';
+  static const String notificationsToggle = '/api/v1/notifications/toggle/';
+  static String notificationMarkRead(String id) =>
+      '/api/v1/notifications/$id/read/';
+  static const String notificationsReadAll = '/api/v1/notifications/read-all/';
   static const String liveLocation = '/api/v1/location/live/';
   static const String pingLocation = '/api/v1/location/ping/';
   static const String contacts = '/api/v1/contacts/';

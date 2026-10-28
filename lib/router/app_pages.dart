@@ -72,10 +72,18 @@ import 'package:iwitnez/feature/add_trusted_contact/widget/add_trusted_field_wid
 import 'package:iwitnez/feature/add_trusted_contact/screen/trusted_contact_success_screen.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
+
+GoRouter? _globalAppRouter;
+GoRouter? get globalAppRouter => _globalAppRouter;
+
 final appPages = Provider<GoRouter>(
-  (ref) => GoRouter(
-    initialLocation: AppRouteNames.splashScreen,
-    routes: [
+  (ref) {
+    final router = GoRouter(
+      navigatorKey: rootNavigatorKey,
+      initialLocation: AppRouteNames.splashScreen,
+      routes: [
       GoRoute(
         path: AppRouteNames.splashScreen,
         pageBuilder: (context, state) =>
@@ -386,6 +394,12 @@ final appPages = Provider<GoRouter>(
         pageBuilder: (context, state) =>
             CupertinoPage(child: const TrustedLiveLocationScreen()),
       ),
+      // Active SOS Map Screen
+      GoRoute(
+        path: AppRouteNames.activeSosMap,
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const TrustedLiveLocationScreen()),
+      ),
       // Get Directions Screen
       GoRoute(
         path: AppRouteNames.getDirectionsScreen,
@@ -509,5 +523,7 @@ final appPages = Provider<GoRouter>(
     //if page not found show this message
     errorBuilder: (context, state) =>
         Scaffold(body: Center(child: Text("Page Not Found: ${state.error}"))),
-  ),
-);
+  );
+  _globalAppRouter = router;
+  return router;
+});

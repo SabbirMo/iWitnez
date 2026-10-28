@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/core/services/location_service.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/home_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
@@ -16,11 +17,21 @@ final homeProvider = AsyncNotifierProvider<HomeNotifier, HomeState>(
 
 class HomeNotifier extends AsyncNotifier<HomeState> {
   StreamSubscription<Position>? _positionSubscription;
+  StreamSubscription<dynamic>? _fcmSubscription;
 
   @override
   FutureOr<HomeState> build() {
     ref.onDispose(() {
       _positionSubscription?.cancel();
+      _fcmSubscription?.cancel();
+    });
+
+    _fcmSubscription = FcmService.onNotificationReceived.stream.listen((_) async {
+      try {
+        final repository = ref.read(homeRepositoryProvider);
+        final unreadCount = await repository.getUnreadNotificationCount();
+        updateUnreadNotificationCount(unreadCount);
+      } catch (_) {}
     });
 
     // Start background fetching without blocking initial render
@@ -80,6 +91,9 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     final repository = ref.read(homeRepositoryProvider);
     final current = state.value ?? HomeState.initial();
 
+    // Ensure FCM token is synced with backend if user previously permitted
+    FcmService.instance.syncDeviceTokenIfPermitted();
+
     try {
       final results = await Future.wait([
         repository.getProfile(),
@@ -118,6 +132,7 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
             subtitle: 'Stay Safe, Stay Connected',
             avatarUrl: userData?.avatarUrl ?? current.greeting.avatarUrl,
             hasUnreadNotification: unreadCount > 0,
+            unreadCount: unreadCount,
           ),
         ),
       );
@@ -173,7 +188,23 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     if (current == null) return;
     state = AsyncValue.data(
       current.copyWith(
-        greeting: current.greeting.copyWith(hasUnreadNotification: false),
+        greeting: current.greeting.copyWith(
+          hasUnreadNotification: false,
+          unreadCount: 0,
+        ),
+      ),
+    );
+  }
+
+  void updateUnreadNotificationCount(int count) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data(
+      current.copyWith(
+        greeting: current.greeting.copyWith(
+          hasUnreadNotification: count > 0,
+          unreadCount: count,
+        ),
       ),
     );
   }

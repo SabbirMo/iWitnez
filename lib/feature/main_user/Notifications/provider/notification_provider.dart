@@ -5,5 +5,5 @@ import '../controller/notification_controller.dart';
 final notificationControllerProvider =
     StateNotifierProvider<NotificationController, NotificationState>((ref) {
   final repository = ref.read(notificationRepositoryProvider);
-  return NotificationController(repository);
+  return NotificationController(repository, ref);
 });

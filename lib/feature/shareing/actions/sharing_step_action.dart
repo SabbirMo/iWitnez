@@ -65,11 +65,22 @@ class LocationStepAction extends SharingStepAction {
       debugPrint('[LocationStepAction] Warning: Could not get exact position: $e');
     }
 
+    double? lat;
+    double? lng;
+    if (position != null) {
+      lat = double.tryParse(position.latitude.toStringAsFixed(6));
+      lng = double.tryParse(position.longitude.toStringAsFixed(6));
+    }
+
     final body = <String, dynamic>{
       'location_permission_granted': true,
-      if (position != null) 'last_latitude': position.latitude,
-      if (position != null) 'last_longitude': position.longitude,
     };
+    if (lat != null) {
+      body['last_latitude'] = lat;
+    }
+    if (lng != null) {
+      body['last_longitude'] = lng;
+    }
 
     try {
       await ref

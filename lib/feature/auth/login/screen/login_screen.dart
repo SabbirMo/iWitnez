@@ -16,6 +16,7 @@ import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/login/provider/login_notifier.dart';
 import 'package:iwitnez/feature/auth/login/provider/login_provider.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
@@ -76,6 +77,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       final role = isTrusted ? UserRole.trustedContact : UserRole.mainUser;
 
       ref.read(userRoleProvider.notifier).set(role);
+
+      // Step 1.1: Register Device Token with Backend if already permitted
+      FcmService.instance.syncDeviceTokenIfPermitted();
+
       if (isTrusted) {
         context.go(AppRouteNames.trustedHome);
       } else {
