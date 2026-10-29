@@ -80,7 +80,7 @@ class HomeState {
     ),
     isProtected: true,
     isLoading: false,
-    liveLocation: LiveLocationModel(isSharingLive: true, address: ''),
+    liveLocation: LiveLocationModel(isSharingLive: false, address: ''),
     quickActions: [
       QuickActionItem(type: QuickActionType.safety),
       QuickActionItem(type: QuickActionType.checkIn),

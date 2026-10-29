@@ -18,11 +18,13 @@ final homeProvider = AsyncNotifierProvider<HomeNotifier, HomeState>(
 class HomeNotifier extends AsyncNotifier<HomeState> {
   StreamSubscription<Position>? _positionSubscription;
   StreamSubscription<dynamic>? _fcmSubscription;
+  Timer? _pingTimer;
 
   @override
   FutureOr<HomeState> build() {
     ref.onDispose(() {
       _positionSubscription?.cancel();
+      _pingTimer?.cancel();
       _fcmSubscription?.cancel();
     });
 
@@ -42,6 +44,8 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
 
   Future<void> _startLocationTracking() async {
     _positionSubscription?.cancel();
+    _pingTimer?.cancel();
+
     try {
       final permission = await const LocationService().checkPermission();
       if (permission == LocationPermission.denied ||
@@ -49,6 +53,15 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
         return;
       }
 
+      // Initial GPS ping on start
+      pingCurrentGpsLocation();
+
+      // Periodic timer: ping every 30 seconds while sharing is active
+      _pingTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+        await pingCurrentGpsLocation();
+      });
+
+      // Stream updates: ping whenever phone moves >= 10 meters
       _positionSubscription = const LocationService()
           .getPositionStream(
             accuracy: LocationAccuracy.high,
@@ -85,6 +98,8 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
   void _stopLocationTracking() {
     _positionSubscription?.cancel();
     _positionSubscription = null;
+    _pingTimer?.cancel();
+    _pingTimer = null;
   }
 
   Future<void> fetchHomeData() async {
@@ -177,6 +192,18 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
           heading: pos.heading,
           address: state.value?.liveLocation?.address,
         );
+
+        final current = state.value;
+        if (current != null && current.liveLocation != null) {
+          state = AsyncValue.data(
+            current.copyWith(
+              liveLocation: current.liveLocation!.copyWith(
+                latitude: pos.latitude,
+                longitude: pos.longitude,
+              ),
+            ),
+          );
+        }
       }
     } catch (_) {
       // Ignore if GPS or network fails

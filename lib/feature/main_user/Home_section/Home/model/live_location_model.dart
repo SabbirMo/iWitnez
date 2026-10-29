@@ -1,9 +1,11 @@
 class LiveLocationModel {
   final bool isSharingLive;
+  final String? durationType;
+  final String? durationDisplay;
+  final String? userName;
   final String? address;
   final double? latitude;
   final double? longitude;
-  final String? durationDisplay;
   final String? updatedAgoDisplay;
   final int? batteryLevel;
   final String? movementStatus;
@@ -11,10 +13,12 @@ class LiveLocationModel {
 
   const LiveLocationModel({
     this.isSharingLive = false,
+    this.durationType,
+    this.durationDisplay,
+    this.userName,
     this.address,
     this.latitude,
     this.longitude,
-    this.durationDisplay,
     this.updatedAgoDisplay,
     this.batteryLevel,
     this.movementStatus,
@@ -41,10 +45,20 @@ class LiveLocationModel {
 
     return LiveLocationModel(
       isSharingLive: json['is_sharing_live'] == true,
+      durationType: json['duration_type'] as String?,
       durationDisplay: json['duration_display'] as String?,
+      userName: myLoc?['user_name'] as String?,
       address: myLoc?['address'] as String?,
-      latitude: parseCoord(myLoc?['latitude']),
-      longitude: parseCoord(myLoc?['longitude']),
+      latitude: parseCoord(
+        myLoc?['latitude'] ??
+            myLoc?['lat'] ??
+            (myLoc?['location'] as Map?)?['latitude'],
+      ),
+      longitude: parseCoord(
+        myLoc?['longitude'] ??
+            myLoc?['lng'] ??
+            (myLoc?['location'] as Map?)?['longitude'],
+      ),
       batteryLevel: (myLoc?['battery_level'] as num?)?.toInt(),
       updatedAgoDisplay: myLoc?['updated_ago_display'] as String?,
       movementStatus: myLoc?['movement_status'] as String?,
@@ -54,10 +68,12 @@ class LiveLocationModel {
 
   LiveLocationModel copyWith({
     bool? isSharingLive,
+    String? durationType,
+    String? durationDisplay,
+    String? userName,
     String? address,
     double? latitude,
     double? longitude,
-    String? durationDisplay,
     String? updatedAgoDisplay,
     int? batteryLevel,
     String? movementStatus,
@@ -65,10 +81,12 @@ class LiveLocationModel {
   }) {
     return LiveLocationModel(
       isSharingLive: isSharingLive ?? this.isSharingLive,
+      durationType: durationType ?? this.durationType,
+      durationDisplay: durationDisplay ?? this.durationDisplay,
+      userName: userName ?? this.userName,
       address: address ?? this.address,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
-      durationDisplay: durationDisplay ?? this.durationDisplay,
       updatedAgoDisplay: updatedAgoDisplay ?? this.updatedAgoDisplay,
       batteryLevel: batteryLevel ?? this.batteryLevel,
       movementStatus: movementStatus ?? this.movementStatus,
@@ -122,8 +140,18 @@ class PeopleSharingModel {
       lastSeen: json['last_seen'] as String?,
       isSelf: json['is_self'] == true,
       isLive: json['is_live'] == true,
-      latitude: parseCoord(json['latitude']),
-      longitude: parseCoord(json['longitude']),
+      latitude: parseCoord(
+        json['latitude'] ??
+            json['lat'] ??
+            (json['location'] as Map?)?['latitude'] ??
+            (json['location'] as Map?)?['lat'],
+      ),
+      longitude: parseCoord(
+        json['longitude'] ??
+            json['lng'] ??
+            (json['location'] as Map?)?['longitude'] ??
+            (json['location'] as Map?)?['lng'],
+      ),
     );
   }
 }
