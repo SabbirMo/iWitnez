@@ -19,13 +19,7 @@ class HomeController {
   }
 
   void onToggleSharing(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Live location sharing updated'),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    // Handled by homeProvider.toggleSharing()
   }
 
   void onQuickActionTap(BuildContext context, QuickActionType type) {

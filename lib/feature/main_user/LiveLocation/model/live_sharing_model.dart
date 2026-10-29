@@ -8,8 +8,8 @@ class SharingPersonModel {
   final bool isLive;
   final bool isSharingWith;
   final Color fallbackColor;
-  final double? relativeX;
-  final double? relativeY;
+  final double? latitude;
+  final double? longitude;
 
   const SharingPersonModel({
     required this.id,
@@ -19,8 +19,8 @@ class SharingPersonModel {
     this.isLive = false,
     this.isSharingWith = true,
     this.fallbackColor = const Color(0xFF6B7280),
-    this.relativeX,
-    this.relativeY,
+    this.latitude,
+    this.longitude,
   });
 
   SharingPersonModel copyWith({
@@ -31,8 +31,8 @@ class SharingPersonModel {
     bool? isLive,
     bool? isSharingWith,
     Color? fallbackColor,
-    double? relativeX,
-    double? relativeY,
+    double? latitude,
+    double? longitude,
   }) {
     return SharingPersonModel(
       id: id ?? this.id,
@@ -42,8 +42,8 @@ class SharingPersonModel {
       isLive: isLive ?? this.isLive,
       isSharingWith: isSharingWith ?? this.isSharingWith,
       fallbackColor: fallbackColor ?? this.fallbackColor,
-      relativeX: relativeX ?? this.relativeX,
-      relativeY: relativeY ?? this.relativeY,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 }

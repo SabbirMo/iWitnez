@@ -96,6 +96,41 @@ class HomeRepository {
       requireAuth: true,
     );
   }
+
+  /// Start / Enable Sharing: POST /api/v1/location/live/
+  Future<LiveLocationModel?> startSharingLocation({
+    String durationType = 'until_off',
+  }) async {
+    try {
+      final response = await _apiServices.post(
+        ApiEndPoints.liveLocation,
+        data: {'duration_type': durationType},
+        requireAuth: true,
+      );
+
+      final data = response.data?['data'];
+      if (data is Map<String, dynamic>) {
+        return LiveLocationModel.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Stop Sharing: DELETE /api/v1/location/live/
+  Future<bool> stopSharingLocation() async {
+    try {
+      final response = await _apiServices.delete(
+        ApiEndPoints.liveLocation,
+        requireAuth: true,
+      );
+
+      return response.data?['success'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
 }
 
 final homeRepositoryProvider = Provider<HomeRepository>((ref) {

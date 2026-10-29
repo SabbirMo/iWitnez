@@ -156,12 +156,13 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     }
   }
 
-  void toggleSharing() {
+  Future<void> toggleSharing() async {
     final current = state.value;
     if (current == null) return;
     final currentSharing = current.liveLocation?.isSharingLive ?? false;
     final newSharing = !currentSharing;
 
+    // Optimistically update UI
     state = AsyncValue.data(
       current.copyWith(
         liveLocation: current.liveLocation != null
@@ -170,7 +171,72 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
       ),
     );
 
+    final repository = ref.read(homeRepositoryProvider);
+
     if (newSharing) {
+      _startLocationTracking();
+      pingCurrentGpsLocation();
+
+      // Persist to backend: POST /api/v1/location/live/
+      try {
+        final updated = await repository.startSharingLocation();
+        if (updated != null) {
+          final latest = state.value;
+          if (latest != null) {
+            state = AsyncValue.data(
+              latest.copyWith(
+                liveLocation: latest.liveLocation != null
+                    ? latest.liveLocation!.copyWith(
+                        isSharingLive: true,
+                        durationType: updated.durationType,
+                        durationDisplay: updated.durationDisplay,
+                        peopleSharing: updated.peopleSharing,
+                      )
+                    : updated,
+              ),
+            );
+          }
+        }
+      } catch (_) {}
+    } else {
+      _stopLocationTracking();
+
+      // Persist to backend: DELETE /api/v1/location/live/
+      try {
+        await repository.stopSharingLocation();
+        final latest = state.value;
+        if (latest != null) {
+          state = AsyncValue.data(
+            latest.copyWith(
+              liveLocation: latest.liveLocation?.copyWith(
+                isSharingLive: false,
+                peopleSharing: const [],
+              ),
+            ),
+          );
+        }
+      } catch (_) {}
+    }
+  }
+
+  void setSharing(bool isSharing) {
+    final current = state.value;
+    if (current == null) return;
+
+    state = AsyncValue.data(
+      current.copyWith(
+        liveLocation: current.liveLocation != null
+            ? current.liveLocation!.copyWith(
+                isSharingLive: isSharing,
+                peopleSharing: isSharing
+                    ? current.liveLocation!.peopleSharing
+                    : const [],
+              )
+            : LiveLocationModel(isSharingLive: isSharing),
+      ),
+    );
+
+    if (isSharing) {
       _startLocationTracking();
       pingCurrentGpsLocation();
     } else {

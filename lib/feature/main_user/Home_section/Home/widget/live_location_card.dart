@@ -1,12 +1,10 @@
-import 'dart:io';
-import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
+import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
 
 const List<Color> _contactAvatarColors = [
   Color(0xFFFDA4AF), // Pink
@@ -43,15 +41,35 @@ class LiveLocationCard extends StatefulWidget {
   State<LiveLocationCard> createState() => _LiveLocationCardState();
 }
 
-class _LiveLocationCardState extends State<LiveLocationCard> {
+class _LiveLocationCardState extends State<LiveLocationCard>
+    with SingleTickerProviderStateMixin {
   final Set<Marker> _markers = {};
-  BitmapDescriptor? _userDotIcon;
-  final Map<String, BitmapDescriptor> _avatarMarkerCache = {};
+  AnimationController? _pulseController;
+  Animation<double>? _pulseAnimation;
+
+  void _ensurePulseAnimation() {
+    if (_pulseController != null) return;
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+    _pulseAnimation = CurvedAnimation(
+      parent: _pulseController!,
+      curve: Curves.easeOut,
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    _ensurePulseAnimation();
     _buildMarkers();
+  }
+
+  @override
+  void dispose() {
+    _pulseController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -59,7 +77,8 @@ class _LiveLocationCardState extends State<LiveLocationCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.latitude != widget.latitude ||
         oldWidget.longitude != widget.longitude ||
-        oldWidget.peopleSharing != widget.peopleSharing) {
+        oldWidget.peopleSharing != widget.peopleSharing ||
+        oldWidget.isSharing != widget.isSharing) {
       _buildMarkers();
     }
   }
@@ -67,43 +86,27 @@ class _LiveLocationCardState extends State<LiveLocationCard> {
   Future<void> _buildMarkers() async {
     final markers = <Marker>{};
 
-    if (widget.latitude != null && widget.longitude != null) {
-      final userLatLng = LatLng(widget.latitude!, widget.longitude!);
-
-      // 1. User Location: Small glowing blue dot marker
-      _userDotIcon ??= await _createSmallUserDotIcon();
-      markers.add(
-        Marker(
-          markerId: const MarkerId('user_location'),
-          position: userLatLng,
-          icon: _userDotIcon!,
-          anchor: const Offset(0.5, 0.5),
-        ),
-      );
-
-      // 2. Trusted Contacts: Profile picture markers placed at their REAL coordinates
+    if (widget.isSharing &&
+        widget.latitude != null &&
+        widget.longitude != null) {
+      // Trusted Contacts: Profile picture markers placed at their REAL coordinates
       final others = widget.peopleSharing.where((p) => !p.isSelf).toList();
       for (int i = 0; i < others.length; i++) {
         final person = others[i];
-        // ONLY place marker if the person has real latitude and longitude
         if (person.latitude != null && person.longitude != null) {
-          final cacheKey =
-              '${person.id ?? person.name}_${person.avatarUrl ?? ''}';
-          if (!_avatarMarkerCache.containsKey(cacheKey)) {
-            _avatarMarkerCache[cacheKey] = await _createAvatarMarker(
-              name: person.name ?? 'Contact',
-              avatarUrl: person.avatarUrl,
-              fallbackColor:
-                  _contactAvatarColors[i % _contactAvatarColors.length],
-              isLive: person.isLive,
-            );
-          }
+          final avatarIcon = await MapMarkerHelper.createAvatarMarker(
+            name: person.name ?? 'Contact',
+            avatarUrl: person.avatarUrl,
+            fallbackColor:
+                _contactAvatarColors[i % _contactAvatarColors.length],
+            isLive: person.isLive,
+          );
 
           markers.add(
             Marker(
               markerId: MarkerId(person.id ?? 'contact_$i'),
               position: LatLng(person.latitude!, person.longitude!),
-              icon: _avatarMarkerCache[cacheKey]!,
+              icon: avatarIcon,
               anchor: const Offset(0.5, 0.5),
             ),
           );
@@ -122,6 +125,7 @@ class _LiveLocationCardState extends State<LiveLocationCard> {
 
   @override
   Widget build(BuildContext context) {
+    _ensurePulseAnimation();
     final hasCoordinates = widget.latitude != null && widget.longitude != null;
     final userLatLng = hasCoordinates
         ? LatLng(widget.latitude!, widget.longitude!)
@@ -343,6 +347,68 @@ class _LiveLocationCardState extends State<LiveLocationCard> {
                             zoomGesturesEnabled: false,
                           ),
 
+                          // Animated Pulsing Blue Dot centered on the user's location
+                          if (_pulseAnimation != null)
+                            Center(
+                              child: AnimatedBuilder(
+                                animation: _pulseAnimation!,
+                                builder: (context, child) {
+                                  final wave = _pulseAnimation!.value;
+                                  return Stack(
+                                    alignment: Alignment.center,
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      // Outer pulse halo (expanding with fading alpha)
+                                      Container(
+                                        width: (24 + wave * 14).r,
+                                        height: (24 + wave * 14).r,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF3B82F6)
+                                              .withValues(
+                                                alpha: (1.0 - wave) * 0.35,
+                                              ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      // Static translucent halo ring
+                                      Container(
+                                        width: 20.r,
+                                        height: 20.r,
+                                        decoration: BoxDecoration(
+                                          color: const Color(
+                                            0xFF93C5FD,
+                                          ).withValues(alpha: 0.45),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      // Center blue circle with white border (compact & crisp)
+                                      Container(
+                                        width: 12.r,
+                                        height: 12.r,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF007AFF),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 1.8.w,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFF007AFF,
+                                              ).withValues(alpha: 0.4),
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+
                           // Tap overlay to navigate to Full Map (Screen 2)
                           Positioned.fill(
                             child: Material(
@@ -387,157 +453,5 @@ class _LiveLocationCardState extends State<LiveLocationCard> {
         ),
       ),
     );
-  }
-
-  // Small blue user dot marker (NO big teardrop pin)
-  Future<BitmapDescriptor> _createSmallUserDotIcon() async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    const size = 36.0;
-
-    // Outer soft glow
-    final glowPaint = Paint()..color = const Color(0x40007AFF);
-    canvas.drawCircle(const Offset(size / 2, size / 2), 16, glowPaint);
-
-    // White border
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(const Offset(size / 2, size / 2), 11, borderPaint);
-
-    // Vibrant Blue center
-    final dotPaint = Paint()..color = const Color(0xFF007AFF);
-    canvas.drawCircle(const Offset(size / 2, size / 2), 8.5, dotPaint);
-
-    final picture = recorder.endRecording();
-    final img = await picture.toImage(size.toInt(), size.toInt());
-    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData != null) {
-      return BitmapDescriptor.bytes(byteData.buffer.asUint8List());
-    }
-    return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
-  }
-
-  // Circular profile picture marker for trusted contacts (at their real GPS coordinates)
-  Future<BitmapDescriptor> _createAvatarMarker({
-    required String name,
-    String? avatarUrl,
-    Color fallbackColor = const Color(0xFF8B2CF5),
-    bool isLive = true,
-  }) async {
-    const size = 68.0;
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-
-    // 1. Drop shadow
-    final shadowPaint = Paint()
-      ..color = const Color(0x33000000)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-    canvas.drawCircle(
-      const Offset(size / 2, size / 2 + 2),
-      size / 2 - 6,
-      shadowPaint,
-    );
-
-    // 2. White border circle
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(
-      const Offset(size / 2, size / 2),
-      size / 2 - 5,
-      borderPaint,
-    );
-
-    // 3. Avatar Image or Initial letter
-    ui.Image? loadedImage;
-    if (avatarUrl != null &&
-        avatarUrl.isNotEmpty &&
-        avatarUrl.startsWith('http')) {
-      try {
-        final cleanUrl = avatarUrl.startsWith('http://')
-            ? avatarUrl.replaceFirst('http://', 'https://')
-            : avatarUrl;
-        final uri = Uri.parse(cleanUrl);
-        final request = await HttpClient().getUrl(uri);
-        final response = await request.close().timeout(
-          const Duration(seconds: 3),
-        );
-        if (response.statusCode == 200) {
-          final bytes = await consolidateHttpClientResponseBytes(response);
-          final codec = await ui.instantiateImageCodec(
-            bytes,
-            targetWidth: (size - 14).toInt(),
-            targetHeight: (size - 14).toInt(),
-          );
-          final frame = await codec.getNextFrame();
-          loadedImage = frame.image;
-        }
-      } catch (_) {
-        // Fallback to initial
-      }
-    }
-
-    final clipPath = Path()
-      ..addOval(
-        Rect.fromCircle(
-          center: const Offset(size / 2, size / 2),
-          radius: size / 2 - 8,
-        ),
-      );
-    canvas.save();
-    canvas.clipPath(clipPath);
-
-    if (loadedImage != null) {
-      canvas.drawImage(
-        loadedImage,
-        Offset((size - loadedImage.width) / 2, (size - loadedImage.height) / 2),
-        Paint(),
-      );
-    } else {
-      // Fallback background color
-      final bgPaint = Paint()..color = fallbackColor;
-      canvas.drawCircle(
-        const Offset(size / 2, size / 2),
-        size / 2 - 8,
-        bgPaint,
-      );
-
-      // Initial letter
-      final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: initial,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      textPainter.paint(
-        canvas,
-        Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2),
-      );
-    }
-    canvas.restore();
-
-    // 4. Live green dot on bottom-right
-    if (isLive) {
-      const dotOffset = Offset(size - 13, size - 13);
-      final dotBg = Paint()..color = Colors.white;
-      canvas.drawCircle(dotOffset, 7.5, dotBg);
-      final dotPaint = Paint()..color = const Color(0xFF22C55E);
-      canvas.drawCircle(dotOffset, 5.5, dotPaint);
-    }
-
-    final picture = recorder.endRecording();
-    final img = await picture.toImage(size.toInt(), size.toInt());
-    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData != null) {
-      return BitmapDescriptor.bytes(byteData.buffer.asUint8List());
-    }
-    return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose);
   }
 }

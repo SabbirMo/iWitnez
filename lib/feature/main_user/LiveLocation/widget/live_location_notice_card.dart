@@ -7,11 +7,13 @@ import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 
 class LiveLocationNoticeCard extends StatelessWidget {
   final int contactsCount;
+  final bool isSharing;
   final VoidCallback? onManageTap;
 
   const LiveLocationNoticeCard({
     super.key,
     required this.contactsCount,
+    this.isSharing = true,
     this.onManageTap,
   });
 
@@ -47,13 +49,17 @@ class LiveLocationNoticeCard extends StatelessWidget {
                 ),
                 children: [
                   TextSpan(
-                    text: 'Your location is being shared \n',
+                    text: isSharing
+                        ? 'Your location is being shared \n'
+                        : 'Location sharing is paused \n',
                     style: CustomTextStyle.semiBold14(
                       AppColors.textDark,
                     ).copyWith(fontSize: 12.sp),
                   ),
                   TextSpan(
-                    text: 'with $contactsCount trusted contacts',
+                    text: isSharing
+                        ? 'with $contactsCount trusted contacts'
+                        : 'Not sharing with contacts',
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 11.sp,
@@ -69,23 +75,27 @@ class LiveLocationNoticeCard extends StatelessWidget {
           // Manage link
           InkWell(
             onTap: onManageTap,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Manage',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.5.sp,
-                    fontWeight: FontWeight.w700,
+            borderRadius: BorderRadius.circular(8.r),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Manage',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.homeSosStart,
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16.sp,
                     color: AppColors.homeSosStart,
                   ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16.sp,
-                  color: AppColors.homeSosStart,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

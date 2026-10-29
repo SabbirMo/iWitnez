@@ -9,11 +9,49 @@ import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/model/live_sharing_model.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/provider/live_location_screen_provider.dart';
 
-class StopSharingLocationScreen extends ConsumerWidget {
+class StopSharingLocationScreen extends ConsumerStatefulWidget {
   const StopSharingLocationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StopSharingLocationScreen> createState() =>
+      _StopSharingLocationScreenState();
+}
+
+class _StopSharingLocationScreenState
+    extends ConsumerState<StopSharingLocationScreen> {
+  bool _isLoading = false;
+
+  Future<void> _handleStopSharing() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    final success = await ref
+        .read(liveLocationScreenProvider.notifier)
+        .stopSharing();
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (success) {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        Navigator.of(context).maybePop();
+      }
+    }
+  }
+
+  void _handleCancel() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final liveState = ref.watch(liveLocationScreenProvider);
     // Filter out "Emma (You)" so we display the trusted contacts
     final stoppedContacts = liveState.contacts
@@ -32,13 +70,7 @@ class StopSharingLocationScreen extends ConsumerWidget {
             size: 32.sp,
             color: const Color(0xFF111827),
           ),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
+          onPressed: _handleCancel,
         ),
       ),
       body: SafeArea(
@@ -103,17 +135,30 @@ class StopSharingLocationScreen extends ConsumerWidget {
                     SizedBox(height: 14.h),
 
                     // Contact rows
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: stoppedContacts.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 12.h),
-                      itemBuilder: (context, index) {
-                        final person = stoppedContacts[index];
-                        return _buildContactRow(person);
-                      },
-                    ),
+                    if (stoppedContacts.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.h),
+                        child: Text(
+                          'All contacts',
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      )
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: stoppedContacts.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 12.h),
+                        itemBuilder: (context, index) {
+                          final person = stoppedContacts[index];
+                          return _buildContactRow(person);
+                        },
+                      ),
                   ],
                 ),
               ),
@@ -165,6 +210,7 @@ class StopSharingLocationScreen extends ConsumerWidget {
               // Solid Red "Stop Sharing" button
               CustomButton(
                 text: 'Stop Sharing',
+                isLoading: _isLoading,
                 icon: null,
                 height: 52.h,
                 borderRadius: 30.r,
@@ -174,26 +220,13 @@ class StopSharingLocationScreen extends ConsumerWidget {
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
-                onTap: () {
-                  ref.read(liveLocationScreenProvider.notifier).stopSharing();
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    Navigator.of(context).maybePop();
-                  }
-                },
+                onTap: _handleStopSharing,
               ),
               SizedBox(height: 12.h),
 
               // Outline "Cancel" button
               InkWell(
-                onTap: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    Navigator.of(context).maybePop();
-                  }
-                },
+                onTap: _handleCancel,
                 borderRadius: BorderRadius.circular(30.r),
                 child: Container(
                   width: double.infinity,
@@ -248,25 +281,41 @@ class StopSharingLocationScreen extends ConsumerWidget {
                 ],
               ),
               child: ClipOval(
-                child: Image.network(
-                  person.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: person.fallbackColor,
-                      child: Center(
-                        child: Text(
-                          person.name[0],
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
+                child:
+                    person.imageUrl.isNotEmpty &&
+                        person.imageUrl.startsWith('http')
+                    ? Image.network(
+                        person.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: person.fallbackColor,
+                            child: Center(
+                              child: Text(
+                                person.name.isNotEmpty ? person.name[0] : '?',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: person.fallbackColor,
+                        child: Center(
+                          child: Text(
+                            person.name.isNotEmpty ? person.name[0] : '?',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
               ),
             ),
             Positioned(
