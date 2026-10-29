@@ -1,30 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iwitnez/feature/main_user/SafetyTracking/model/location_history_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/safety_tracking_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/repository/safety_tracking_repository.dart';
 
 class SafetyTrackingState {
-  final bool isLoading;
-  final bool isLocationSharingActive;
+  final bool? _isLoading;
+  final bool? _isLocationSharingActive;
   final MyLocationModel? myLocation;
-  final bool alertsEnabled;
+  final bool? _alertsEnabled;
   final int selectedTabIndex; // 0: Live Tracking, 1: History
   final double zoomLevel;
   final List<SafePlaceModel> safePlaces;
   final DateTime selectedDate;
-  final List<HistoryTimelineItem> timelineItems;
+  final LocationHistoryData? historyData;
+  final bool? _isLoadingHistory;
+
+  bool get isLoading => _isLoading ?? false;
+  bool get isLocationSharingActive => _isLocationSharingActive ?? true;
+  bool get alertsEnabled => _alertsEnabled ?? true;
+  bool get isLoadingHistory => _isLoadingHistory ?? false;
 
   SafetyTrackingState({
-    this.isLoading = false,
-    this.isLocationSharingActive = true,
+    bool? isLoading,
+    bool? isLocationSharingActive,
     this.myLocation,
-    this.alertsEnabled = true,
+    bool? alertsEnabled,
     this.selectedTabIndex = 0,
     this.zoomLevel = 1.0,
     this.safePlaces = const [],
     DateTime? selectedDate,
-    this.timelineItems = const [],
-  }) : selectedDate = selectedDate ?? DateTime.now();
+    this.historyData,
+    bool? isLoadingHistory,
+  }) : _isLoading = isLoading ?? false,
+       _isLocationSharingActive = isLocationSharingActive ?? true,
+       _alertsEnabled = alertsEnabled ?? true,
+       selectedDate = selectedDate ?? DateTime.now(),
+       _isLoadingHistory = isLoadingHistory ?? false;
 
   SafetyTrackingState copyWith({
     bool? isLoading,
@@ -35,7 +47,8 @@ class SafetyTrackingState {
     double? zoomLevel,
     List<SafePlaceModel>? safePlaces,
     DateTime? selectedDate,
-    List<HistoryTimelineItem>? timelineItems,
+    LocationHistoryData? historyData,
+    bool? isLoadingHistory,
   }) {
     return SafetyTrackingState(
       isLoading: isLoading ?? this.isLoading,
@@ -47,7 +60,8 @@ class SafetyTrackingState {
       zoomLevel: zoomLevel ?? this.zoomLevel,
       safePlaces: safePlaces ?? this.safePlaces,
       selectedDate: selectedDate ?? this.selectedDate,
-      timelineItems: timelineItems ?? this.timelineItems,
+      historyData: historyData ?? this.historyData,
+      isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
     );
   }
 }
@@ -55,8 +69,11 @@ class SafetyTrackingState {
 class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
   @override
   SafetyTrackingState build() {
-    // Automatically load safety tracking dashboard on init from real API
-    Future.microtask(() => fetchSafetyTracking());
+    // Automatically load safety tracking dashboard & history on init from real API
+    Future.microtask(() {
+      fetchSafetyTracking();
+      fetchLocationHistory();
+    });
     return SafetyTrackingState();
   }
 
@@ -95,6 +112,20 @@ class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
   void setTabIndex(int index) {
     if (state.selectedTabIndex != index) {
       state = state.copyWith(selectedTabIndex: index);
+      if (index == 1 && state.historyData == null) {
+        fetchLocationHistory();
+      }
+    }
+  }
+
+  Future<void> fetchLocationHistory([String? dateString]) async {
+    state = state.copyWith(isLoadingHistory: true);
+    try {
+      final repository = ref.read(safetyTrackingRepositoryProvider);
+      final history = await repository.getLocationHistory(dateString);
+      state = state.copyWith(isLoadingHistory: false, historyData: history);
+    } catch (_) {
+      state = state.copyWith(isLoadingHistory: false);
     }
   }
 
@@ -169,7 +200,9 @@ class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
       final details = await repository.getSafePlaceDetails(id);
       if (details != null) {
         state = state.copyWith(
-          safePlaces: state.safePlaces.map((p) => p.id == id ? details : p).toList(),
+          safePlaces: state.safePlaces
+              .map((p) => p.id == id ? details : p)
+              .toList(),
         );
         return details;
       }
@@ -202,7 +235,9 @@ class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
 
       if (updated != null) {
         state = state.copyWith(
-          safePlaces: state.safePlaces.map((p) => p.id == id ? updated : p).toList(),
+          safePlaces: state.safePlaces
+              .map((p) => p.id == id ? updated : p)
+              .toList(),
         );
         return updated;
       }
@@ -239,6 +274,9 @@ class SafetyTrackingNotifier extends Notifier<SafetyTrackingState> {
 
   void setDate(DateTime date) {
     state = state.copyWith(selectedDate: date);
+    final formattedDate =
+        '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    fetchLocationHistory(formattedDate);
   }
 }
 

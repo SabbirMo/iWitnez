@@ -22,6 +22,7 @@ class ApiEndPoints {
   static const String pingLocation = '/api/v1/location/ping/';
   static const String safetyTracking = '/api/v1/location/safety-tracking/';
   static const String safePlaces = '/api/v1/location/safe-places/';
+  static const String locationHistory = '/api/v1/location/history/';
   static const String contacts = '/api/v1/contacts/';
   static const String trustedCircles = '/api/v1/contacts/circles/';
 

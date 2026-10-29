@@ -4,11 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 class SafetyHistoryDateCard extends StatelessWidget {
   final DateTime selectedDate;
+  final String? dateDisplay;
   final VoidCallback onTap;
 
   const SafetyHistoryDateCard({
     super.key,
     required this.selectedDate,
+    this.dateDisplay,
     required this.onTap,
   });
 
@@ -52,7 +54,7 @@ class SafetyHistoryDateCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16.r),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             child: Row(
               children: [
                 // Calendar icon
@@ -76,7 +78,9 @@ class SafetyHistoryDateCard extends StatelessWidget {
 
                 // Selected Date Text
                 Text(
-                  _formatDate(selectedDate),
+                  dateDisplay != null && dateDisplay!.isNotEmpty
+                      ? dateDisplay!
+                      : _formatDate(selectedDate),
                   style: GoogleFonts.inter(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w500,

@@ -15,6 +15,12 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(safetyTrackingProvider);
     final notifier = ref.read(safetyTrackingProvider.notifier);
+    final historyData = state.historyData;
+    final isToday = historyData?.isToday ?? true;
+    final sectionTitle =
+        (!isToday && historyData != null && historyData.dateDisplay.isNotEmpty)
+        ? historyData.dateDisplay
+        : 'Today';
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFC),
@@ -61,13 +67,18 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
 
               // 2. Content below map
               Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  14.h,
+                  16.w,
+                  40.h + MediaQuery.of(context).padding.bottom,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Section Title: "Today"
+                    // Section Title: "Today" or selected date
                     Text(
-                      'Today',
+                      sectionTitle,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -77,12 +88,18 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
                     SizedBox(height: 12.h),
 
                     // Timeline Card
-                    SafetyHistoryTimelineCard(items: state.timelineItems),
+                    SafetyHistoryTimelineCard(
+                      items: historyData?.timeline ?? const [],
+                      isToday: isToday,
+                      dateDisplay: historyData?.dateDisplay ?? 'Today',
+                      isLoading: state.isLoadingHistory,
+                    ),
                     SizedBox(height: 14.h),
 
-                    // Select Date Card
+                    // Select Date Card (scrolls with the page)
                     SafetyHistoryDateCard(
                       selectedDate: state.selectedDate,
+                      dateDisplay: historyData?.dateDisplay,
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,

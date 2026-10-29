@@ -148,68 +148,94 @@ class SafetyTrackingScreen extends ConsumerWidget {
     SafetyTrackingState state,
     SafetyTrackingNotifier notifier,
   ) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1. History Route Map with Start and End pins
-          SizedBox(height: 250.h, child: const SafetyHistoryMapView()),
+    final historyData = state.historyData;
+    final isToday = historyData?.isToday ?? true;
+    final sectionTitle = (!isToday && historyData != null && historyData.dateDisplay.isNotEmpty)
+        ? historyData.dateDisplay
+        : 'Today';
 
-          // 2. Content below map
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 24.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Section Title: "Today"
-                Text(
-                  'Today',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+    return RefreshIndicator(
+      onRefresh: () {
+        final d = state.selectedDate;
+        final formatted =
+            '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+        return notifier.fetchLocationHistory(formatted);
+      },
+      color: const Color(0xFF7E22CE),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 1. History Route Map with Start and End pins
+            SizedBox(height: 250.h, child: const SafetyHistoryMapView()),
+
+            // 2. Content below map
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                14.h,
+                16.w,
+                40.h + MediaQuery.of(context).padding.bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Section Title: "Today" or selected date
+                  Text(
+                    sectionTitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF111827),
+                    ),
                   ),
-                ),
-                SizedBox(height: 12.h),
+                  SizedBox(height: 12.h),
 
-                // Timeline Card
-                SafetyHistoryTimelineCard(items: state.timelineItems),
-                SizedBox(height: 14.h),
+                  // Timeline Card
+                  SafetyHistoryTimelineCard(
+                    items: historyData?.timeline ?? const [],
+                    isToday: isToday,
+                    dateDisplay: historyData?.dateDisplay ?? 'Today',
+                    isLoading: state.isLoadingHistory,
+                  ),
+                  SizedBox(height: 14.h),
 
-                // Select Date Card
-                SafetyHistoryDateCard(
-                  selectedDate: state.selectedDate,
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: state.selectedDate,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Color(0xFF6C48F5),
-                              onPrimary: Colors.white,
-                              onSurface: Color(0xFF111827),
+                  // Select Date Card (scrolls with the page)
+                  SafetyHistoryDateCard(
+                    selectedDate: state.selectedDate,
+                    dateDisplay: historyData?.dateDisplay,
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: state.selectedDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2030),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: const ColorScheme.light(
+                                primary: Color(0xFF6C48F5),
+                                onPrimary: Colors.white,
+                                onSurface: Color(0xFF111827),
+                              ),
                             ),
-                          ),
-                          child: child!,
-                        );
-                      },
-                    );
-                    if (picked != null) {
-                      notifier.setDate(picked);
-                    }
-                  },
-                ),
-              ],
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        notifier.setDate(picked);
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,15 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
+import 'package:iwitnez/feature/main_user/SafetyTracking/model/location_history_model.dart';
 
 class SafetyHistoryTimelineCard extends StatelessWidget {
-  final List<HistoryTimelineItem> items;
+  final List<LocationHistoryTimelineItem> items;
+  final bool isToday;
+  final String dateDisplay;
+  final bool isLoading;
 
   const SafetyHistoryTimelineCard({
     super.key,
     required this.items,
+    this.isToday = true,
+    this.dateDisplay = 'Today',
+    this.isLoading = false,
   });
 
   @override
@@ -34,7 +41,14 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (items.isEmpty)
+          if (isLoading)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 36.h),
+              child: const Center(
+                child: CupertinoActivityIndicator(radius: 12),
+              ),
+            )
+          else if (items.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 24.h),
               child: Center(
@@ -68,7 +82,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
               ),
             SizedBox(height: 12.h),
 
-            // Bottom info banner: "Showing history for Today • All times are in local time."
+            // Bottom info banner
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
@@ -87,7 +101,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: 'Today',
+                      text: isToday ? 'Today' : dateDisplay,
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
                         fontWeight: FontWeight.w600,
@@ -112,14 +126,18 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
   }
 
   Widget _buildTimelineRow({
-    required HistoryTimelineItem item,
+    required LocationHistoryTimelineItem item,
     required bool isFirst,
     required bool isLast,
   }) {
-    final (indicatorColor, labelColor) = switch (item.pointType) {
-      HistoryPointType.start => (const Color(0xFF10B981), const Color(0xFF16A34A)),
-      HistoryPointType.waypoint => (const Color(0xFF6C48F5), const Color(0xFF6C48F5)),
-      HistoryPointType.end => (const Color(0xFFEF4444), const Color(0xFFEF4444)),
+    // Dot indicator color mapping:
+    // start -> Green (#2ECC71 / #16A34A)
+    // waypoint -> Purple (#6C5CE7)
+    // end -> Red (#E74C3C / #EF4444)
+    final (indicatorColor, labelColor) = switch (item.pointType.toLowerCase()) {
+      'start' => (const Color(0xFF2ECC71), const Color(0xFF16A34A)),
+      'end' => (const Color(0xFFE74C3C), const Color(0xFFEF4444)),
+      _ => (const Color(0xFF6C5CE7), const Color(0xFF6C5CE7)),
     };
 
     return IntrinsicHeight(
@@ -172,53 +190,63 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Time row + Badge/Duration
+                  // Time row + Badge / Duration
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        item.time,
+                        item.timeDisplay,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF111827),
                         ),
                       ),
-                      if (item.label != null)
+                      if (item.isStart)
                         Text(
-                          item.label!,
+                          'Start',
                           style: GoogleFonts.inter(
-                            fontSize: 11.sp,
+                            fontSize: 11.5.sp,
                             fontWeight: FontWeight.w600,
                             color: labelColor,
                           ),
                         )
-                      else if (item.duration != null)
+                      else if (item.isEnd)
+                        Text(
+                          'End',
+                          style: GoogleFonts.inter(
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w600,
+                            color: labelColor,
+                          ),
+                        )
+                      else ...[
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.access_time_rounded,
                               size: 13.sp,
-                              color: const Color(0xFF6C48F5),
+                              color: const Color(0xFF6C5CE7),
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              item.duration!,
+                              item.durationDisplay,
                               style: GoogleFonts.inter(
                                 fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6C48F5),
+                                color: const Color(0xFF6C5CE7),
                               ),
                             ),
                           ],
                         ),
+                      ],
                     ],
                   ),
                   SizedBox(height: 2.h),
 
-                  // Subtitles
-                  if (item.pointType == HistoryPointType.start) ...[
+                  // Start subtitle tag
+                  if (item.isStart) ...[
                     Text(
                       'Start',
                       style: GoogleFonts.inter(
@@ -229,6 +257,8 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                     ),
                     SizedBox(height: 1.h),
                   ],
+
+                  // Address subtitle
                   Text(
                     item.address,
                     style: GoogleFonts.inter(

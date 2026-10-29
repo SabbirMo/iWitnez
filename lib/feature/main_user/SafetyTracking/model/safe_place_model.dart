@@ -182,27 +182,3 @@ class SafePlaceModel {
     );
   }
 }
-
-enum HistoryPointType {
-  start,
-  waypoint,
-  end,
-}
-
-class HistoryTimelineItem {
-  final String id;
-  final String time;
-  final String? label; // e.g. "Start", "End"
-  final String? duration; // e.g. "50 min", "2h 25m"
-  final String address;
-  final HistoryPointType pointType;
-
-  const HistoryTimelineItem({
-    required this.id,
-    required this.time,
-    this.label,
-    this.duration,
-    required this.address,
-    required this.pointType,
-  });
-}

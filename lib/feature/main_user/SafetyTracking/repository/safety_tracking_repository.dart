@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
 import 'package:iwitnez/core/network/service/api_services.dart';
+import 'package:iwitnez/feature/main_user/SafetyTracking/model/location_history_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/safety_tracking_model.dart';
 
@@ -154,6 +155,30 @@ class SafetyTrackingRepository {
       return response.data?['success'] == true;
     } catch (_) {
       return false;
+    }
+  }
+
+  /// 7. Location History: GET /api/v1/location/history/?date=YYYY-MM-DD
+  Future<LocationHistoryData?> getLocationHistory([String? date]) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (date != null && date.isNotEmpty) {
+        queryParams['date'] = date;
+      }
+
+      final response = await _apiServices.get(
+        ApiEndPoints.locationHistory,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        requireAuth: true,
+      );
+
+      final data = response.data?['data'];
+      if (data is Map<String, dynamic>) {
+        return LocationHistoryData.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 }
