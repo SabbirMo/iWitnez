@@ -13,7 +13,7 @@ extension SafePlaceTypeX on SafePlaceType {
   String get label => switch (this) {
     SafePlaceType.home => 'Home',
     SafePlaceType.work => 'Work',
-    SafePlaceType.university => 'University',
+    SafePlaceType.university => 'School',
     SafePlaceType.favorite => 'Favorite',
     SafePlaceType.star => 'Starred',
     SafePlaceType.other => 'Safe Place',
@@ -45,6 +45,27 @@ extension SafePlaceTypeX on SafePlaceType {
     SafePlaceType.star => const Color(0xFFFEF3C7),
     SafePlaceType.other => const Color(0xFFFEF3C7),
   };
+
+  String get iconKey => switch (this) {
+    SafePlaceType.home => 'home',
+    SafePlaceType.work => 'work',
+    SafePlaceType.university => 'school',
+    SafePlaceType.favorite => 'heart',
+    SafePlaceType.star => 'star',
+    SafePlaceType.other => 'home',
+  };
+
+  static SafePlaceType fromString(String? val) {
+    final v = val?.toLowerCase().trim() ?? '';
+    if (v == 'home') return SafePlaceType.home;
+    if (v == 'work' || v == 'office' || v == 'business') return SafePlaceType.work;
+    if (v == 'school' || v == 'university' || v == 'college') {
+      return SafePlaceType.university;
+    }
+    if (v == 'heart' || v == 'favorite') return SafePlaceType.favorite;
+    if (v == 'star' || v == 'starred') return SafePlaceType.star;
+    return SafePlaceType.other;
+  }
 }
 
 class SafePlaceModel {
@@ -57,6 +78,10 @@ class SafePlaceModel {
   final Color? customIconColor;
   final Color? customBgColor;
   final int? radius;
+  final double? latitude;
+  final double? longitude;
+  final String? iconString;
+  final String? statusDisplay;
 
   const SafePlaceModel({
     required this.id,
@@ -68,11 +93,62 @@ class SafePlaceModel {
     this.customIconColor,
     this.customBgColor,
     this.radius,
+    this.latitude,
+    this.longitude,
+    this.iconString,
+    this.statusDisplay,
   });
 
   IconData get displayIcon => customIcon ?? type.iconData;
   Color get displayIconColor => customIconColor ?? type.iconColor;
   Color get displayBackgroundColor => customBgColor ?? type.backgroundColor;
+  String get displayStatus =>
+      statusDisplay ?? (isInside ? 'Inside' : 'Outside');
+
+  factory SafePlaceModel.fromJson(Map<String, dynamic> json) {
+    final iconStr = json['icon'] as String? ?? '';
+    final type = SafePlaceTypeX.fromString(iconStr);
+    final title = json['name'] as String? ??
+        json['title'] as String? ??
+        type.label;
+    final address = json['address'] as String? ?? '';
+    final isInside = json['is_inside'] as bool? ?? false;
+    final statusDisplay = json['status_display'] as String? ??
+        (isInside ? 'Inside' : 'Outside');
+    final radius = (json['radius_meters'] as num?)?.toInt() ??
+        (json['radius'] as num?)?.toInt() ??
+        150;
+    final lat = double.tryParse(json['latitude']?.toString() ?? '');
+    final lng = double.tryParse(json['longitude']?.toString() ?? '');
+
+    return SafePlaceModel(
+      id: json['id']?.toString() ?? '',
+      title: title,
+      address: address,
+      isInside: isInside,
+      type: type,
+      radius: radius,
+      latitude: lat,
+      longitude: lng,
+      iconString: iconStr,
+      statusDisplay: statusDisplay,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': title,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius_meters': radius,
+      'icon': iconString ?? type.iconKey,
+      'is_inside': isInside,
+      'status_display': statusDisplay ?? (isInside ? 'Inside' : 'Outside'),
+      'alerts_enabled': true,
+    };
+  }
 
   SafePlaceModel copyWith({
     String? id,
@@ -84,6 +160,10 @@ class SafePlaceModel {
     Color? customIconColor,
     Color? customBgColor,
     int? radius,
+    double? latitude,
+    double? longitude,
+    String? iconString,
+    String? statusDisplay,
   }) {
     return SafePlaceModel(
       id: id ?? this.id,
@@ -95,6 +175,10 @@ class SafePlaceModel {
       customIconColor: customIconColor ?? this.customIconColor,
       customBgColor: customBgColor ?? this.customBgColor,
       radius: radius ?? this.radius,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      iconString: iconString ?? this.iconString,
+      statusDisplay: statusDisplay ?? this.statusDisplay,
     );
   }
 }
@@ -122,4 +206,3 @@ class HistoryTimelineItem {
     required this.pointType,
   });
 }
-

@@ -48,3 +48,5 @@ app.*.map.json
 # Build artifacts and cache
 build_alt/
 *.dill
+# Widget Preview related
+.widget_preview/

@@ -34,51 +34,78 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (int i = 0; i < items.length; i++)
-            _buildTimelineRow(
-              item: items[i],
-              isFirst: i == 0,
-              isLast: i == items.length - 1,
-            ),
-          SizedBox(height: 12.h),
+          if (items.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 24.h),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.history_toggle_off_rounded,
+                      size: 32.sp,
+                      color: const Color(0xFFCBD5E1),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'No location history available for this date.',
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else ...[
+            for (int i = 0; i < items.length; i++)
+              _buildTimelineRow(
+                item: items[i],
+                isFirst: i == 0,
+                isLast: i == items.length - 1,
+              ),
+            SizedBox(height: 12.h),
 
-          // Bottom info banner: "Showing history for Today • All times are in local time."
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F3FF),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Showing history for ',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.2.sp,
-                      color: const Color(0xFF6B7280),
+            // Bottom info banner: "Showing history for Today • All times are in local time."
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F3FF),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Showing history for ',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.2.sp,
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: 'Today',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.2.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.callsPurple,
+                    TextSpan(
+                      text: 'Today',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.2.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.callsPurple,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: ' • All times are in local time.',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.2.sp,
-                      color: const Color(0xFF6B7280),
+                    TextSpan(
+                      text: ' • All times are in local time.',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.2.sp,
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

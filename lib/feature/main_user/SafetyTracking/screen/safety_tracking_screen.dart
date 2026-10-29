@@ -81,55 +81,63 @@ class SafetyTrackingScreen extends ConsumerWidget {
     SafetyTrackingState state,
     SafetyTrackingNotifier notifier,
   ) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1. Vector Map View with user pin and controls
-          SizedBox(height: 270.h, child: const SafetyTrackingMapView()),
+    return RefreshIndicator(
+      onRefresh: () => notifier.fetchSafetyTracking(),
+      color: const Color(0xFF7E22CE),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Vector Map View with user pin and controls
+              SizedBox(height: 360.h, child: const SafetyTrackingMapView()),
 
-          // 2. Cards Below Map
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 24.h),
-            child: Column(
-              children: [
-                // Safe Places Card
-                SafePlacesCard(
-                  places: state.safePlaces,
-                  onManageTap: () {
-                    _showManagePlacesSheet(context, ref);
-                  },
-                  onPlaceTap: (place) {
-                    notifier.togglePlaceStatus(place.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${place.title} status changed to ${!place.isInside ? "Inside" : "Outside"}',
-                        ),
-                        duration: const Duration(milliseconds: 1400),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
-                  onAddSafePlaceTap: () {
-                    context.push(AppRouteNames.addSafePlaceScreen);
-                  },
-                ),
-                SizedBox(height: 14.h),
+              // 2. Cards Below Map
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 24.h),
+                child: Column(
+                  children: [
+                    // Safe Places Card
+                    SafePlacesCard(
+                      places: state.safePlaces,
+                      onManageTap: () {
+                        if (state.safePlaces.isEmpty) return;
+                        if (state.safePlaces.length == 1) {
+                          context.push(
+                            AppRouteNames.safePlaceDetailsScreen,
+                            extra: state.safePlaces.first,
+                          );
+                        } else {
+                          _showManagePlacesSheet(context, ref);
+                        }
+                      },
+                      onPlaceTap: (place) {
+                        context.push(
+                          AppRouteNames.safePlaceDetailsScreen,
+                          extra: place,
+                        );
+                      },
+                      onAddSafePlaceTap: () {
+                        context.push(AppRouteNames.addSafePlaceScreen);
+                      },
+                    ),
+                    SizedBox(height: 14.h),
 
-                // Alerts Card
-                SafetyAlertsCard(
-                  onTap: () {
-                    context.push(AppRouteNames.safetySettingsScreen);
-                  },
+                    // Alerts Card
+                    SafetyAlertsCard(
+                      onTap: () {
+                        context.push(AppRouteNames.safetySettingsScreen);
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -217,82 +225,78 @@ class SafetyTrackingScreen extends ConsumerWidget {
         final currentPlaces = ref.watch(safetyTrackingProvider).safePlaces;
         return Padding(
           padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                'Manage Safe Places',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF111827),
-                ),
-              ),
-              SizedBox(height: 12.h),
-              for (final place in currentPlaces)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Container(
-                    width: 38.r,
-                    height: 38.r,
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
                     decoration: BoxDecoration(
-                      color: place.displayBackgroundColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      place.displayIcon,
-                      color: place.displayIconColor,
-                      size: 20.sp,
+                      color: const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
-                  title: Text(
-                    place.title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'Manage Safe Places',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111827),
                   ),
-                  subtitle: Text(
-                    place.address,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline_rounded,
-                      color: Color(0xFFEF4444),
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(safetyTrackingProvider.notifier)
-                          .removeSafePlace(place.id);
+                ),
+                SizedBox(height: 12.h),
+                for (final place in currentPlaces)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () {
                       Navigator.of(bottomSheetContext).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${place.title} removed'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
+                      context.push(
+                        AppRouteNames.safePlaceDetailsScreen,
+                        extra: place,
                       );
                     },
+                    leading: Container(
+                      width: 38.r,
+                      height: 38.r,
+                      decoration: BoxDecoration(
+                        color: place.displayBackgroundColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        place.displayIcon,
+                        color: place.displayIconColor,
+                        size: 20.sp,
+                      ),
+                    ),
+                    title: Text(
+                      place.title,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      place.address,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right_rounded,
+                      color: const Color(0xFF94A3B8),
+                      size: 22.sp,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },

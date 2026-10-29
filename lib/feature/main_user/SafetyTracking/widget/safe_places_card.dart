@@ -50,38 +50,66 @@ class SafePlacesCard extends StatelessWidget {
                   letterSpacing: -0.2,
                 ),
               ),
-              InkWell(
-                onTap: onManageTap,
-                borderRadius: BorderRadius.circular(6.r),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                  child: Text(
-                    'Manage',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF6D28D9),
+              if (places.isNotEmpty)
+                InkWell(
+                  onTap: onManageTap,
+                  borderRadius: BorderRadius.circular(6.r),
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                    child: Text(
+                      'Manage',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF6D28D9),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
           SizedBox(height: 16.h),
 
-          // Safe Places List
-          for (int i = 0; i < places.length; i++) ...[
-            if (i > 0)
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
-                child: const Divider(
-                  color: Color(0xFFF1F5F9),
-                  height: 1,
-                  thickness: 1,
+          // Safe Places List (or empty state if none exist yet)
+          if (places.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 18.h),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.place_outlined,
+                      size: 32.sp,
+                      color: const Color(0xFFCBD5E1),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'No safe places added yet.',
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            _buildPlaceTile(context, places[i]),
-          ],
+            )
+          else
+            for (int i = 0; i < places.length; i++) ...[
+              if (i > 0)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                  child: const Divider(
+                    color: Color(0xFFF1F5F9),
+                    height: 1,
+                    thickness: 1,
+                  ),
+                ),
+              _buildPlaceTile(context, places[i]),
+            ],
 
           SizedBox(height: 18.h),
 
@@ -150,30 +178,43 @@ class SafePlacesCard extends StatelessWidget {
               SizedBox(width: 8.w),
 
               // Status badge (Inside / Outside) with Chevron
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    place.isInside ? 'Inside' : 'Outside',
-                    style: GoogleFonts.inter(
-                      fontSize: 12.5.sp,
-                      fontWeight: place.isInside
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                      color: place.isInside
-                          ? const Color(0xFF16A34A)
-                          : const Color(0xFF6B7280),
-                    ),
-                  ),
-                  SizedBox(width: 4.w),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20.sp,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: place.isInside
+                      ? const Color(0xFFDCFCE7)
+                      : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
                     color: place.isInside
-                        ? const Color(0xFF16A34A)
-                        : const Color(0xFF9CA3AF),
+                        ? const Color(0xFF86EFAC).withValues(alpha: 0.6)
+                        : const Color(0xFFE2E8F0),
+                    width: 0.8.w,
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      place.displayStatus,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: place.isInside
+                            ? const Color(0xFF15803D)
+                            : const Color(0xFF64748B),
+                      ),
+                    ),
+                    SizedBox(width: 3.w),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16.sp,
+                      color: place.isInside
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFF94A3B8),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

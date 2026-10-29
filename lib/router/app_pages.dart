@@ -46,6 +46,8 @@ import 'package:iwitnez/feature/main_user/Profile_section/Profile/screen/profile
 import 'package:iwitnez/feature/main_user/SafetySettings/screen/safety_settings_screen.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/screen/safety_tracking_screen.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/screen/add_safe_place_screen.dart';
+import 'package:iwitnez/feature/main_user/SafetyTracking/screen/safe_place_details_screen.dart';
+import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
 import 'package:iwitnez/feature/main_user/ScheduledTimer/screen/scheduled_timer_screen.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/screen/check_in_screen.dart';
 import 'package:iwitnez/feature/onboarding/onboarding_start_screen.dart';
@@ -396,8 +398,31 @@ final appPages = Provider<GoRouter>((ref) {
       // Add Safe Place Screen
       GoRoute(
         path: AppRouteNames.addSafePlaceScreen,
-        pageBuilder: (context, state) =>
-            CupertinoPage(child: const AddSafePlaceScreen()),
+        pageBuilder: (context, state) {
+          final place = state.extra is SafePlaceModel
+              ? state.extra as SafePlaceModel
+              : null;
+          return CupertinoPage(
+            child: AddSafePlaceScreen(placeToEdit: place),
+          );
+        },
+      ),
+      // Safe Place Details Screen
+      GoRoute(
+        path: AppRouteNames.safePlaceDetailsScreen,
+        pageBuilder: (context, state) {
+          final place = state.extra is SafePlaceModel
+              ? state.extra as SafePlaceModel
+              : null;
+          final placeId =
+              state.uri.queryParameters['id'] ?? place?.id ?? '';
+          return CupertinoPage(
+            child: SafePlaceDetailsScreen(
+              placeId: placeId,
+              initialPlace: place,
+            ),
+          );
+        },
       ),
       // Scheduled Timer Screen
       GoRoute(

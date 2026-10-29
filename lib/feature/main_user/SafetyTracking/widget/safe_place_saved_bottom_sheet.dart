@@ -17,6 +17,7 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
   static Future<void> show(
     BuildContext context, {
     required SafePlaceModel place,
+    VoidCallback? onRefresh,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -31,6 +32,7 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
           place: place,
           onGreatTap: () {
             Navigator.of(bottomSheetContext).pop();
+            onRefresh?.call();
           },
         );
       },
