@@ -9,7 +9,8 @@ class SosCountdownState {
   final bool isCancelling;
   final double? latitude;
   final double? longitude;
-  final String address;
+  final String? address;
+  final int? batteryLevel;
 
   const SosCountdownState({
     this.secondsRemaining = 10,
@@ -22,7 +23,8 @@ class SosCountdownState {
     this.isCancelling = false,
     this.latitude,
     this.longitude,
-    this.address = '1200 Park Ave, New York, NY 10028, USA',
+    this.address,
+    this.batteryLevel,
   });
 
   String get formattedTime {
@@ -43,6 +45,7 @@ class SosCountdownState {
     double? latitude,
     double? longitude,
     String? address,
+    int? batteryLevel,
   }) {
     return SosCountdownState(
       secondsRemaining: secondsRemaining ?? this.secondsRemaining,
@@ -56,6 +59,7 @@ class SosCountdownState {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       address: address ?? this.address,
+      batteryLevel: batteryLevel ?? this.batteryLevel,
     );
   }
 }

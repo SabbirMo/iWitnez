@@ -8,17 +8,23 @@ class SosActiveCameraState {
   final String? errorMessage;
   final String? recordedVideoPath;
   final bool isSosEnded;
+  final String? alertId;
+  final DateTime? activatedAt;
+  final bool isStopping;
 
   const SosActiveCameraState({
     this.elapsedSeconds = 0,
-    this.isRecording = true,
+    this.isRecording = false,
     this.isFrontCamera = false,
     this.isFlashOn = false,
-    this.isAudioActive = true,
+    this.isAudioActive = false,
     this.isCameraInitialized = false,
     this.errorMessage,
     this.recordedVideoPath,
     this.isSosEnded = false,
+    this.alertId,
+    this.activatedAt,
+    this.isStopping = false,
   });
 
   String get formattedDuration {
@@ -41,6 +47,9 @@ class SosActiveCameraState {
     String? errorMessage,
     String? recordedVideoPath,
     bool? isSosEnded,
+    String? alertId,
+    DateTime? activatedAt,
+    bool? isStopping,
   }) {
     return SosActiveCameraState(
       elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
@@ -52,6 +61,9 @@ class SosActiveCameraState {
       errorMessage: errorMessage ?? this.errorMessage,
       recordedVideoPath: recordedVideoPath ?? this.recordedVideoPath,
       isSosEnded: isSosEnded ?? this.isSosEnded,
+      alertId: alertId ?? this.alertId,
+      activatedAt: activatedAt ?? this.activatedAt,
+      isStopping: isStopping ?? this.isStopping,
     );
   }
 }

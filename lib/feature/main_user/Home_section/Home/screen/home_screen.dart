@@ -49,8 +49,7 @@ class HomeScreen extends ConsumerWidget {
                       SizedBox(height: 16.h),
                       LiveLocationCard(
                         isSharing: state.liveLocation?.isSharingLive ?? false,
-                        address: state.liveLocation?.address ??
-                            '1200 Park Ave, New York, NY 10028, USA',
+                        address: state.liveLocation?.address ?? '',
                         latitude: state.liveLocation?.latitude,
                         longitude: state.liveLocation?.longitude,
                         peopleSharing:
@@ -83,6 +82,7 @@ class HomeScreen extends ConsumerWidget {
                             latitude: state.liveLocation?.latitude,
                             longitude: state.liveLocation?.longitude,
                             address: state.liveLocation?.address,
+                            batteryLevel: state.liveLocation?.batteryLevel,
                           ),
                         ),
                       ),

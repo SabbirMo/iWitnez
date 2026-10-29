@@ -11,12 +11,14 @@ class SosCountdownScreen extends ConsumerStatefulWidget {
   final double? latitude;
   final double? longitude;
   final String? address;
+  final int? batteryLevel;
 
   const SosCountdownScreen({
     super.key,
     this.latitude,
     this.longitude,
     this.address,
+    this.batteryLevel,
   });
 
   @override
@@ -35,6 +37,7 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
           latitude: widget.latitude,
           longitude: widget.longitude,
           address: widget.address,
+          batteryLevel: widget.batteryLevel,
         );
       }
     });
@@ -49,12 +52,18 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
 
   void _navigateToCamera() {
     if (!mounted) return;
+    final alertId = ref.read(sosCountdownProvider).alertId;
     try {
-      context.pushReplacement(AppRouteNames.sosActiveCameraScreen);
+      context.pushReplacement(
+        AppRouteNames.sosActiveCameraScreen,
+        extra: {'alert_id': alertId},
+      );
     } catch (_) {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const SosActiveCameraScreen()),
+          MaterialPageRoute(
+            builder: (_) => SosActiveCameraScreen(alertId: alertId),
+          ),
         );
       }
     }
@@ -65,7 +74,7 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
     final state = ref.watch(sosCountdownProvider);
     final notifier = ref.read(sosCountdownProvider.notifier);
 
-    // When 10-second countdown reaches 0 automatically, navigate directly to camera
+    // When 10-second countdown reaches 0 automatically, navigate directly to Screen 4 (Active Camera/Recording)
     ref.listen(sosCountdownProvider, (previous, next) {
       if (next.isAlertSent && !(previous?.isAlertSent ?? false)) {
         if (!_isDispatched) {
@@ -81,7 +90,7 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
         // Only cancel if user actually pressed back without dispatching SOS
         if (didPop && !_isDispatched) {
           try {
-            notifier.cancelAlert(reason: 'False alarm / Accidental tap');
+            notifier.cancelAlert(reason: 'Accidental tap');
           } catch (_) {}
         }
       },
@@ -125,12 +134,12 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    notifier.cancelAlert(reason: 'False alarm / Accidental tap');
+                    notifier.cancelAlert(reason: 'Accidental tap');
                     if (context.mounted) {
                       context.pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('SOS Alert Cancelled'),
+                          content: Text('Emergency alert has been cancelled.'),
                           duration: Duration(seconds: 2),
                           behavior: SnackBarBehavior.floating,
                         ),

@@ -1,14 +1,53 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iwitnez/router/app_route_names.dart';
+import '../model/sos_recipient_model.dart';
+import '../model/sos_upload_state.dart';
+import '../provider/sos_upload_provider.dart';
 
-class SosVideoStoppedScreen extends StatelessWidget {
-  const SosVideoStoppedScreen({super.key});
+class SosVideoStoppedScreen extends ConsumerStatefulWidget {
+  final String? videoPath;
+  final String? alertId;
+  final int? durationSeconds;
+
+  const SosVideoStoppedScreen({
+    super.key,
+    this.videoPath,
+    this.alertId,
+    this.durationSeconds,
+  });
+
+  @override
+  ConsumerState<SosVideoStoppedScreen> createState() =>
+      _SosVideoStoppedScreenState();
+}
+
+class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(sosUploadProvider.notifier).uploadRecording(
+              alertId: widget.alertId,
+              videoFilePath: widget.videoPath,
+              durationSeconds: widget.durationSeconds,
+            );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final uploadState = ref.watch(sosUploadProvider);
+    final isUploading = uploadState.isUploading;
+    final isUploadSuccess = uploadState.isUploadSuccess;
+    final errorMessage = uploadState.errorMessage;
+    final formattedDuration = uploadState.formattedDuration;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -67,7 +106,9 @@ class SosVideoStoppedScreen extends StatelessWidget {
               SizedBox(height: 6.h),
 
               Text(
-                'Your emergency recording is being\nuploaded securely.',
+                isUploadSuccess
+                    ? 'Your emergency recording has been\nuploaded and secured.'
+                    : 'Your emergency recording is being\nuploaded securely.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.5.sp,
@@ -108,7 +149,9 @@ class SosVideoStoppedScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Icon(
-                          Icons.cloud_upload_outlined,
+                          isUploadSuccess
+                              ? Icons.cloud_done_rounded
+                              : Icons.cloud_upload_outlined,
                           color: const Color(0xFF00C853),
                           size: 24.sp,
                         ),
@@ -120,7 +163,9 @@ class SosVideoStoppedScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Uploading & Sharing',
+                            isUploadSuccess
+                                ? 'Evidence Uploaded & Secured'
+                                : 'Uploading & Sharing Evidence',
                             style: TextStyle(
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w700,
@@ -129,7 +174,11 @@ class SosVideoStoppedScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            'Your recording, live location and alert will be shared with trusted contacts.',
+                            isUploadSuccess
+                                ? (formattedDuration != null
+                                    ? 'Incident recording ($formattedDuration) stored safely. Contacts alerted.'
+                                    : 'Your incident file is stored safely. Contacts have received evidence link.')
+                                : 'Your recording, live location and alert will be shared with trusted contacts.',
                             style: TextStyle(
                               fontSize: 11.5.sp,
                               color: const Color(0xFF6B7280),
@@ -140,19 +189,53 @@ class SosVideoStoppedScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 10.w),
-                    SizedBox(
-                      width: 20.w,
-                      height: 20.w,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Color(0xFF00C853),
+                    if (isUploading)
+                      SizedBox(
+                        width: 22.w,
+                        height: 22.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF00C853),
+                          ),
                         ),
+                      )
+                    else if (isUploadSuccess)
+                      Icon(
+                        Icons.check_circle_rounded,
+                        color: const Color(0xFF00C853),
+                        size: 24.sp,
+                      )
+                    else if (errorMessage != null)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.refresh_rounded,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          ref.read(sosUploadProvider.notifier).uploadRecording(
+                                alertId: widget.alertId,
+                                videoFilePath: widget.videoPath,
+                                durationSeconds: widget.durationSeconds,
+                              );
+                        },
+                        tooltip: 'Retry Upload',
                       ),
-                    ),
                   ],
                 ),
               ),
+
+              if (errorMessage != null) ...[
+                SizedBox(height: 10.h),
+                Text(
+                  errorMessage,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
 
               SizedBox(height: 24.h),
 
@@ -178,7 +261,7 @@ class SosVideoStoppedScreen extends StatelessWidget {
 
               SizedBox(height: 12.h),
 
-              // ── 5. Contacts List Card ──
+              // ── 5. Contacts List Card (Dynamically rendered from Riverpod state) ──
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -197,42 +280,7 @@ class SosVideoStoppedScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    _buildContactRow(
-                      name: 'Rafiq Ahmed',
-                      relation: 'Brother',
-                      relationBg: const Color(0xFFECFDF5),
-                      relationColor: const Color(0xFF059669),
-                      avatarUrl:
-                          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      child: Divider(height: 1, color: const Color(0xFFF3F4F6)),
-                    ),
-                    _buildContactRow(
-                      name: 'Sadia Islam',
-                      relation: 'Sister',
-                      relationBg: const Color(0xFFF3E8FF),
-                      relationColor: const Color(0xFF7C3AED),
-                      avatarUrl:
-                          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      child: Divider(height: 1, color: const Color(0xFFF3F4F6)),
-                    ),
-                    _buildContactRow(
-                      name: 'Mahin Uddin',
-                      relation: 'Friend',
-                      relationBg: const Color(0xFFEFF6FF),
-                      relationColor: const Color(0xFF2563EB),
-                      avatarUrl:
-                          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-                    ),
-                  ],
-                ),
+                child: _buildContactsContent(uploadState),
               ),
 
               SizedBox(height: 20.h),
@@ -242,38 +290,32 @@ class SosVideoStoppedScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: EdgeInsets.all(16.r),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4F7FD),
+                  color: const Color(0xFFF0FDF4),
                   borderRadius: BorderRadius.circular(18.r),
                   border: Border.all(
-                    color: const Color(0xFFE5E7EB),
-                    width: 0.8,
+                    color: const Color(0xFFDCFCE7),
+                    width: 1.0,
                   ),
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 44.w,
-                      height: 44.h,
+                      width: 38.w,
+                      height: 38.h,
                       decoration: const BoxDecoration(
-                        color: Colors.white,
+                        color: Color(0xFFDCFCE7),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Center(
                         child: Icon(
-                          Icons.verified_user_outlined,
-                          color: const Color(0xFF2563EB),
-                          size: 22.sp,
+                          Icons.verified_user_rounded,
+                          color: const Color(0xFF15803D),
+                          size: 20.sp,
                         ),
                       ),
                     ),
-                    SizedBox(width: 14.w),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,14 +323,14 @@ class SosVideoStoppedScreen extends StatelessWidget {
                           Text(
                             'Stay Safe!',
                             style: TextStyle(
-                              fontSize: 14.5.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111827),
+                              color: const Color(0xFF15803D),
                             ),
                           ),
-                          SizedBox(height: 4.h),
+                          SizedBox(height: 3.h),
                           Text(
-                            'Your recording, live location and alerts are successfully shared with your trusted contacts.',
+                            'Your trusted circle has been alerted. Live evidence and GPS details are accessible securely.',
                             style: TextStyle(
                               fontSize: 11.5.sp,
                               color: const Color(0xFF6B7280),
@@ -343,52 +385,107 @@ class SosVideoStoppedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContactRow({
-    required String name,
-    required String relation,
-    required Color relationBg,
-    required Color relationColor,
-    required String avatarUrl,
-  }) {
-    return Row(
-      children: [
-        // Avatar with green online dot
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 23.r,
-              backgroundColor: const Color(0xFFE5E7EB),
-              backgroundImage: NetworkImage(avatarUrl),
-            ),
-            Positioned(
-              bottom: 1.h,
-              right: 1.w,
-              child: Container(
-                width: 10.w,
-                height: 10.w,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+  Widget _buildContactsContent(SosUploadState uploadState) {
+    if (uploadState.isUploading) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        child: Center(
+          child: Column(
+            children: [
+              const CircularProgressIndicator(
+                color: Color(0xFF00C853),
+                strokeWidth: 2.2,
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                'Sharing evidence with trusted contacts...',
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  color: const Color(0xFF6B7280),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final recipients = uploadState.recipients;
+    if (recipients.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 20.h),
+        child: Center(
+          child: Text(
+            uploadState.isUploadSuccess
+                ? 'Evidence securely stored. Contacts have been alerted.'
+                : 'No contacts shared yet.',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: const Color(0xFF6B7280),
+              fontWeight: FontWeight.w500,
             ),
-          ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (int i = 0; i < recipients.length; i++) ...[
+          if (i > 0)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              child: const Divider(height: 1, color: Color(0xFFF3F4F6)),
+            ),
+          _buildContactRow(recipients[i]),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildContactRow(SosRecipientModel recipient) {
+    return Row(
+      children: [
+        // Avatar with initial letter or default green ring
+        Container(
+          width: 44.r,
+          height: 44.r,
+          decoration: BoxDecoration(
+            color: recipient.relationshipBgColor,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              recipient.contactName.isNotEmpty
+                  ? recipient.contactName[0].toUpperCase()
+                  : 'C',
+              style: TextStyle(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.bold,
+                color: recipient.relationshipTextColor,
+              ),
+            ),
+          ),
         ),
         SizedBox(width: 12.w),
-        // Name and Status
+        // Name, relationship badge & shared status
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                  Flexible(
+                    child: Text(
+                      recipient.contactName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -398,15 +495,15 @@ class SosVideoStoppedScreen extends StatelessWidget {
                       vertical: 2.h,
                     ),
                     decoration: BoxDecoration(
-                      color: relationBg,
+                      color: recipient.relationshipBgColor,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
-                      relation,
+                      recipient.relationship,
                       style: TextStyle(
                         fontSize: 10.5.sp,
                         fontWeight: FontWeight.w600,
-                        color: relationColor,
+                        color: recipient.relationshipTextColor,
                       ),
                     ),
                   ),
@@ -438,8 +535,8 @@ class SosVideoStoppedScreen extends StatelessWidget {
         Container(
           width: 26.w,
           height: 26.h,
-          decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
+          decoration: const BoxDecoration(
+            color: Color(0xFFECFDF5),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -456,10 +553,6 @@ class SosVideoStoppedScreen extends StatelessWidget {
 }
 
 /// ── Animated Success Badge ──
-/// Features:
-/// 1. Dynamic pop-in entrance animation (bouncy elastic scale + delayed checkmark snap).
-/// 2. Looping radar ripple waves expanding and fading outwards.
-/// 3. Ambient breathing soft-green halo with floating satellite accent particles.
 class AnimatedSuccessBadge extends StatefulWidget {
   const AnimatedSuccessBadge({super.key});
 
@@ -483,7 +576,6 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
   void initState() {
     super.initState();
 
-    // 1. One-shot dynamic entrance animation on landing
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),
@@ -531,7 +623,6 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
       ),
     );
 
-    // 2. Continuous ambient pulse & floating particles loop
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2400),
@@ -609,7 +700,7 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
                   ),
                 ),
 
-                // ── Soft Glowing Outer Halo (Radial Gradient + gentle breathing) ──
+                // ── Soft Glowing Outer Halo ──
                 Transform.scale(
                   scale: _haloScale.value * (1.0 + (breathe * 0.04)),
                   child: Container(
@@ -629,7 +720,7 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
                   ),
                 ),
 
-                // ── Floating Decorative Satellite Dot 1 (Top-right) ──
+                // ── Floating Decorative Satellite Dot 1 ──
                 Positioned(
                   top: 10.h + (breathe * 3),
                   right:
@@ -643,50 +734,25 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
                       decoration: const BoxDecoration(
                         color: Color(0xFF10B981),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(color: Color(0x3310B981), blurRadius: 4),
-                        ],
                       ),
                     ),
                   ),
                 ),
 
-                // ── Floating Decorative Satellite Dot 2 (Bottom-left) ──
+                // ── Floating Decorative Satellite Dot 2 ──
                 Positioned(
                   bottom:
                       22.h +
-                      (math.cos(_pulseController.value * 2 * math.pi) * 3),
-                  left: 14.w + (breathe * 2),
+                      (math.sin((_pulseController.value + 0.5) * 2 * math.pi) *
+                          3),
+                  left: 26.w,
                   child: ScaleTransition(
                     scale: _dotsScale,
                     child: Container(
-                      width: 7.w,
-                      height: 7.w,
+                      width: 6.w,
+                      height: 6.w,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(color: Color(0x3310B981), blurRadius: 4),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // ── Floating Decorative Satellite Dot 3 (Right-center) ──
-                Positioned(
-                  top:
-                      44.h +
-                      (math.sin((_pulseController.value + 0.3) * 2 * math.pi) *
-                          2.5),
-                  right: 8.w,
-                  child: ScaleTransition(
-                    scale: _dotsScale,
-                    child: Container(
-                      width: 4.5.w,
-                      height: 4.5.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.65),
+                        color: Color(0xFF34D399),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -708,24 +774,22 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF00C853).withValues(
-                            alpha: (0.35 + (breathe * 0.08)).clamp(0.2, 0.6),
-                          ),
+                          color: const Color(0xFF00C853).withValues(alpha: 0.38),
                           blurRadius: 18,
-                          spreadRadius: 1,
+                          spreadRadius: 2,
                           offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: Center(
-                      child: Transform.rotate(
-                        angle: _checkRotation.value,
-                        child: ScaleTransition(
-                          scale: _checkScale,
+                      child: ScaleTransition(
+                        scale: _checkScale,
+                        child: RotationTransition(
+                          turns: _checkRotation,
                           child: Icon(
                             Icons.check_rounded,
+                            size: 44.sp,
                             color: Colors.white,
-                            size: 46.sp,
                           ),
                         ),
                       ),

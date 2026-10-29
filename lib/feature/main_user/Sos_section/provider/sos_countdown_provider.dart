@@ -14,7 +14,7 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
       _timer?.cancel();
     });
 
-    // Safely start timer after the build cycle completes
+    // Start 10-second timer countdown immediately
     Future.microtask(() {
       if (ref.mounted) {
         _startTimer();
@@ -45,11 +45,13 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
     });
   }
 
-  /// Step 1: User Taps the SOS Button - initiates session and returns alert ID
+  /// Step 1: User Taps the SOS Button - initiates session with real live location & battery
+  /// Endpoint: POST /api/v1/emergency/sos/start/
   Future<void> initiateSos({
     double? latitude,
     double? longitude,
     String? address,
+    int? batteryLevel,
     int countdownSeconds = 10,
   }) async {
     if (_startCompleter != null) return;
@@ -57,14 +59,13 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
 
     state = state.copyWith(isStarting: true);
 
-    double lat = latitude ?? 40.785091;
-    double lng = longitude ?? -73.968285;
-    String addr = (address != null && address.isNotEmpty)
-        ? address
-        : '1200 Park Ave, New York, NY 10028, USA';
+    double? lat = latitude;
+    double? lng = longitude;
+    String? addr = address;
+    int? battery = batteryLevel;
 
-    // If coordinates were not passed, attempt to fetch current GPS location
-    if (latitude == null || longitude == null) {
+    // If coordinates were not passed from caller, fetch real current GPS position
+    if (lat == null || lng == null) {
       try {
         final loc = await const LocationService().getCurrentLocation();
         if (loc.isSuccess && loc.position != null) {
@@ -80,7 +81,17 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
       latitude: lat,
       longitude: lng,
       address: addr,
+      batteryLevel: battery,
     );
+
+    // If device location could not be determined at all, abort gracefully without sending fake data
+    if (lat == null || lng == null) {
+      _startCompleter?.complete(null);
+      if (ref.mounted) {
+        state = state.copyWith(isStarting: false);
+      }
+      return;
+    }
 
     try {
       final repository = ref.read(sosRepositoryProvider);
@@ -88,6 +99,7 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
         latitude: lat,
         longitude: lng,
         address: addr,
+        batteryLevel: battery,
         countdownSeconds: countdownSeconds,
       );
 
@@ -95,17 +107,14 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
 
       if (!ref.mounted) return;
 
-      state = state.copyWith(
-        alertId: alertId,
-        isStarting: false,
-      );
+      state = state.copyWith(alertId: alertId, isStarting: false);
 
       // Handle race condition: If user activated while start was in-flight
       if (state.isAlertSent && alertId != null && !state.isActivating) {
         _activateSos(alertId);
       } else if (state.isCancelled && alertId != null) {
         // If user cancelled while start was in-flight
-        repository.cancelSos(alertId);
+        repository.cancelSos(alertId, reason: 'Accidental tap');
       }
     } catch (_) {
       _startCompleter?.complete(null);
@@ -115,25 +124,20 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
     }
   }
 
-  /// Step 2: Countdown Finishes (or User confirms "Send Help Now")
+  /// Step 2: Option A - "Slide to Send SOS" (Immediate Activation)
+  /// If user slides the slider OR when 10s countdown hits 0
+  /// Endpoint: POST /api/v1/emergency/sos/{alert_id}/activate/
   void triggerImmediateSend() {
-    if (state.isAlertSent || state.isCancelled) return;
-    _timer?.cancel();
-    state = state.copyWith(secondsRemaining: 0, isAlertSent: true);
-
-    if (state.alertId != null) {
-      _activateSos(state.alertId!);
-    } else {
-      _startCompleter?.future.then((alertId) {
-        if (alertId != null && ref.mounted) {
-          _activateSos(alertId);
-        }
-      });
-    }
+    _triggerActivation();
   }
 
   void _onCountdownFinished() {
+    _triggerActivation();
+  }
+
+  void _triggerActivation() {
     if (state.isAlertSent || state.isCancelled) return;
+    _timer?.cancel();
     state = state.copyWith(secondsRemaining: 0, isAlertSent: true);
 
     if (state.alertId != null) {
@@ -161,10 +165,9 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
     }
   }
 
-  /// Step 3: User Cancels During Countdown
-  Future<void> cancelAlert({
-    String reason = 'False alarm / Accidental tap',
-  }) async {
+  /// Step 3: Option B - "Cancel SOS" (Accidental Tap)
+  /// Endpoint: POST /api/v1/emergency/sos/{alert_id}/cancel/
+  Future<void> cancelAlert({String reason = 'Accidental tap'}) async {
     _timer?.cancel();
     state = state.copyWith(isCancelled: true);
 
@@ -178,7 +181,9 @@ class SosCountdownNotifier extends Notifier<SosCountdownState> {
       _startCompleter?.future.then((resolvedId) {
         if (resolvedId != null && ref.mounted) {
           try {
-            ref.read(sosRepositoryProvider).cancelSos(resolvedId, reason: reason);
+            ref
+                .read(sosRepositoryProvider)
+                .cancelSos(resolvedId, reason: reason);
           } catch (_) {}
         }
       });

@@ -72,18 +72,18 @@ import 'package:iwitnez/feature/add_trusted_contact/widget/add_trusted_field_wid
 import 'package:iwitnez/feature/add_trusted_contact/screen/trusted_contact_success_screen.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'rootNavigatorKey',
+);
 
 GoRouter? _globalAppRouter;
 GoRouter? get globalAppRouter => _globalAppRouter;
 
-final appPages = Provider<GoRouter>(
-  (ref) {
-    final router = GoRouter(
-      navigatorKey: rootNavigatorKey,
-      initialLocation: AppRouteNames.splashScreen,
-      routes: [
+final appPages = Provider<GoRouter>((ref) {
+  final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
+    initialLocation: AppRouteNames.splashScreen,
+    routes: [
       GoRoute(
         path: AppRouteNames.splashScreen,
         pageBuilder: (context, state) =>
@@ -244,19 +244,42 @@ final appPages = Provider<GoRouter>(
               latitude: extra?['latitude'] as double?,
               longitude: extra?['longitude'] as double?,
               address: extra?['address'] as String?,
+              batteryLevel:
+                  extra?['battery_level'] as int? ??
+                  extra?['batteryLevel'] as int?,
             ),
           );
         },
       ),
       GoRoute(
         path: AppRouteNames.sosActiveCameraScreen,
-        pageBuilder: (context, state) =>
-            CupertinoPage(child: const SosActiveCameraScreen()),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return CupertinoPage(
+            child: SosActiveCameraScreen(
+              alertId:
+                  extra?['alert_id'] as String? ?? extra?['alertId'] as String?,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppRouteNames.sosVideoStoppedScreen,
-        pageBuilder: (context, state) =>
-            CupertinoPage(child: const SosVideoStoppedScreen()),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return CupertinoPage(
+            child: SosVideoStoppedScreen(
+              videoPath:
+                  extra?['video_path'] as String? ??
+                  extra?['videoPath'] as String?,
+              alertId:
+                  extra?['alert_id'] as String? ?? extra?['alertId'] as String?,
+              durationSeconds:
+                  extra?['duration_seconds'] as int? ??
+                  extra?['durationSeconds'] as int?,
+            ),
+          );
+        },
       ),
       // Main User Shell (bottom nav: Home / Chat / Calls / Profile)
       StatefulShellRoute.indexedStack(

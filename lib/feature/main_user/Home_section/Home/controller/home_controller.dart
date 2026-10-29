@@ -55,11 +55,13 @@ class HomeController {
     double? latitude,
     double? longitude,
     String? address,
+    int? batteryLevel,
   }) {
     final extra = {
       'latitude': latitude,
       'longitude': longitude,
       'address': address,
+      'battery_level': batteryLevel,
     };
     try {
       context.push(AppRouteNames.sosCountdownScreen, extra: extra);
@@ -70,6 +72,7 @@ class HomeController {
             latitude: latitude,
             longitude: longitude,
             address: address,
+            batteryLevel: batteryLevel,
           ),
         ),
       );

@@ -50,4 +50,7 @@ class ApiEndPoints {
   static const String sosStart = '/api/v1/emergency/sos/start/';
   static String sosActivate(String id) => '/api/v1/emergency/sos/$id/activate/';
   static String sosCancel(String id) => '/api/v1/emergency/sos/$id/cancel/';
+  static const String sosActive = '/api/v1/emergency/sos/active/';
+  static String sosStop(String id) => '/api/v1/emergency/sos/$id/stop/';
+  static String sosUploadRecording(String id) => '/api/v1/emergency/sos/$id/recording/';
 }

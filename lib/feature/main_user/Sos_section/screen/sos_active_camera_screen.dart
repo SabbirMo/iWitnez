@@ -9,22 +9,58 @@ import '../provider/sos_active_camera_provider.dart';
 import '../widget/audio_waveform_widget.dart';
 import 'sos_video_stopped_screen.dart';
 
-class SosActiveCameraScreen extends ConsumerWidget {
-  const SosActiveCameraScreen({super.key});
+class SosActiveCameraScreen extends ConsumerStatefulWidget {
+  final String? alertId;
 
-  void _navigateToStoppedSummary(BuildContext context) {
+  const SosActiveCameraScreen({super.key, this.alertId});
+
+  @override
+  ConsumerState<SosActiveCameraScreen> createState() =>
+      _SosActiveCameraScreenState();
+}
+
+class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(sosActiveCameraProvider.notifier).setAlertId(widget.alertId);
+      }
+    });
+  }
+
+  void _navigateToStoppedSummary(BuildContext context, {String? videoPath}) {
     if (!context.mounted) return;
+    final activeState = ref.read(sosActiveCameraProvider);
+    final alertId = activeState.alertId ?? widget.alertId;
+
+    final extra = {
+      'video_path': videoPath ?? activeState.recordedVideoPath,
+      'alert_id': alertId,
+      'duration_seconds': activeState.elapsedSeconds,
+    };
+
     try {
-      context.push(AppRouteNames.sosVideoStoppedScreen);
+      context.pushReplacement(
+        AppRouteNames.sosVideoStoppedScreen,
+        extra: extra,
+      );
     } catch (_) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const SosVideoStoppedScreen()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => SosVideoStoppedScreen(
+            videoPath: videoPath ?? activeState.recordedVideoPath,
+            alertId: alertId,
+            durationSeconds: activeState.elapsedSeconds,
+          ),
+        ),
+      );
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(sosActiveCameraProvider);
     final notifier = ref.read(sosActiveCameraProvider.notifier);
     final cameraCtrl = notifier.cameraController;
@@ -106,132 +142,129 @@ class SosActiveCameraScreen extends ConsumerWidget {
               ),
             ),
 
-            SizedBox(height: 6.h),
+            SizedBox(height: 10.h),
 
-            // ── Camera Video Viewport (NO PICTURE - REAL LIVE CAMERA FEED) ──
+            // ── Camera Video Viewport Area ──
             Expanded(
               child: Container(
-                color: Colors.black,
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(24.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 18,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // 1. Real Live Camera Stream
+                    // 1. Live Camera Preview
                     if (state.isCameraInitialized &&
                         cameraCtrl != null &&
                         cameraCtrl.value.isInitialized)
-                      ClipRect(
-                        child: OverflowBox(
-                          alignment: Alignment.center,
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: SizedBox(
-                              width: cameraCtrl.value.previewSize?.height ?? 720.0,
-                              height: cameraCtrl.value.previewSize?.width ?? 1280.0,
-                              child: CameraPreview(cameraCtrl),
-                            ),
+                      SizedBox.expand(
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: SizedBox(
+                            width: cameraCtrl.value.previewSize?.height ?? 1,
+                            height: cameraCtrl.value.previewSize?.width ?? 1,
+                            child: CameraPreview(cameraCtrl),
                           ),
                         ),
                       )
                     else
-                      // Dark camera viewfinder while initializing (NO PICTURE)
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 68.w,
-                              height: 68.h,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.1),
+                      Container(
+                        color: const Color(0xFF1F242F),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(
+                                color: Color(0xFFE52525),
+                                strokeWidth: 2.5,
                               ),
-                              child: Center(
-                                child: state.errorMessage == null
-                                    ? SizedBox(
-                                        width: 28.w,
-                                        height: 28.h,
-                                        child: const CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          color: Color(0xFFE52525),
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.videocam_off_outlined,
-                                        color: Colors.white70,
-                                        size: 32.sp,
-                                      ),
-                              ),
-                            ),
-                            SizedBox(height: 14.h),
-                            Text(
-                              state.errorMessage ?? 'Opening Video Camera...',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13.5.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            if (state.errorMessage != null) ...[
                               SizedBox(height: 14.h),
-                              ElevatedButton.icon(
-                                onPressed: notifier.initCameraAndRecording,
-                                icon: const Icon(
-                                  Icons.refresh,
-                                  color: Colors.white,
-                                ),
-                                label: const Text(
-                                  'Retry Camera',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFE52525),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20.r),
-                                  ),
+                              Text(
+                                state.errorMessage ??
+                                    'Initializing Secure Video Recording...',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
-                          ],
+                          ),
                         ),
                       ),
 
-                    // 2. Top-Left: REC live indicator badge
+                    // Top Gradient Scrim for readable badges
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 80.h,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.65),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 2. Top-Left: "Recording Evidence" Red Badge
                     Positioned(
                       top: 14.h,
-                      left: 16.w,
+                      left: 14.w,
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 10.w,
                           vertical: 5.h,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.65),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            width: 0.8,
-                          ),
+                          color: const Color(0xFFE52525),
+                          borderRadius: BorderRadius.circular(16.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFFE52525,
+                              ).withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                              width: 8.w,
-                              height: 8.w,
+                              width: 7.w,
+                              height: 7.h,
                               decoration: const BoxDecoration(
-                                color: Color(0xFFEF4444),
+                                color: Colors.white,
                                 shape: BoxShape.circle,
                               ),
                             ),
                             SizedBox(width: 6.w),
                             Text(
-                              'REC',
+                              'Recording Evidence',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
+                                fontSize: 11.5.sp,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
                               ),
                             ),
                           ],
@@ -239,7 +272,7 @@ class SosActiveCameraScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    // 3. Top-Right: Video Recording Timer
+                    // 3. Top-Right: Video Recording Timer (00:05:23)
                     Positioned(
                       top: 14.h,
                       right: 16.w,
@@ -269,11 +302,11 @@ class SosActiveCameraScreen extends ConsumerWidget {
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [const Color(0xFFFFF5F5), Colors.white],
+                  colors: [Color(0xFFFFF5F5), Colors.white],
                 ),
               ),
               child: Row(
@@ -374,24 +407,40 @@ class SosActiveCameraScreen extends ConsumerWidget {
                   width: double.infinity,
                   height: 52.h,
                   child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await ref
-                          .read(sosActiveCameraProvider.notifier)
-                          .stopSos();
-                      if (context.mounted) {
-                        _navigateToStoppedSummary(context);
-                      }
-                    },
-                    icon: Container(
-                      width: 13.w,
-                      height: 13.h,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(2)),
-                      ),
-                    ),
+                    onPressed: state.isStopping
+                        ? null
+                        : () async {
+                            final videoPath = await ref
+                                .read(sosActiveCameraProvider.notifier)
+                                .stopSos();
+                            if (context.mounted) {
+                              _navigateToStoppedSummary(
+                                context,
+                                videoPath: videoPath,
+                              );
+                            }
+                          },
+                    icon: state.isStopping
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Container(
+                            width: 13.w,
+                            height: 13.h,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(2),
+                              ),
+                            ),
+                          ),
                     label: Text(
-                      'Stop SOS',
+                      state.isStopping ? 'Stopping SOS...' : 'Stop SOS',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,

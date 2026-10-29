@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class AudioWaveformWidget extends StatefulWidget {
   const AudioWaveformWidget({
     super.key,
-    this.isActive = true,
+    this.isActive = false,
   });
 
   final bool isActive;
@@ -28,7 +28,24 @@ class _AudioWaveformWidgetState extends State<AudioWaveformWidget>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
-    )..repeat();
+    );
+    if (widget.isActive) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AudioWaveformWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive != oldWidget.isActive) {
+      if (widget.isActive) {
+        if (!_controller.isAnimating) {
+          _controller.repeat();
+        }
+      } else {
+        _controller.stop();
+      }
+    }
   }
 
   @override
