@@ -4,11 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/provider/check_in_provider.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/widget/check_in_location_card.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/widget/check_in_shared_with_card.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/widget/check_in_time_card.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/widget/im_safe_banner_card.dart';
+import 'package:iwitnez/router/app_route_names.dart';
 
 class CheckInScreen extends ConsumerWidget {
   const CheckInScreen({super.key});
@@ -16,12 +18,9 @@ class CheckInScreen extends ConsumerWidget {
   void _onCheckInNow(BuildContext context, WidgetRef ref) {
     ref.read(checkInProvider.notifier).checkIn();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Check-in shared with your trusted circles!"),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
+    CustomSnackBar.showSuccess(
+      context,
+      message: 'Check-in shared with your trusted circles!',
     );
 
     if (context.canPop()) {
@@ -101,17 +100,11 @@ class CheckInScreen extends ConsumerWidget {
 
               // 2. Your Location Card with Map Image
               CheckInLocationCard(
-                address: state.address,
+                address: state.address.isNotEmpty
+                    ? state.address
+                    : 'Current Location',
                 accuracy: state.accuracy,
-                onUpdateTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Location updated to current GPS location'),
-                      duration: Duration(milliseconds: 1400),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
+                onUpdateTap: () {},
               ),
               SizedBox(height: 14.h),
 
@@ -123,13 +116,7 @@ class CheckInScreen extends ConsumerWidget {
               CheckInTimeCard(
                 timeText: state.checkInTime,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Time set to current time'),
-                      duration: Duration(milliseconds: 1200),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  context.push(AppRouteNames.scheduledTimerScreen);
                 },
               ),
               SizedBox(height: 24.h),

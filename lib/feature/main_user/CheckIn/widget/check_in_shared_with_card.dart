@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
 
-class CheckInSharedWithCard extends StatelessWidget {
+class CheckInSharedWithCard extends ConsumerWidget {
   const CheckInSharedWithCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final circles = ref.watch(trustedCircleProvider);
+    final totalMembers =
+        circles.fold<int>(0, (sum, c) => sum + c.memberCount);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -45,7 +51,9 @@ class CheckInSharedWithCard extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'Your trusted circles will get this check-in.',
+                  totalMembers > 0
+                      ? 'Shared with $totalMembers trusted contact${totalMembers > 1 ? 's' : ''}.'
+                      : 'Your trusted circles will get this check-in.',
                   style: GoogleFonts.inter(
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w400,
@@ -57,57 +65,55 @@ class CheckInSharedWithCard extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
 
-          // Overlapping avatars +2
+          // Circle icon badges
           SizedBox(
-            width: 90.w,
+            width: 80.w,
             height: 32.h,
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.centerLeft,
               children: [
-                _buildAvatar(
+                _buildBadge(
                   left: 0,
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-                  fallbackColor: const Color(0xFFFED7AA),
-                  fallbackIcon: Icons.person_rounded,
+                  bgColor: const Color(0xFFF3E8FF),
+                  icon: Icons.groups_rounded,
+                  iconColor: const Color(0xFFA855F7),
                 ),
-                _buildAvatar(
+                _buildBadge(
                   left: 18.w,
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
-                  fallbackColor: const Color(0xFFBAE6FD),
-                  fallbackIcon: Icons.person_rounded,
+                  bgColor: const Color(0xFFDBEAFE),
+                  icon: Icons.people_alt_rounded,
+                  iconColor: const Color(0xFF3B82F6),
                 ),
-                _buildAvatar(
+                _buildBadge(
                   left: 36.w,
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
-                  fallbackColor: const Color(0xFFDDD6FE),
-                  fallbackIcon: Icons.person_rounded,
+                  bgColor: const Color(0xFFFFE4E6),
+                  icon: Icons.favorite_rounded,
+                  iconColor: const Color(0xFFF43F5E),
                 ),
-                Positioned(
-                  left: 54.w,
-                  child: Container(
-                    width: 28.r,
-                    height: 28.r,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3E8FF),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2.w),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '+2',
-                        style: GoogleFonts.inter(
-                          fontSize: 10.5.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF7C3AED),
+                if (totalMembers > 3)
+                  Positioned(
+                    left: 54.w,
+                    child: Container(
+                      width: 28.r,
+                      height: 28.r,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3E8FF),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2.w),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '+${totalMembers - 3}',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF7C3AED),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -116,11 +122,11 @@ class CheckInSharedWithCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar({
+  Widget _buildBadge({
     required double left,
-    required String imageUrl,
-    required Color fallbackColor,
-    required IconData fallbackIcon,
+    required Color bgColor,
+    required IconData icon,
+    required Color iconColor,
   }) {
     return Positioned(
       left: left,
@@ -128,6 +134,7 @@ class CheckInSharedWithCard extends StatelessWidget {
         width: 28.r,
         height: 28.r,
         decoration: BoxDecoration(
+          color: bgColor,
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 2.w),
           boxShadow: [
@@ -138,14 +145,11 @@ class CheckInSharedWithCard extends StatelessWidget {
             ),
           ],
         ),
-        child: ClipOval(
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: fallbackColor,
-              child: Icon(fallbackIcon, size: 16.sp, color: Colors.white),
-            ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: 14.sp,
+            color: iconColor,
           ),
         ),
       ),

@@ -125,12 +125,17 @@ class CheckInNoteCard extends StatelessWidget {
                 ),
                 Align(
                   alignment: Alignment.bottomRight,
-                  child: Text(
-                    '${controller.text.length}/100',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.sp,
-                      color: const Color(0xFF9CA3AF),
-                    ),
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: controller,
+                    builder: (context, value, _) {
+                      return Text(
+                        '${value.text.length}/100',
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          color: const Color(0xFF9CA3AF),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -139,49 +144,54 @@ class CheckInNoteCard extends StatelessWidget {
           SizedBox(height: 12.h),
 
           // Quick note suggestion chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: suggestions.map((suggestion) {
-                final isSelected = controller.text == suggestion;
-                return Padding(
-                  padding: EdgeInsets.only(right: 8.w),
-                  child: GestureDetector(
-                    onTap: () => onSuggestionSelected(suggestion),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14.w,
-                        vertical: 8.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFFF3E8FF)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFF8B5CF6)
-                              : const Color(0xFFE5E7EB),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, _) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: suggestions.map((suggestion) {
+                    final isSelected = value.text.trim() == suggestion.trim();
+                    return Padding(
+                      padding: EdgeInsets.only(right: 8.w),
+                      child: GestureDetector(
+                        onTap: () => onSuggestionSelected(suggestion),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 14.w,
+                            vertical: 8.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFFF3E8FF)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(20.r),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFF8B5CF6)
+                                  : const Color(0xFFE5E7EB),
+                            ),
+                          ),
+                          child: Text(
+                            suggestion,
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? const Color(0xFF7C3AED)
+                                  : const Color(0xFF4B5563),
+                            ),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        suggestion,
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? const Color(0xFF7C3AED)
-                              : const Color(0xFF4B5563),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
           ),
         ],
       ),

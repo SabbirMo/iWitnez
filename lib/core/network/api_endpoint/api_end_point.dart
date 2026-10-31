@@ -60,6 +60,10 @@ class ApiEndPoints {
   static const String supportContact = '/api/v1/support/contact/';
   static const String supportFaqs = '/api/v1/support/faqs/';
 
+  // Emergency Check-Ins Endpoints
+  static const String checkInStartTimer =
+      '/api/v1/emergency/check-ins/start-timer/';
+
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';
   static String sosActivate(String id) => '/api/v1/emergency/sos/$id/activate/';

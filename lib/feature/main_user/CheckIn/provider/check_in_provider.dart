@@ -7,9 +7,9 @@ class CheckInState {
   final bool isCheckedIn;
 
   const CheckInState({
-    this.address = '1200 Park Ave,\nNew York, NY 10028, USA',
-    this.accuracy = '±10 m',
-    this.checkInTime = 'Today, 10:30 AM',
+    this.address = '',
+    this.accuracy = '',
+    this.checkInTime = '',
     this.isCheckedIn = false,
   });
 

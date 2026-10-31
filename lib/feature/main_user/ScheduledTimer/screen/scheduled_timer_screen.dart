@@ -27,7 +27,7 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
   final List<String> _quickSuggestions = [
     "I'm at Office",
     "At Work",
-    "In Meeting",
+    "In a Meeting",
     "Walking home",
     "At Gym",
     "Heading home",
@@ -59,20 +59,14 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
   }
 
   void _onStartTimer() {
-    ref.read(scheduledTimerProvider.notifier).startTimer();
-    final durationStr = ref.read(scheduledTimerProvider).formattedDuration;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Scheduled check-in timer set for $durationStr'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
+    ref.read(scheduledTimerProvider.notifier).startTimerApi(
+      context: context,
+      onSuccess: () {
+        if (context.canPop()) {
+          context.pop();
+        }
+      },
     );
-
-    if (context.canPop()) {
-      context.pop();
-    }
   }
 
   @override
@@ -211,6 +205,7 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
                 text: 'Start Timer',
                 icon: Icons.check_rounded,
                 isLeadingIcon: true,
+                isLoading: state.isLoading,
                 height: 52.h,
                 borderRadius: 26.r,
                 onTap: _onStartTimer,

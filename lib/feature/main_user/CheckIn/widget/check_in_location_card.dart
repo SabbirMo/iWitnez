@@ -158,15 +158,17 @@ class CheckInLocationCard extends StatelessWidget {
                         height: 1.35,
                       ),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'Accuracy: $accuracy',
-                      style: GoogleFonts.inter(
-                        fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.onboardingDesc,
+                    if (accuracy.isNotEmpty) ...[
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Accuracy: $accuracy',
+                        style: GoogleFonts.inter(
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.onboardingDesc,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

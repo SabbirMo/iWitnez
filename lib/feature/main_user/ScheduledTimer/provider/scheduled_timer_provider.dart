@@ -1,4 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
+import '../model/scheduled_check_in_model.dart';
+import '../repository/scheduled_timer_repository.dart';
 
 class ScheduledTimerState {
   final int hours;
@@ -9,6 +14,10 @@ class ScheduledTimerState {
   final bool notifyIfNotCheckedIn;
   final bool isTimerActive;
   final int? remainingSeconds;
+  final bool? _isLoading;
+  final ScheduledCheckInModel? activeCheckIn;
+
+  bool get isLoading => _isLoading ?? false;
 
   const ScheduledTimerState({
     this.hours = 1,
@@ -19,7 +28,9 @@ class ScheduledTimerState {
     this.notifyIfNotCheckedIn = true,
     this.isTimerActive = false,
     this.remainingSeconds,
-  });
+    bool? isLoading = false,
+    this.activeCheckIn,
+  }) : _isLoading = isLoading ?? false;
 
   ScheduledTimerState copyWith({
     int? hours,
@@ -30,6 +41,9 @@ class ScheduledTimerState {
     bool? notifyIfNotCheckedIn,
     bool? isTimerActive,
     int? remainingSeconds,
+    bool? isLoading,
+    ScheduledCheckInModel? activeCheckIn,
+    bool clearActiveCheckIn = false,
   }) {
     return ScheduledTimerState(
       hours: hours ?? this.hours,
@@ -40,6 +54,9 @@ class ScheduledTimerState {
       notifyIfNotCheckedIn: notifyIfNotCheckedIn ?? this.notifyIfNotCheckedIn,
       isTimerActive: isTimerActive ?? this.isTimerActive,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
+      isLoading: isLoading ?? this.isLoading,
+      activeCheckIn:
+          clearActiveCheckIn ? null : (activeCheckIn ?? this.activeCheckIn),
     );
   }
 
@@ -83,17 +100,67 @@ class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
     );
   }
 
-  void startTimer() {
-    state = state.copyWith(
-      isTimerActive: true,
-      remainingSeconds: state.totalDurationSeconds,
-    );
+  Future<bool> startTimerApi({
+    required BuildContext context,
+    VoidCallback? onSuccess,
+  }) async {
+    final totalSec = state.totalDurationSeconds;
+    if (totalSec <= 0) {
+      CustomSnackBar.showError(
+        context,
+        message: 'Please set a timer duration greater than 0.',
+      );
+      return false;
+    }
+
+    state = state.copyWith(isLoading: true);
+
+    try {
+      final repository = ref.read(scheduledTimerRepositoryProvider);
+      final checkIn = await repository.startCheckInTimer(
+        hours: state.hours,
+        minutes: state.minutes,
+        seconds: state.seconds,
+        notes: state.note.trim(),
+        remindBeforeEnd: state.remindBeforeTimeEnds,
+        notifyIfNotCheckedIn: state.notifyIfNotCheckedIn,
+      );
+
+      state = state.copyWith(
+        isLoading: false,
+        isTimerActive: true,
+        activeCheckIn: checkIn,
+        remainingSeconds: checkIn.timerDurationSeconds > 0
+            ? checkIn.timerDurationSeconds
+            : totalSec,
+      );
+
+      if (context.mounted) {
+        CustomSnackBar.showSuccess(
+          context,
+          message: 'Check-in timer started. Stay safe!',
+        );
+      }
+
+      onSuccess?.call();
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      if (context.mounted) {
+        CustomSnackBar.showError(
+          context,
+          message: ApiErrorHandler.getMessage(e),
+        );
+      }
+      return false;
+    }
   }
 
   void stopTimer() {
     state = state.copyWith(
       isTimerActive: false,
       remainingSeconds: null,
+      clearActiveCheckIn: true,
     );
   }
 
@@ -104,5 +171,5 @@ class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
 
 final scheduledTimerProvider =
     NotifierProvider<ScheduledTimerNotifier, ScheduledTimerState>(
-      ScheduledTimerNotifier.new,
-    );
+  ScheduledTimerNotifier.new,
+);
