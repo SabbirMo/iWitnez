@@ -1,5 +1,6 @@
 class ImageAssets {
   static const String image = "assets/images";
+  static const String darkImage = "assets/dark_images";
   static const String svg = "assets/svg";
   static const String icons = "assets/icons";
 
@@ -10,6 +11,7 @@ class ImageAssets {
 
   static const String protectedIcon = "$image/protected_icon.png";
   static const String sosAlert = "$image/sos_alert.png";
+  static const String trusted = "$image/trusted.png";
 
   //onboarding image
   static const String onboarding1 = "$image/onboarding1.png";
@@ -66,5 +68,13 @@ class ImageAssets {
   static const String audio = "assets/audio";
   static const String demoAlertVideo = "$video/demo_alert_video.mp4";
   static const String demoVoiceAudio = "$audio/demo_voice.mp3";
-}
 
+  //dark image
+  static const String darkOnboarding1 = "$darkImage/dark_onboarding1.png";
+  static const String darkOnboarding2 = "$darkImage/dark_onboarding2.png";
+  static const String darkOnboarding3 = "$darkImage/dark_onboarding3.png";
+  static const String darkLocation = "$darkImage/dark_location.png";
+  static const String darkNotification = "$darkImage/dark_notification.png";
+  static const String darkMic = "$darkImage/dark_mic.png";
+  static const String darkTrusted = "$darkImage/dark_trusted.png";
+}

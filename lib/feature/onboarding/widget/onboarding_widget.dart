@@ -32,6 +32,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         _animations.textTransition(
@@ -39,7 +40,9 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
             textAlign: TextAlign.center,
             text: TextSpan(
               text: widget.data.title,
-              style: CustomTextStyle.bold32(AppColors.textDark),
+              style: CustomTextStyle.bold32(
+                isDark ? AppColors.white : AppColors.textDark,
+              ),
               children: [
                 TextSpan(
                   text: " ${widget.data.impText} ",
@@ -47,7 +50,9 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
                 ),
                 TextSpan(
                   text: widget.data.subTitle,
-                  style: CustomTextStyle.bold32(AppColors.textDark),
+                  style: CustomTextStyle.bold32(
+                    isDark ? AppColors.white : AppColors.textDark,
+                  ),
                 ),
               ],
             ),
@@ -58,16 +63,17 @@ class _OnboardingWidgetState extends State<OnboardingWidget>
           child: Text(
             widget.data.description,
             textAlign: TextAlign.center,
-            style: CustomTextStyle.regular16(AppColors.onboardingDesc),
+            style: CustomTextStyle.regular16(
+              isDark
+                  ? AppColors.white.withValues(alpha: 0.65)
+                  : AppColors.onboardingDesc,
+            ),
           ),
         ),
         SizedBox(height: 18.h),
         Expanded(
           child: _animations.buttonTransition(
-            child: Image.asset(
-              widget.data.image,
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset(widget.data.image, fit: BoxFit.contain),
           ),
         ),
       ],

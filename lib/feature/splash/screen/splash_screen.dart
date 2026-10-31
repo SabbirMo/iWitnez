@@ -172,6 +172,7 @@ class _SplashScreenState extends State<SplashScreen>
     final dotScale = _dotScale!;
 
     final screenHeight = MediaQuery.sizeOf(context).height;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -257,7 +258,9 @@ class _SplashScreenState extends State<SplashScreen>
                           child: SlideTransition(
                             position: textSlide,
                             child: Image.asset(
-                              ImageAssets.logoText,
+                              isDark
+                                  ? ImageAssets.logoTextWhite
+                                  : ImageAssets.logoText,
                               width: 195.w,
                               fit: BoxFit.contain,
                             ),
@@ -276,7 +279,9 @@ class _SplashScreenState extends State<SplashScreen>
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w400,
-                                color: AppColors.textMuted,
+                                color: isDark
+                                    ? AppColors.white
+                                    : AppColors.textMuted,
                                 letterSpacing: 0.2,
                               ),
                             ),

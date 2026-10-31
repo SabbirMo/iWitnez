@@ -33,6 +33,7 @@ class _ShareingWidgetState extends State<ShareingWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         // 1. Image on top (just like the screenshot)
@@ -58,7 +59,7 @@ class _ShareingWidgetState extends State<ShareingWidget>
                   text: TextSpan(
                     text: widget.data.title,
                     style: CustomTextStyle.bold32(
-                      AppColors.textDark,
+                      isDark ? AppColors.white : AppColors.textDark,
                     ).copyWith(fontSize: 28.sp, fontWeight: FontWeight.w800),
                     children: [
                       TextSpan(
@@ -75,8 +76,10 @@ class _ShareingWidgetState extends State<ShareingWidget>
                           widget.data.subTitle!.isNotEmpty)
                         TextSpan(
                           text: "\n${widget.data.subTitle}",
-                          style: CustomTextStyle.bold32(AppColors.textDark)
-                              .copyWith(
+                          style:
+                              CustomTextStyle.bold32(
+                                isDark ? AppColors.white : AppColors.textDark,
+                              ).copyWith(
                                 fontSize: 28.sp,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -88,7 +91,7 @@ class _ShareingWidgetState extends State<ShareingWidget>
                   widget.data.title,
                   textAlign: TextAlign.center,
                   style: CustomTextStyle.bold32(
-                    AppColors.textDark,
+                    isDark ? AppColors.white : AppColors.textDark,
                   ).copyWith(fontSize: 28.sp, fontWeight: FontWeight.w800),
                 ),
         ),
@@ -104,7 +107,9 @@ class _ShareingWidgetState extends State<ShareingWidget>
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF6B7280),
+                color: isDark
+                    ? AppColors.white.withValues(alpha: 0.65)
+                    : const Color(0xFF6B7280),
                 height: 1.5,
               ),
             ),

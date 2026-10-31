@@ -25,13 +25,18 @@ class AddContactWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(50.r),
       child: Container(
         padding: EdgeInsets.all(10.r),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.gray.withValues(alpha: 0.4)),
+          border: Border.all(
+            color: isDark
+                ? AppColors.white.withValues(alpha: 0.4)
+                : AppColors.gray.withValues(alpha: 0.4),
+          ),
           borderRadius: BorderRadius.circular(50.r),
         ),
         child: Row(
@@ -46,7 +51,12 @@ class AddContactWidget extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: CustomTextStyle.regular14(AppColors.black)),
+                Text(
+                  title,
+                  style: CustomTextStyle.regular14(
+                    isDark ? AppColors.white : AppColors.black,
+                  ),
+                ),
                 Text(
                   subTitle,
                   style: TextStyle(
@@ -80,6 +90,8 @@ class CustomSwitchButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -90,7 +102,11 @@ class CustomSwitchButton extends StatelessWidget {
         padding: EdgeInsets.all(3.r),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20.r),
-          color: const Color(0xFFE5E7EB),
+          color: isDark
+              ? (value
+                    ? AppColors.buttonGradientStart.withValues(alpha: 0.35)
+                    : const Color(0xFF2A2D3E))
+              : const Color(0xFFE5E7EB),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
@@ -103,7 +119,7 @@ class CustomSwitchButton extends StatelessWidget {
               shape: BoxShape.circle,
               color: value
                   ? AppColors.buttonGradientStart
-                  : const Color(0xFF9CA3AF),
+                  : (isDark ? Colors.white70 : const Color(0xFF9CA3AF)),
             ),
           ),
         ),
@@ -125,6 +141,8 @@ class NotificationPreferenceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: () => onChanged(!isEnabled),
       borderRadius: BorderRadius.circular(50.r),
@@ -132,10 +150,12 @@ class NotificationPreferenceWidget extends StatelessWidget {
         height: 52.h,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? Colors.transparent : Colors.white,
           borderRadius: BorderRadius.circular(50.r),
           border: Border.all(
-            color: AppColors.gray.withValues(alpha: 0.3),
+            color: isDark
+                ? AppColors.fieldColor.withValues(alpha: 0.6)
+                : AppColors.gray.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -151,7 +171,7 @@ class NotificationPreferenceWidget extends StatelessWidget {
               child: Text(
                 "Emergency alerts",
                 style: CustomTextStyle.regular14(
-                  AppColors.black,
+                  isDark ? AppColors.white : AppColors.black,
                 ).copyWith(fontWeight: FontWeight.w400),
               ),
             ),
@@ -183,9 +203,11 @@ class RelationshipFieldWidget extends StatelessWidget {
   ];
 
   void _showRelationshipPicker(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -199,7 +221,7 @@ class RelationshipFieldWidget extends StatelessWidget {
                 height: 4.h,
                 margin: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: isDark ? Colors.white24 : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -211,24 +233,32 @@ class RelationshipFieldWidget extends StatelessWidget {
                     Text(
                       "Select Relationship",
                       style: CustomTextStyle.semiBold14(
-                        AppColors.black,
+                        isDark ? AppColors.white : AppColors.black,
                       ).copyWith(fontSize: 16.sp),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 20),
+                      icon: Icon(
+                        Icons.close,
+                        size: 20,
+                        color: isDark ? AppColors.white : AppColors.black,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? Colors.white12 : Colors.grey.shade200,
+              ),
               Flexible(
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: relationships.length,
                   itemBuilder: (context, index) {
                     final item = relationships[index];
-                    final isSelected = item.toLowerCase() ==
+                    final isSelected =
+                        item.toLowerCase() ==
                             selectedRelationship.toLowerCase() ||
                         (item.toLowerCase() == 'friend' &&
                             selectedRelationship.toLowerCase() == 'friends');
@@ -239,7 +269,9 @@ class RelationshipFieldWidget extends StatelessWidget {
                             CustomTextStyle.regular14(
                               isSelected
                                   ? AppColors.buttonGradientStart
-                                  : AppColors.black,
+                                  : (isDark
+                                        ? AppColors.white
+                                        : AppColors.black),
                             ).copyWith(
                               fontWeight: isSelected
                                   ? FontWeight.w600
@@ -269,6 +301,7 @@ class RelationshipFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isPlaceholder =
         selectedRelationship.isEmpty || selectedRelationship == 'Select';
     final displayText = isPlaceholder ? 'Select' : selectedRelationship;
@@ -280,10 +313,12 @@ class RelationshipFieldWidget extends StatelessWidget {
         height: 52.h,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? Colors.transparent : Colors.white,
           borderRadius: BorderRadius.circular(50.r),
           border: Border.all(
-            color: AppColors.gray.withValues(alpha: 0.3),
+            color: isDark
+                ? AppColors.fieldColor.withValues(alpha: 0.6)
+                : AppColors.gray.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -301,15 +336,23 @@ class RelationshipFieldWidget extends StatelessWidget {
                 style:
                     CustomTextStyle.regular14(
                       isPlaceholder
-                          ? AppColors.gray.withValues(alpha: 0.5)
-                          : AppColors.black,
+                          ? (isDark
+                                ? AppColors.white.withValues(alpha: 0.4)
+                                : AppColors.gray.withValues(alpha: 0.5))
+                          : (isDark ? AppColors.white : AppColors.black),
                     ).copyWith(
-                      fontWeight:
-                          isPlaceholder ? FontWeight.w400 : FontWeight.w500,
+                      fontWeight: isPlaceholder
+                          ? FontWeight.w400
+                          : FontWeight.w500,
                     ),
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: isDark
+                  ? AppColors.white.withValues(alpha: 0.6)
+                  : Colors.grey,
+            ),
           ],
         ),
       ),
@@ -330,9 +373,10 @@ class ContactAvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return CircleAvatar(
       radius: radius.r,
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: isDark ? Colors.transparent : Colors.grey.shade200,
       child: ClipOval(
         child: SizedBox(
           width: radius * 2.r,
@@ -383,13 +427,17 @@ class TrustedContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Colors.transparent : Colors.white,
         borderRadius: BorderRadius.circular(50.r),
         border: Border.all(
-          color: AppColors.fieldColor.withValues(alpha: 0.8),
+          color: isDark
+              ? AppColors.fieldColor.withValues(alpha: 0.6)
+              : AppColors.fieldColor.withValues(alpha: 0.8),
           width: 1,
         ),
       ),
@@ -405,7 +453,7 @@ class TrustedContactCard extends StatelessWidget {
                 Text(
                   contact.fullName,
                   style: CustomTextStyle.regular14(
-                    AppColors.black,
+                    isDark ? AppColors.white : AppColors.black,
                   ).copyWith(fontWeight: FontWeight.w600, fontSize: 14.sp),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -415,7 +463,9 @@ class TrustedContactCard extends StatelessWidget {
                   contact.phoneNumber,
                   style: TextStyle(
                     fontSize: 11.sp,
-                    color: AppColors.onboardingDesc,
+                    color: isDark
+                        ? AppColors.white.withValues(alpha: 0.6)
+                        : AppColors.onboardingDesc,
                     fontWeight: FontWeight.w400,
                   ),
                   maxLines: 1,
@@ -450,12 +500,14 @@ class AddAnotherContactWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(50.r),
       child: CustomPaint(
         painter: DashedPillPainter(
-          color: Colors.grey.shade400,
+          color: isDark ? Colors.white30 : Colors.grey.shade400,
           strokeWidth: 1.2,
           dash: 5,
           gap: 4,
@@ -470,14 +522,18 @@ class AddAnotherContactWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.add_circle_outline_rounded,
-                color: AppColors.onboardingDesc,
+                color: isDark
+                    ? AppColors.white.withValues(alpha: 0.7)
+                    : AppColors.onboardingDesc,
                 size: 20.sp,
               ),
               SizedBox(width: 8.w),
               Text(
                 "Add Another Contact",
                 style: CustomTextStyle.regular14(
-                  AppColors.onboardingDesc,
+                  isDark
+                      ? AppColors.white.withValues(alpha: 0.7)
+                      : AppColors.onboardingDesc,
                 ).copyWith(fontWeight: FontWeight.w500),
               ),
             ],

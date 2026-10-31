@@ -124,6 +124,8 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     final notifier = ref.read(createAccountProvider.notifier);
     final createAccountState = ref.watch(createAccountNotiferProvider);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(
@@ -138,13 +140,17 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                     SizedBox(height: 16.h),
                     Text(
                       AppString.createAccountTitle,
-                      style: CustomTextStyle.bold30(AppColors.textDark),
+                      style: CustomTextStyle.bold30(
+                        isDark ? AppColors.white : AppColors.textDark,
+                      ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       AppString.createAccountSubTitle,
                       style: CustomTextStyle.regular16(
-                        AppColors.gray,
+                        isDark
+                            ? AppColors.white.withValues(alpha: 0.65)
+                            : AppColors.gray,
                       ).copyWith(fontSize: 12.sp),
                     ),
                     SizedBox(height: 10.h),
@@ -153,6 +159,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                       selectedRole: provider.role,
                       onChanged: notifier.setRole,
                     ),
+                    SizedBox(height: 8.h),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -169,6 +176,12 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                                 child: SvgPicture.asset(
                                   ImageAssets.personSvg,
                                   width: 6.w,
+                                  colorFilter: ColorFilter.mode(
+                                    isDark
+                                        ? AppColors.buttonPrimaryLight
+                                        : AppColors.gray,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ),
@@ -185,6 +198,12 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                                 child: SvgPicture.asset(
                                   ImageAssets.emailSvg,
                                   width: 6.w,
+                                  colorFilter: ColorFilter.mode(
+                                    isDark
+                                        ? AppColors.buttonPrimaryLight
+                                        : AppColors.gray,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ),
@@ -201,6 +220,12 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                                 child: SvgPicture.asset(
                                   ImageAssets.lockSvg,
                                   width: 6.w,
+                                  colorFilter: ColorFilter.mode(
+                                    isDark
+                                        ? AppColors.buttonPrimaryLight
+                                        : AppColors.gray,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                               suffixIcon: IconButton(
@@ -230,6 +255,12 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                                 child: SvgPicture.asset(
                                   ImageAssets.lockSvg,
                                   width: 6.w,
+                                  colorFilter: ColorFilter.mode(
+                                    isDark
+                                        ? AppColors.buttonPrimaryLight
+                                        : AppColors.gray,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                               suffixIcon: IconButton(
@@ -334,7 +365,9 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                     RichText(
                       text: TextSpan(
                         text: AppString.alreadyHaveAccount,
-                        style: CustomTextStyle.regular14(AppColors.black),
+                        style: CustomTextStyle.regular14(
+                          isDark ? AppColors.white : AppColors.black,
+                        ),
                         children: [
                           TextSpan(
                             text: "Login",

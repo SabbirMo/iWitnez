@@ -185,8 +185,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
     final verifyState = ref.watch(verificationNotiferProvider);
     final isLoading = verifyState.isLoading || state.isLoading;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -213,8 +214,10 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                           Text(
                             'Verify Your Email',
                             textAlign: TextAlign.center,
-                            style: CustomTextStyle.bold30(AppColors.textDark)
-                                .copyWith(
+                            style:
+                                CustomTextStyle.bold30(
+                                  isDark ? AppColors.white : AppColors.textDark,
+                                ).copyWith(
                                   fontSize: 28.sp,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -228,7 +231,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                             style: GoogleFonts.inter(
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w400,
-                              color: AppColors.gray,
+                              color: isDark
+                                  ? AppColors.white.withValues(alpha: 0.65)
+                                  : AppColors.gray,
                             ),
                           ),
                           SizedBox(height: 5.h),
@@ -260,9 +265,15 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                               borderColor: const Color(0xFFE5E7EB),
                               focusedBorderColor: AppColors.buttonGradientStart,
                               filledBorderColor: AppColors.buttonGradientStart,
-                              fillColor: Colors.white,
-                              focusedFillColor: Colors.white,
-                              filledFillColor: Colors.white,
+                              fillColor: isDark
+                                  ? Colors.transparent
+                                  : Colors.white,
+                              focusedFillColor: isDark
+                                  ? Colors.transparent
+                                  : Colors.white,
+                              filledFillColor: isDark
+                                  ? Colors.transparent
+                                  : Colors.white,
                               showCursor: true,
                               cursorColor: AppColors.buttonGradientStart,
                               cursorWidth: 2.0,
@@ -270,12 +281,16 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                               hintStyle: GoogleFonts.inter(
                                 fontSize: 24.sp,
                                 fontWeight: FontWeight.w300,
-                                color: const Color(0xFF9CA3AF),
+                                color: isDark
+                                    ? AppColors.white
+                                    : const Color(0xFF9CA3AF),
                               ),
                               textStyle: GoogleFonts.inter(
                                 fontSize: 24.sp,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textDark,
+                                color: isDark
+                                    ? AppColors.white
+                                    : AppColors.textDark,
                               ),
                             ),
                             onChanged: notifier.onPinChanged,
@@ -292,7 +307,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                                 style: GoogleFonts.inter(
                                   fontSize: 13.5.sp,
                                   fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF9CA3AF),
+                                  color: isDark
+                                      ? AppColors.white.withValues(alpha: 0.65)
+                                      : const Color(0xFF9CA3AF),
                                 ),
                               ),
                               GestureDetector(
@@ -343,7 +360,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen>
                                 style: GoogleFonts.inter(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textDark,
+                                  color: isDark
+                                      ? AppColors.white
+                                      : AppColors.textDark,
                                 ),
                               ),
                               GestureDetector(

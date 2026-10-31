@@ -10,12 +10,13 @@ class TextFieldHintText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 6.h, vertical: 6.h),
       child: Text(
         text,
         style: CustomTextStyle.regular14(
-          AppColors.fieldText,
+          isDark ? AppColors.white : AppColors.fieldText,
         ).copyWith(fontWeight: FontWeight.w600),
       ),
     );

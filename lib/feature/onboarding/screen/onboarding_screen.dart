@@ -28,6 +28,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(onboardingProvider);
+    final screens = onboardingScreens(context);
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -54,17 +56,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ref.read(onboardingProvider.notifier).changeIndex(value);
                   },
                   itemBuilder: (_, index) {
-                    final data = onboardingScreens[index];
+                    final data = screens[index];
                     return OnboardingWidget(data: data);
                   },
-                  itemCount: onboardingScreens.length,
+                  itemCount: screens.length,
                 ),
               ),
               SizedBox(height: 16.h),
               Row(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 10,
-                children: List.generate(onboardingScreens.length, (index) {
+                children: List.generate(screens.length, (index) {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     width: 10.w,
@@ -84,9 +86,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onTap: () {
                   ref
                       .read(onboardingProvider.notifier)
-                      .nextPage(_pageController, onboardingScreens.length);
+                      .nextPage(_pageController, screens.length);
                   if (mounted) {
-                    if (selectedIndex == onboardingScreens.length - 1) {
+                    if (selectedIndex == screens.length - 1) {
                       context.pushReplacement(
                         AppRouteNames.createAccountScreen,
                       );

@@ -66,10 +66,12 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
   Widget build(BuildContext context) {
     final sharingState = ref.watch(shareingProvider);
     final notifier = ref.read(shareingProvider.notifier);
-    final currentItem = shareingList[sharingState.currentIndex];
+    final items = shareingList(context);
+    final currentItem =
+        items[sharingState.currentIndex.clamp(0, items.length - 1)];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -95,14 +97,14 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                     },
                     icon: Icon(
                       Icons.arrow_back,
-                      color: AppColors.textDark,
+                      color: isDark ? AppColors.white : AppColors.textDark,
                       size: 20.sp,
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
                   Text(
-                    '${sharingState.currentIndex + 1} of ${shareingList.length}',
+                    '${sharingState.currentIndex + 1} of ${items.length}',
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -117,12 +119,12 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: shareingList.length,
+                  itemCount: items.length,
                   onPageChanged: (index) {
                     notifier.changeIndex(index);
                   },
                   itemBuilder: (_, index) {
-                    final data = shareingList[index];
+                    final data = items[index];
                     return ShareingWidget(data: data);
                   },
                 ),
@@ -137,7 +139,7 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                     ? null
                     : () => notifier.executeCurrentStep(
                         controller: _pageController,
-                        totalPages: shareingList.length,
+                        totalPages: items.length,
                         onCompleted: _navigateToNextScreen,
                         onError: _handleError,
                       ),
@@ -148,7 +150,7 @@ class _SharingScreenState extends ConsumerState<SharingScreen> {
                 onPressed: () {
                   notifier.skip(
                     _pageController,
-                    shareingList.length,
+                    items.length,
                     onCompleted: _navigateToNextScreen,
                   );
                 },

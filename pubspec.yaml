@@ -70,6 +70,7 @@ flutter:
     - assets/svg/
     - assets/audio/
     - assets/video/
+    - assets/dark_images/
  
   # fonts:
   #   - family: Schyler

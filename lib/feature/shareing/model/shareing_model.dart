@@ -22,32 +22,36 @@ class ShareingModel {
   });
 }
 
-List<ShareingModel> shareingList = [
-  ShareingModel(
-    image: ImageAssets.location,
-    title: AppString.allowLocationTitle,
-    impText: AppString.allowLocationImportantText,
-    subTitle: AppString.allowLocationImp1,
-    description: AppString.allowLocationDesc,
-    buttonText: "Allow Location",
-    buttonIcon: Icons.location_on_outlined,
-  ),
-  ShareingModel(
-    image: ImageAssets.notification,
-    title: AppString.allowNotiticationTitle,
-    impText: AppString.allowNotiticationImportantText,
-    subTitle: AppString.allowNotiticationImp1,
-    description: AppString.allowNotiticationDesc,
-    buttonText: "Allow Notifications",
-    buttonIcon: Icons.notifications_none_outlined,
-  ),
-  ShareingModel(
-    image: ImageAssets.allowCamera,
-    title: AppString.allowCameraTitle,
-    impText: AppString.allowCameraImportantText,
-    subTitle: "",
-    description: AppString.allowCameraDesc,
-    buttonText: "Allow Camera & Microphone",
-    buttonIcon: Icons.camera_alt_outlined,
-  ),
-];
+List<ShareingModel> shareingList(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  return [
+    ShareingModel(
+      image: isDark ? ImageAssets.darkLocation : ImageAssets.location,
+      title: AppString.allowLocationTitle,
+      impText: AppString.allowLocationImportantText,
+      subTitle: AppString.allowLocationImp1,
+      description: AppString.allowLocationDesc,
+      buttonText: "Allow Location",
+      buttonIcon: Icons.location_on_outlined,
+    ),
+    ShareingModel(
+      image: isDark ? ImageAssets.darkNotification : ImageAssets.notification,
+      title: AppString.allowNotiticationTitle,
+      impText: AppString.allowNotiticationImportantText,
+      subTitle: AppString.allowNotiticationImp1,
+      description: AppString.allowNotiticationDesc,
+      buttonText: "Allow Notifications",
+      buttonIcon: Icons.notifications_none_outlined,
+    ),
+    ShareingModel(
+      image: isDark ? ImageAssets.darkMic : ImageAssets.allowCamera,
+      title: AppString.allowCameraTitle,
+      impText: AppString.allowCameraImportantText,
+      subTitle: "",
+      description: AppString.allowCameraDesc,
+      buttonText: "Allow Camera & Microphone",
+      buttonIcon: Icons.camera_alt_outlined,
+    ),
+  ];
+}

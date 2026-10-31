@@ -23,11 +23,16 @@ class AppTheme {
         scrolledUnderElevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
+        prefixIconColor: AppColors.onboardingDesc,
         suffixIconColor: AppColors.onboardingDesc,
         hintStyle: CustomTextStyle.regular14(
           AppColors.gray,
         ).copyWith(fontSize: 12.sp),
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: AppColors.fieldColor),
+        ),
+        enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(color: AppColors.fieldColor),
         ),
@@ -52,13 +57,40 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF0D0E15),
+      scaffoldBackgroundColor: AppColors.black,
       cardColor: const Color(0xFF181A26),
       dividerColor: Colors.white12,
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF0D0E15),
         elevation: 0,
         scrolledUnderElevation: 0,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        prefixIconColor: const Color(0xFF9CA3AF),
+        suffixIconColor: const Color(0xFF9CA3AF),
+        hintStyle: CustomTextStyle.regular14(
+          AppColors.white.withValues(alpha: 0.5),
+        ).copyWith(fontSize: 12.sp),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: AppColors.white.withValues(alpha: 0.2)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: AppColors.white.withValues(alpha: 0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: AppColors.primaryColor),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: AppColors.accentRed),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: AppColors.accentRed),
+        ),
       ),
     );
     return base.copyWith(textTheme: GoogleFonts.interTextTheme(base.textTheme));

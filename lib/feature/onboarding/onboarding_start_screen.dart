@@ -45,6 +45,7 @@ class _OnboardingStartScreenState extends ConsumerState<OnboardingStartScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -59,7 +60,7 @@ class _OnboardingStartScreenState extends ConsumerState<OnboardingStartScreen>
                   // 1. Header Text Section ("iWitnez" + "Stay Connected. Stay Protected")
                   _animations.textTransition(
                     child: Image.asset(
-                      ImageAssets.logoText,
+                      isDark ? ImageAssets.logoTextWhite : ImageAssets.logoText,
                       width: 210.w,
                       fit: BoxFit.contain,
                     ),
@@ -73,7 +74,7 @@ class _OnboardingStartScreenState extends ConsumerState<OnboardingStartScreen>
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textMuted,
+                        color: isDark ? AppColors.white : AppColors.textMuted,
                         letterSpacing: 0.2,
                       ),
                     ),

@@ -17,13 +17,14 @@ class RoleSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppString.loginAs,
           style: GoogleFonts.inter(
-            color: const Color(0xFF4A4A4A),
+            color: isDark ? AppColors.white : const Color(0xFF4A4A4A),
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
           ),
@@ -72,20 +73,36 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final borderRadius = 12.r;
     const borderWidth = 1.0;
-
-    final bgColor =
-        isSelected ? const Color(0xFFFAF5FF) : AppColors.white;
-    final borderColor =
-        isSelected ? const Color(0xFFE9D5FF) : const Color(0xFFE5E7EB);
-    final iconBg =
-        isSelected ? const Color(0xFF9333EA) : const Color(0xFFF3F4F6);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isSelected
+        ? isDark
+              ? AppColors.buttonPrimaryLight.withValues(alpha: 0.2)
+              : const Color(0xFFFAF5FF)
+        : isDark
+        ? Colors.transparent
+        : AppColors.white;
+    final borderColor = isSelected
+        ? isDark
+              ? AppColors.buttonPrimaryLight
+              : const Color(0xFFE9D5FF)
+        : isDark
+        ? AppColors.white.withValues(alpha: 0.2)
+        : const Color(0xFFE5E7EB);
+    final iconBg = isSelected
+        ? const Color(0xFF9333EA)
+        : const Color(0xFFF3F4F6);
     final iconColor = isSelected ? AppColors.white : const Color(0xFF4B5563);
-    final titleColor =
-        isSelected ? const Color(0xFF7E22CE) : const Color(0xFF374151);
-    final titleWeight =
-        isSelected ? FontWeight.w700 : FontWeight.w600;
-    final subtitleColor =
-        isSelected ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF);
+    final titleColor = isSelected
+        ? isDark
+              ? AppColors.white
+              : const Color(0xFF7E22CE)
+        : isDark
+        ? AppColors.white
+        : const Color(0xFF374151);
+    final titleWeight = isSelected ? FontWeight.w700 : FontWeight.w600;
+    final subtitleColor = isSelected
+        ? const Color(0xFF6B7280)
+        : const Color(0xFF9CA3AF);
 
     return GestureDetector(
       onTap: onTap,
@@ -105,15 +122,8 @@ class _RoleCard extends StatelessWidget {
             Container(
               width: 32.w,
               height: 32.w,
-              decoration: BoxDecoration(
-                color: iconBg,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 18.sp,
-              ),
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor, size: 18.sp),
             ),
             SizedBox(width: 8.w),
             Expanded(

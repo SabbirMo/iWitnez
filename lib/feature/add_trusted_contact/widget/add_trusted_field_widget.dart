@@ -467,17 +467,18 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
     final notifier = ref.read(addTrustedContactProvider.notifier);
     final defaultRel = resolveRelationshipFromCircle(widget.circleTitle);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
-            color: AppColors.black,
+            color: isDark ? AppColors.white : AppColors.black,
             size: 32.sp,
           ),
           onPressed: () {
@@ -510,13 +511,19 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                 Text(
                   AppString.addTrustedContactTitle,
                   textAlign: TextAlign.center,
-                  style: CustomTextStyle.ibold28(AppColors.black),
+                  style: CustomTextStyle.ibold28(
+                    isDark ? AppColors.white : AppColors.black,
+                  ),
                 ),
                 SizedBox(height: 6.h),
                 Text(
                   AppString.addTrustedContactEmer,
                   textAlign: TextAlign.center,
-                  style: CustomTextStyle.regular12(AppColors.gray),
+                  style: CustomTextStyle.regular12(
+                    isDark
+                        ? AppColors.white.withValues(alpha: 0.65)
+                        : AppColors.gray,
+                  ),
                 ),
                 SizedBox(height: 24.h),
               ] else ...[
@@ -599,7 +606,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                         height: 52.h,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? Colors.transparent : Colors.white,
                           borderRadius: BorderRadius.circular(50.r),
                           border: Border.all(
                             color: const Color(
@@ -775,3 +782,6 @@ class _AvatarPicker extends StatelessWidget {
     );
   }
 }
+
+
+

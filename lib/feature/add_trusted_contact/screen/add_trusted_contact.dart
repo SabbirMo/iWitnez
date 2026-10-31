@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
@@ -48,8 +49,9 @@ class _AddTrustedContactScreenState
   Widget build(BuildContext context) {
     final contacts = ref.watch(trustedContactsProvider);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -59,7 +61,7 @@ class _AddTrustedContactScreenState
               SizedBox(height: 20.h),
               _animations.buttonTransition(
                 child: Image.asset(
-                  "assets/images/trusted.png",
+                  isDark ? ImageAssets.darkTrusted : ImageAssets.trusted,
                   height: 190.h,
                   fit: BoxFit.contain,
                 ),
@@ -71,7 +73,9 @@ class _AddTrustedContactScreenState
                 child: Text(
                   AppString.addTrustedContactTitle,
                   textAlign: TextAlign.center,
-                  style: CustomTextStyle.ibold28(AppColors.black),
+                  style: CustomTextStyle.ibold28(
+                    isDark ? AppColors.white : AppColors.black,
+                  ),
                 ),
               ),
 
@@ -81,7 +85,11 @@ class _AddTrustedContactScreenState
                 child: Text(
                   AppString.addTrustedContactDesc,
                   textAlign: TextAlign.center,
-                  style: CustomTextStyle.regular14(AppColors.gray),
+                  style: CustomTextStyle.regular14(
+                    isDark
+                        ? AppColors.white.withValues(alpha: 0.65)
+                        : AppColors.gray,
+                  ),
                 ),
               ),
 
