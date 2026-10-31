@@ -6,17 +6,21 @@ class AccountSettingsState {
     required this.email,
     required this.phone,
     required this.isTwoFactorEnabled,
-    this.isLoading = false,
-    this.isToggling2FA = false,
+    bool? isLoading = false,
+    bool? isToggling2FA = false,
     this.errorMessage,
-  });
+  })  : _isLoading = isLoading ?? false,
+        _isToggling2FA = isToggling2FA ?? false;
 
   final String email;
   final String phone;
   final bool isTwoFactorEnabled;
-  final bool isLoading;
-  final bool isToggling2FA;
+  final bool? _isLoading;
+  final bool? _isToggling2FA;
   final String? errorMessage;
+
+  bool get isLoading => _isLoading ?? false;
+  bool get isToggling2FA => _isToggling2FA ?? false;
 
   factory AccountSettingsState.initial() {
     final cached = ProfileRepository().cachedProfile;
