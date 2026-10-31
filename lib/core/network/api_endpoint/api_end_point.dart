@@ -13,6 +13,7 @@ class ApiEndPoints {
   static const String resetPassword = '/api/v1/auth/password/reset/';
   static const String getProfile = '/api/v1/auth/me/';
   static const String deviceSettings = '/api/v1/auth/device-settings/';
+  static const String safetySettings = '/api/v1/auth/safety-settings/';
   static const String notifications = '/api/v1/notifications/';
   static const String notificationsToggle = '/api/v1/notifications/toggle/';
   static String notificationMarkRead(String id) =>

@@ -30,7 +30,7 @@ class SettingsTile extends StatelessWidget {
               height: 48,
               width: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFF8B5CF6).withOpacity(0.15), // Light purple background
+                color: const Color(0xFF8B5CF6).withValues(alpha: 0.15), // Light purple background
                 shape: BoxShape.circle,
               ),
               child: Icon(
