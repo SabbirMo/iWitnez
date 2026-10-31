@@ -48,6 +48,18 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
 
   bool get _isEditMode => widget.contact != null || widget.isEditMember;
 
+  static String resolveRelationshipFromCircle(String? circleTitle) {
+    if (circleTitle == null || circleTitle.trim().isEmpty) return '';
+    final lower = circleTitle.trim().toLowerCase();
+    if (lower == 'friends' || lower == 'friend') return 'Friend';
+    if (lower == 'family') return 'Family';
+    if (lower == 'partner' || lower == 'spouse') return 'Partner';
+    if (lower == 'work' || lower == 'colleague') return 'Work';
+    if (lower == 'other') return 'Other';
+    return circleTitle.trim()[0].toUpperCase() +
+        circleTitle.trim().substring(1);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +79,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
 
     if (widget.circleMember != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        final defaultRel = resolveRelationshipFromCircle(widget.circleTitle);
         ref
             .read(addTrustedContactProvider.notifier)
             .setContact(
@@ -77,7 +90,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                 phoneNumber: widget.circleMember!.phone,
                 relationship: widget.circleMember!.relationship.isNotEmpty
                     ? widget.circleMember!.relationship
-                    : 'Sister',
+                    : (defaultRel.isNotEmpty ? defaultRel : 'Family'),
                 circle: widget.circleTitle?.toLowerCase() ?? 'family',
                 emergencyAlerts: widget.circleMember!.emergencyAlerts,
                 avatarUrl: widget.circleMember!.avatarUrl,
@@ -89,6 +102,13 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
         ref
             .read(addTrustedContactProvider.notifier)
             .setContact(widget.contact!);
+      });
+    } else if (widget.circleTitle != null && widget.circleTitle!.isNotEmpty) {
+      final defaultRel = resolveRelationshipFromCircle(widget.circleTitle);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(addTrustedContactProvider.notifier)
+            .updateRelationship(defaultRel);
       });
     }
   }
@@ -275,20 +295,21 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
         widget.circleMember?.avatarUrl ??
         widget.contact?.avatarUrl;
 
+    final defaultRel = resolveRelationshipFromCircle(widget.circleTitle);
     final chosenRelationship = state.relationship.isNotEmpty
         ? state.relationship
         : (widget.circleMember?.relationship.isNotEmpty == true
               ? widget.circleMember!.relationship
               : (widget.contact?.relationship.isNotEmpty == true
                     ? widget.contact!.relationship
-                    : 'Sister'));
+                    : (defaultRel.isNotEmpty ? defaultRel : 'Family')));
 
     final chosenCircle = state.circle.isNotEmpty
         ? state.circle
         : (widget.contact?.circle.isNotEmpty == true
               ? widget.contact!.circle
               : (widget.circleTitle != null
-                    ? widget.circleTitle!.toLowerCase()
+                    ? widget.circleTitle!.toLowerCase().trim()
                     : TrustedContactModel.defaultCircleFor(
                         chosenRelationship,
                       )));
@@ -444,6 +465,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
   Widget build(BuildContext context) {
     final state = ref.watch(addTrustedContactProvider);
     final notifier = ref.read(addTrustedContactProvider.notifier);
+    final defaultRel = resolveRelationshipFromCircle(widget.circleTitle);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -545,7 +567,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                         ? state.relationship
                         : (widget.contact?.relationship ??
                               widget.circleMember?.relationship ??
-                              'Sister'),
+                              (defaultRel.isNotEmpty ? defaultRel : 'Select')),
                     onRelationshipChanged: notifier.updateRelationship,
                   ),
 

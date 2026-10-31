@@ -25,6 +25,7 @@ class TrustedContactModel {
     if (r == 'friend' || r == 'friends') return 'friends';
     if (r == 'partner' || r == 'spouse') return 'partner';
     if (r == 'colleague' || r == 'work') return 'work';
+    if (r == 'other') return 'other';
     return 'family';
   }
 

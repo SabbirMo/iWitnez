@@ -175,15 +175,10 @@ class RelationshipFieldWidget extends StatelessWidget {
   });
 
   static const List<String> relationships = [
-    'Sister',
-    'Brother',
-    'Mother',
-    'Father',
+    'Family',
     'Friend',
     'Partner',
-    'Spouse',
-    'Son',
-    'Daughter',
+    'Work',
     'Other',
   ];
 
@@ -233,9 +228,10 @@ class RelationshipFieldWidget extends StatelessWidget {
                   itemCount: relationships.length,
                   itemBuilder: (context, index) {
                     final item = relationships[index];
-                    final isSelected =
-                        item.toLowerCase() ==
-                        selectedRelationship.toLowerCase();
+                    final isSelected = item.toLowerCase() ==
+                            selectedRelationship.toLowerCase() ||
+                        (item.toLowerCase() == 'friend' &&
+                            selectedRelationship.toLowerCase() == 'friends');
                     return ListTile(
                       title: Text(
                         item,
@@ -273,6 +269,10 @@ class RelationshipFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPlaceholder =
+        selectedRelationship.isEmpty || selectedRelationship == 'Select';
+    final displayText = isPlaceholder ? 'Select' : selectedRelationship;
+
     return InkWell(
       onTap: () => _showRelationshipPicker(context),
       borderRadius: BorderRadius.circular(50.r),
@@ -297,16 +297,15 @@ class RelationshipFieldWidget extends StatelessWidget {
             SizedBox(width: 12.w),
             Expanded(
               child: Text(
-                selectedRelationship.isEmpty ? "Sister" : selectedRelationship,
+                displayText,
                 style:
                     CustomTextStyle.regular14(
-                      selectedRelationship.isEmpty
+                      isPlaceholder
                           ? AppColors.gray.withValues(alpha: 0.5)
                           : AppColors.black,
                     ).copyWith(
-                      fontWeight: selectedRelationship.isEmpty
-                          ? FontWeight.w400
-                          : FontWeight.w500,
+                      fontWeight:
+                          isPlaceholder ? FontWeight.w400 : FontWeight.w500,
                     ),
               ),
             ),
