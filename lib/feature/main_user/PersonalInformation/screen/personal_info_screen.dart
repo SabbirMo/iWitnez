@@ -5,6 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:iwitnez/core/network/base_url/api_base_url.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import '../provider/personal_info_provider.dart';
 import '../widget/custom_text_field.dart';
 
@@ -62,23 +65,28 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
     return Icons.person_outline_rounded;
   }
 
-  ImageProvider _getProfileImage(String savedUrl) {
+  ImageProvider? _getProfileImage(String savedUrl) {
     if (_pickedImagePath != null && _pickedImagePath!.isNotEmpty) {
       final file = File(_pickedImagePath!);
       if (file.existsSync()) {
         return FileImage(file);
       }
     }
-    if (savedUrl.startsWith('http://') || savedUrl.startsWith('https://')) {
-      return NetworkImage(savedUrl);
+    final clean = savedUrl.trim();
+    if (clean.isEmpty) {
+      return null;
     }
-    if (savedUrl.isNotEmpty) {
-      final file = File(savedUrl);
-      if (file.existsSync()) {
-        return FileImage(file);
-      }
+    if (clean.startsWith('http://') || clean.startsWith('https://')) {
+      return NetworkImage(clean);
     }
-    return const NetworkImage('https://i.pravatar.cc/150?img=5');
+    if (clean.startsWith('/')) {
+      return NetworkImage('${ApiBaseUrl.baseUrl}$clean');
+    }
+    final file = File(clean);
+    if (file.existsSync()) {
+      return FileImage(file);
+    }
+    return null;
   }
 
   Future<void> _pickImage() async {
@@ -101,28 +109,35 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
   Future<void> _selectDate(String currentDateStr) async {
     DateTime initialDate = DateTime(1998, 5, 12);
     try {
-      final parts = currentDateStr.trim().split(RegExp(r'\s+'));
-      if (parts.length >= 3) {
-        final day = int.tryParse(parts[0]) ?? 12;
-        final monthStr = parts[1].toLowerCase();
-        const monthNames = [
-          'jan',
-          'feb',
-          'mar',
-          'apr',
-          'may',
-          'jun',
-          'jul',
-          'aug',
-          'sep',
-          'oct',
-          'nov',
-          'dec',
-        ];
-        final monthIndex = monthNames.indexWhere((m) => monthStr.startsWith(m));
-        final month = monthIndex != -1 ? monthIndex + 1 : 5;
-        final year = int.tryParse(parts[2]) ?? 1998;
-        initialDate = DateTime(year, month, day);
+      final parsed = DateTime.tryParse(currentDateStr.trim());
+      if (parsed != null) {
+        initialDate = parsed;
+      } else {
+        final parts = currentDateStr.trim().split(RegExp(r'\s+'));
+        if (parts.length >= 3) {
+          final day = int.tryParse(parts[0]) ?? 12;
+          final monthStr = parts[1].toLowerCase();
+          const monthNames = [
+            'jan',
+            'feb',
+            'mar',
+            'apr',
+            'may',
+            'jun',
+            'jul',
+            'aug',
+            'sep',
+            'oct',
+            'nov',
+            'dec',
+          ];
+          final monthIndex = monthNames.indexWhere(
+            (m) => monthStr.startsWith(m),
+          );
+          final month = monthIndex != -1 ? monthIndex + 1 : 5;
+          final year = int.tryParse(parts[2]) ?? 1998;
+          initialDate = DateTime(year, month, day);
+        }
       }
     } catch (_) {}
 
@@ -277,32 +292,80 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
     }
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     FocusScope.of(context).unfocus();
     final controller = ref.read(personalInfoControllerProvider.notifier);
 
-    controller.updateUserInfo(
-      fullName: _fullNameController.text,
-      phoneNumber: _phoneNumberController.text,
-      email: _emailController.text,
-      dateOfBirth: _dobController.text,
-      gender: _genderController.text,
-      address: _addressController.text,
-      profileImageUrl: _pickedImagePath,
-    );
+    File? avatarFile;
+    if (_pickedImagePath != null && _pickedImagePath!.isNotEmpty) {
+      final f = File(_pickedImagePath!);
+      if (f.existsSync()) {
+        avatarFile = f;
+      }
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Personal information saved successfully!'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Color(0xFF8B5CF6),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    try {
+      final success = await controller.saveProfile(
+        fullName: _fullNameController.text,
+        phoneNumber: _phoneNumberController.text,
+        email: _emailController.text,
+        dateOfBirth: _dobController.text,
+        gender: _genderController.text,
+        address: _addressController.text,
+        avatarFile: avatarFile,
+      );
+
+      if (success && mounted) {
+        setState(() {
+          _pickedImagePath = null;
+        });
+        if (context.canPop()) {
+          context.pop();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomSnackBar.showError(
+          context,
+          message: ApiErrorHandler.getMessage(e),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(personalInfoControllerProvider, (previous, next) {
+      final oldUser = previous?.userInfo;
+      final newUser = next.userInfo;
+      if (oldUser != newUser) {
+        if (_fullNameController.text.isEmpty ||
+            _fullNameController.text == oldUser?.fullName) {
+          _fullNameController.text = newUser.fullName;
+        }
+        if (_phoneNumberController.text.isEmpty ||
+            _phoneNumberController.text == oldUser?.phoneNumber) {
+          _phoneNumberController.text = newUser.phoneNumber;
+        }
+        if (_emailController.text.isEmpty ||
+            _emailController.text == oldUser?.email) {
+          _emailController.text = newUser.email;
+        }
+        if (_dobController.text.isEmpty ||
+            _dobController.text == oldUser?.dateOfBirth) {
+          _dobController.text = newUser.dateOfBirth;
+        }
+        if (_genderController.text.isEmpty ||
+            _genderController.text == oldUser?.gender) {
+          _genderController.text = newUser.gender;
+        }
+        if (_addressController.text.isEmpty ||
+            _addressController.text == oldUser?.address) {
+          _addressController.text = newUser.address;
+        }
+      }
+    });
+
     final state = ref.watch(personalInfoControllerProvider);
     final user = state.userInfo;
 
@@ -333,152 +396,218 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
         ),
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed: _onSave,
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: Color(0xFF8B5CF6),
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
+          if (state.isSaving)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF8B5CF6),
+                  ),
+                ),
+              ),
+            )
+          else
+            TextButton(
+              onPressed: _onSave,
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  color: Color(0xFF8B5CF6),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
             ),
-          ),
           const SizedBox(width: 10),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.05),
-                spreadRadius: 2,
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- Profile Header (Displays saved information) ---
-              Row(
-                children: [
-                  Stack(
-                    children: [
-                      Container(
-                        height: 70,
-                        width: 70,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          image: DecorationImage(
-                            image: _getProfileImage(user.profileImageUrl),
-                            fit: BoxFit.cover,
+      body: SafeArea(
+        child: state.isLoading && user.fullName.isEmpty
+            ? const Center(
+                child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
+              )
+            : RefreshIndicator(
+                onRefresh: () async {
+                  await ref
+                      .read(personalInfoControllerProvider.notifier)
+                      .loadProfile(forceRefresh: true);
+                },
+                color: const Color(0xFF8B5CF6),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    20.w,
+                    16.h,
+                    20.w,
+                    60.h + MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(20.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.05),
+                          spreadRadius: 2,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // --- Profile Header (Displays saved information) ---
+                        Row(
+                          children: [
+                            Stack(
+                              children: [
+                                () {
+                                  final profileImage = _getProfileImage(
+                                    user.profileImageUrl,
+                                  );
+                                  return Container(
+                                    height: 70,
+                                    width: 70,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.grey.shade200,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                      image: profileImage != null
+                                          ? DecorationImage(
+                                              image: profileImage,
+                                              fit: BoxFit.cover,
+                                              onError: (_, __) {},
+                                            )
+                                          : null,
+                                    ),
+                                    child: profileImage == null
+                                        ? Icon(
+                                            Icons.person,
+                                            color: Colors.grey.shade400,
+                                            size: 34,
+                                          )
+                                        : null,
+                                  );
+                                }(),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: _pickImage,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF8B5CF6),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    user.fullName.isNotEmpty
+                                        ? user.fullName
+                                        : 'User',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  if (user.phoneNumber.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      user.phoneNumber,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+
+                        // --- Form Fields ---
+                        CustomTextField(
+                          label: 'Full Name',
+                          controller: _fullNameController,
+                          icon: Icons.person_outline,
+                        ),
+                        const SizedBox(height: 20),
+
+                        CustomTextField(
+                          label: 'Phone Number',
+                          controller: _phoneNumberController,
+                          icon: Icons.phone_outlined,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Email field is disabled so it cannot be edited
+                        CustomTextField(
+                          label: 'Email Address',
+                          controller: _emailController,
+                          icon: Icons.email_outlined,
+                          enabled: false,
+                        ),
+                        const SizedBox(height: 20),
+
+                        CustomTextField(
+                          label: 'Date of Birth',
+                          controller: _dobController,
+                          icon: Icons.calendar_today_outlined,
+                          isDropdown: true,
+                          onTap: () => _selectDate(_dobController.text),
+                        ),
+                        const SizedBox(height: 20),
+
+                        Container(
+                          key: _genderFieldKey,
+                          child: CustomTextField(
+                            label: 'Gender',
+                            controller: _genderController,
+                            icon: _getGenderIcon(_genderController.text),
+                            isDropdown: true,
+                            onTap: () => _selectGender(_genderController.text),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF8B5CF6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                          ),
+                        const SizedBox(height: 20),
+
+                        CustomTextField(
+                          label: 'Address',
+                          controller: _addressController,
+                          icon: Icons.location_on_outlined,
+                          isMultiline: true,
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 16.h),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.fullName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.phoneNumber,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-
-              // --- Form Fields ---
-              CustomTextField(
-                label: 'Full Name',
-                controller: _fullNameController,
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 20),
-
-              CustomTextField(
-                label: 'Phone Number',
-                controller: _phoneNumberController,
-                icon: Icons.phone_outlined,
-              ),
-              const SizedBox(height: 20),
-
-              CustomTextField(
-                label: 'Email Address',
-                controller: _emailController,
-                icon: Icons.email_outlined,
-              ),
-              const SizedBox(height: 20),
-
-              CustomTextField(
-                label: 'Date of Birth',
-                controller: _dobController,
-                icon: Icons.calendar_today_outlined,
-                isDropdown: true,
-                onTap: () => _selectDate(_dobController.text),
-              ),
-              const SizedBox(height: 20),
-
-              Container(
-                key: _genderFieldKey,
-                child: CustomTextField(
-                  label: 'Gender',
-                  controller: _genderController,
-                  icon: _getGenderIcon(_genderController.text),
-                  isDropdown: true,
-                  onTap: () => _selectGender(_genderController.text),
                 ),
               ),
-              const SizedBox(height: 20),
-
-              CustomTextField(
-                label: 'Address',
-                controller: _addressController,
-                icon: Icons.location_on_outlined,
-                isMultiline: true,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

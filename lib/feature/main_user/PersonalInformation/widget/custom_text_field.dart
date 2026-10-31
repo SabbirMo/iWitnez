@@ -10,6 +10,8 @@ class CustomTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
   final TextInputType? keyboardType;
+  final bool enabled;
+  final bool readOnly;
 
   const CustomTextField({
     super.key,
@@ -22,6 +24,8 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.keyboardType,
+    this.enabled = true,
+    this.readOnly = false,
   });
 
   @override
@@ -33,40 +37,72 @@ class CustomTextField extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 13,
-            color: Colors.grey[700],
+            color: enabled ? Colors.grey[700] : Colors.grey[500],
             fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
         InkWell(
-          onTap: isDropdown ? onTap : null,
+          onTap: (isDropdown && enabled) ? onTap : null,
           borderRadius: BorderRadius.circular(12),
           child: IgnorePointer(
-            ignoring: isDropdown,
+            ignoring: isDropdown || !enabled,
             child: TextFormField(
               controller: controller,
               initialValue: controller == null ? value : null,
               onChanged: onChanged,
-              keyboardType: keyboardType ??
+              enabled: enabled,
+              readOnly: readOnly || isDropdown || !enabled,
+              textAlignVertical: isMultiline ? TextAlignVertical.top : null,
+              keyboardType:
+                  keyboardType ??
                   (isMultiline
                       ? TextInputType.multiline
                       : (label.toLowerCase().contains('phone')
-                          ? TextInputType.phone
-                          : (label.toLowerCase().contains('email')
-                              ? TextInputType.emailAddress
-                              : TextInputType.text))),
+                            ? TextInputType.phone
+                            : (label.toLowerCase().contains('email')
+                                  ? TextInputType.emailAddress
+                                  : TextInputType.text))),
               maxLines: isMultiline ? 3 : 1,
-              readOnly: isDropdown,
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: const Color(0xFF8B5CF6), size: 20),
-                suffixIcon: isDropdown
-                    ? const Icon(Icons.keyboard_arrow_down, color: Colors.grey)
-                    : null,
+                prefixIcon: isMultiline
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 14),
+                            child: Icon(
+                              icon,
+                              color: enabled
+                                  ? const Color(0xFF8B5CF6)
+                                  : const Color(
+                                      0xFF8B5CF6,
+                                    ).withValues(alpha: 0.4),
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Icon(
+                        icon,
+                        color: enabled
+                            ? const Color(0xFF8B5CF6)
+                            : const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                        size: 20,
+                      ),
+
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: enabled ? Colors.white : const Color(0xFFF3F4F6),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 14,
                   horizontal: 12,
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.grey.withValues(alpha: 0.15),
+                  ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -88,9 +124,9 @@ class CustomTextField extends StatelessWidget {
                   ),
                 ),
               ),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.black87,
+                color: enabled ? Colors.black87 : Colors.grey[600],
                 fontWeight: FontWeight.w500,
               ),
             ),

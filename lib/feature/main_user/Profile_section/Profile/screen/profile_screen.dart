@@ -189,95 +189,114 @@ class _ProfileScreenState extends State<ProfileScreen>
         child: ListenableBuilder(
           listenable: _provider,
           builder: (context, _) {
-            if (_provider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+            if (_provider.isLoading && _provider.profile.name.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(color: Color(0xFF9023FF)),
+              );
             }
-            return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: 20.w,
-                vertical: 16.h,
-              ).copyWith(bottom: 68.h + MediaQuery.of(context).padding.bottom),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppString.profile,
-                    style: CustomTextStyle.bold30(
-                      AppColors.textDark,
-                    ).copyWith(fontSize: 24.sp),
-                  ),
-                  SizedBox(height: 20.h),
-                  ProfileHeaderCard(profile: _provider.profile),
-                  SizedBox(height: 24.h),
-                  ProfileMenuGroup(
-                    children: [
-                      for (int i = 0; i < _mainMenu.length; i++) ...[
-                        () {
-                          final item = _mainMenu[i];
-                          final isNotification =
-                              item.action == ProfileMenuAction.notifications;
+            return RefreshIndicator(
+              onRefresh: () async {
+                await _provider.fetchProfile(forceRefresh: true);
+                await _checkNotificationStatus();
+              },
+              color: const Color(0xFF9023FF),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.w,
+                  vertical: 16.h,
+                ).copyWith(bottom: 68.h + MediaQuery.of(context).padding.bottom),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppString.profile,
+                      style: CustomTextStyle.bold30(
+                        AppColors.textDark,
+                      ).copyWith(fontSize: 24.sp),
+                    ),
+                    SizedBox(height: 20.h),
+                    ProfileHeaderCard(profile: _provider.profile),
+                    SizedBox(height: 24.h),
+                    ProfileMenuGroup(
+                      children: [
+                        for (int i = 0; i < _mainMenu.length; i++) ...[
+                          () {
+                            final item = _mainMenu[i];
+                            final isNotification =
+                                item.action == ProfileMenuAction.notifications;
 
-                          return ProfileMenuTile(
-                            item: item,
-                            showDivider: i != _mainMenu.length - 1,
-                            trailing: isNotification
-                                ? SizedBox(
-                                    height: 32.h,
-                                    child: Transform.scale(
-                                      scale: 0.85,
-                                      child: CupertinoSwitch(
-                                        activeTrackColor: const Color(
-                                          0xFF9023FF,
+                            return ProfileMenuTile(
+                              item: item,
+                              showDivider: i != _mainMenu.length - 1,
+                              trailing: isNotification
+                                  ? SizedBox(
+                                      height: 32.h,
+                                      child: Transform.scale(
+                                        scale: 0.85,
+                                        child: CupertinoSwitch(
+                                          activeTrackColor: const Color(
+                                            0xFF9023FF,
+                                          ),
+                                          value: _isNotificationEnabled,
+                                          onChanged: _isUpdatingNotification
+                                              ? null
+                                              : (val) =>
+                                                  _toggleNotification(val),
                                         ),
-                                        value: _isNotificationEnabled,
-                                        onChanged: _isUpdatingNotification
-                                            ? null
-                                            : (val) => _toggleNotification(val),
                                       ),
-                                    ),
-                                  )
-                                : null,
-                            onTap: isNotification
-                                ? () => _toggleNotification(
-                                    !_isNotificationEnabled,
-                                  )
-                                : () => _controller.handleMenuTap(
-                                    context,
-                                    item.action,
-                                  ),
-                          );
-                        }(),
+                                    )
+                                  : null,
+                              onTap: isNotification
+                                  ? () => _toggleNotification(
+                                      !_isNotificationEnabled,
+                                    )
+                                  : () async {
+                                      await _controller.handleMenuTap(
+                                        context,
+                                        item.action,
+                                      );
+                                      if (item.action ==
+                                              ProfileMenuAction
+                                                  .personalInformation &&
+                                          mounted) {
+                                        _provider.fetchProfile();
+                                      }
+                                    },
+                            );
+                          }(),
+                        ],
                       ],
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  ProfileMenuGroup(
-                    children: [
-                      ProfileMenuTile(
-                        item: _aboutItem,
-                        showDivider: false,
-                        onTap: () => _controller.handleMenuTap(
-                          context,
-                          _aboutItem.action,
+                    ),
+                    SizedBox(height: 16.h),
+                    ProfileMenuGroup(
+                      children: [
+                        ProfileMenuTile(
+                          item: _aboutItem,
+                          showDivider: false,
+                          onTap: () => _controller.handleMenuTap(
+                            context,
+                            _aboutItem.action,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  ProfileMenuGroup(
-                    children: [
-                      ProfileMenuTile(
-                        item: _logOutItem,
-                        showDivider: false,
-                        onTap: () => _controller.handleMenuTap(
-                          context,
-                          _logOutItem.action,
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    ProfileMenuGroup(
+                      children: [
+                        ProfileMenuTile(
+                          item: _logOutItem,
+                          showDivider: false,
+                          onTap: () => _controller.handleMenuTap(
+                            context,
+                            _logOutItem.action,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-                ],
+                      ],
+                    ),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
               ),
             );
           },

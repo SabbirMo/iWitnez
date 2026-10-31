@@ -8,10 +8,13 @@ import 'package:iwitnez/router/app_route_names.dart';
 class ProfileController {
   ProfileController();
 
-  void handleMenuTap(BuildContext context, ProfileMenuAction action) {
+  Future<void> handleMenuTap(
+    BuildContext context,
+    ProfileMenuAction action,
+  ) async {
     switch (action) {
       case ProfileMenuAction.personalInformation:
-        context.push(AppRouteNames.personalInfoScreen);
+        await context.push(AppRouteNames.personalInfoScreen);
         break;
       case ProfileMenuAction.accountSettings:
         context.push(AppRouteNames.accountSettingsScreen);

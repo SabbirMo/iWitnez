@@ -1,29 +1,51 @@
 import 'package:flutter/foundation.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/model/profile_model.dart';
+import 'package:iwitnez/feature/main_user/Profile_section/Profile/model/user_profile_response_model.dart';
+import 'package:iwitnez/feature/main_user/Profile_section/Profile/repository/profile_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
-  UserProfile _profile = _dummyProfile;
+  final ProfileRepository _repository;
+  UserProfile _profile = _initialProfile;
+  UserProfileResponseModel? _rawProfile;
   bool _isLoading = false;
 
-  UserProfile get profile => _profile;
-  bool get isLoading => _isLoading;
-
-  Future<void> fetchProfile() async {
-    _isLoading = true;
-    notifyListeners();
-
-    // TODO: replace with real API/local-db call
-    await Future.delayed(const Duration(milliseconds: 300));
-    _profile = _dummyProfile;
-
-    _isLoading = false;
-    notifyListeners();
+  ProfileProvider([ProfileRepository? repository])
+      : _repository = repository ?? ProfileRepository() {
+    final cached = _repository.cachedProfile;
+    if (cached != null) {
+      _rawProfile = cached;
+      _profile = UserProfile.fromResponse(cached);
+    }
   }
 
-  static const UserProfile _dummyProfile = UserProfile(
-    name: 'Sarah Khan',
-    phone: '+880 1712 345678',
-    avatarUrl: 'https://i.pravatar.cc/150?img=5',
-    isOnline: true,
+  UserProfile get profile => _profile;
+  UserProfileResponseModel? get rawProfile => _rawProfile;
+  bool get isLoading => _isLoading;
+
+  Future<void> fetchProfile({bool forceRefresh = false}) async {
+    if (_rawProfile == null) {
+      _isLoading = true;
+      notifyListeners();
+    }
+
+    try {
+      final data = await _repository.getProfile(forceRefresh: forceRefresh);
+      if (data != null) {
+        _rawProfile = data;
+        _profile = UserProfile.fromResponse(data);
+      }
+    } catch (e) {
+      debugPrint('[ProfileProvider] fetchProfile error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  static const UserProfile _initialProfile = UserProfile(
+    name: '',
+    phone: '',
+    avatarUrl: '',
+    isOnline: false,
   );
 }

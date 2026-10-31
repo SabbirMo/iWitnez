@@ -1,10 +1,27 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/network/base_url/api_base_url.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/model/profile_model.dart';
 
 const Color _kAccentPurple = Color(0xFF9023FF);
+
+ImageProvider? _resolveAvatarImage(String url) {
+  if (url.isEmpty) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return NetworkImage(url);
+  }
+  final file = File(url);
+  if (file.existsSync()) {
+    return FileImage(file);
+  }
+  if (url.startsWith('/')) {
+    return NetworkImage('${ApiBaseUrl.baseUrl}$url');
+  }
+  return NetworkImage(url);
+}
 
 /// Header card: avatar, name, phone, online status.
 class ProfileHeaderCard extends StatelessWidget {
@@ -14,21 +31,25 @@ class ProfileHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final avatarImage = _resolveAvatarImage(profile.avatarUrl);
+
     return Row(
       children: [
         Container(
           padding: EdgeInsets.all(3.w),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: _kAccentPurple.withValues(alpha: 0.4), width: 2),
+            border: Border.all(
+              color: _kAccentPurple.withValues(alpha: 0.4),
+              width: 2,
+            ),
           ),
           child: CircleAvatar(
             radius: 32.r,
-            backgroundImage: profile.avatarUrl.isNotEmpty
-                ? NetworkImage(profile.avatarUrl)
-                : null,
+            backgroundImage: avatarImage,
+            onBackgroundImageError: avatarImage != null ? (_, __) {} : null,
             backgroundColor: Colors.grey.shade200,
-            child: profile.avatarUrl.isEmpty
+            child: avatarImage == null
                 ? Icon(Icons.person, color: Colors.grey.shade400, size: 28.sp)
                 : null,
           ),
@@ -39,15 +60,17 @@ class ProfileHeaderCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                profile.name,
+                profile.name.isNotEmpty ? profile.name : 'User',
                 style: CustomTextStyle.regular16(AppColors.textDark)
                     .copyWith(fontWeight: FontWeight.w700, fontSize: 17.sp),
               ),
-              SizedBox(height: 4.h),
-              Text(
-                profile.phone,
-                style: CustomTextStyle.regular14(AppColors.textMuted),
-              ),
+              if (profile.phone.isNotEmpty) ...[
+                SizedBox(height: 4.h),
+                Text(
+                  profile.phone,
+                  style: CustomTextStyle.regular14(AppColors.textMuted),
+                ),
+              ],
               SizedBox(height: 6.h),
               if (profile.isOnline)
                 Row(
@@ -127,8 +150,11 @@ class ProfileMenuTile extends StatelessWidget {
                   ),
                 ),
                 trailing ??
-                    Icon(Icons.chevron_right_rounded,
-                        color: AppColors.textMuted, size: 20.sp),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.textMuted,
+                      size: 20.sp,
+                    ),
               ],
             ),
           ),
