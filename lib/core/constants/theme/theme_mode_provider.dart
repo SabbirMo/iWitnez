@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iwitnez/core/utils/theme_storage.dart';
 
 class ThemeModeProvider extends Notifier<ThemeMode> {
-  @override
-  ThemeMode build() => ThemeMode.light;
+  final ThemeMode initialTheme;
 
-  void set(ThemeMode mode) {
+  ThemeModeProvider({this.initialTheme = ThemeMode.light});
+
+  @override
+  ThemeMode build() => initialTheme;
+
+  Future<void> set(ThemeMode mode) async {
     state = mode;
+    await ThemeStorage.saveThemeMode(mode);
   }
 
-  void toggleTheme() {
-    state = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+  Future<void> toggleTheme() async {
+    final newMode = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    state = newMode;
+    await ThemeStorage.saveThemeMode(newMode);
   }
 }
 

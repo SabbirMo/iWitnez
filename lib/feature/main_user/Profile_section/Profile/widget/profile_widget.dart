@@ -31,6 +31,7 @@ class ProfileHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final avatarImage = _resolveAvatarImage(profile.avatarUrl);
 
     return Row(
@@ -40,7 +41,7 @@ class ProfileHeaderCard extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: _kAccentPurple.withValues(alpha: 0.4),
+              color: _kAccentPurple.withValues(alpha: isDark ? 0.6 : 0.4),
               width: 2,
             ),
           ),
@@ -48,9 +49,14 @@ class ProfileHeaderCard extends StatelessWidget {
             radius: 32.r,
             backgroundImage: avatarImage,
             onBackgroundImageError: avatarImage != null ? (_, __) {} : null,
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor:
+                isDark ? const Color(0xFF1E2030) : Colors.grey.shade200,
             child: avatarImage == null
-                ? Icon(Icons.person, color: Colors.grey.shade400, size: 28.sp)
+                ? Icon(
+                    Icons.person,
+                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                    size: 28.sp,
+                  )
                 : null,
           ),
         ),
@@ -61,14 +67,17 @@ class ProfileHeaderCard extends StatelessWidget {
             children: [
               Text(
                 profile.name.isNotEmpty ? profile.name : 'User',
-                style: CustomTextStyle.regular16(AppColors.textDark)
-                    .copyWith(fontWeight: FontWeight.w700, fontSize: 17.sp),
+                style: CustomTextStyle.regular16(
+                  isDark ? Colors.white : AppColors.textDark,
+                ).copyWith(fontWeight: FontWeight.w700, fontSize: 17.sp),
               ),
               if (profile.phone.isNotEmpty) ...[
                 SizedBox(height: 4.h),
                 Text(
                   profile.phone,
-                  style: CustomTextStyle.regular14(AppColors.textMuted),
+                  style: CustomTextStyle.regular14(
+                    isDark ? const Color(0xFF98A2B3) : AppColors.textMuted,
+                  ),
                 ),
               ],
               SizedBox(height: 6.h),
@@ -117,11 +126,16 @@ class ProfileMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = item.isDestructive ? Colors.red : _kAccentPurple;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = item.isDestructive
+        ? Colors.red
+        : (isDark ? const Color(0xFFA855F7) : _kAccentPurple);
     final iconBg = item.isDestructive
-        ? Colors.red.withValues(alpha: 0.08)
-        : _kAccentPurple.withValues(alpha: 0.08);
-    final labelColor = item.isDestructive ? Colors.red : AppColors.textDark;
+        ? Colors.red.withValues(alpha: isDark ? 0.16 : 0.08)
+        : _kAccentPurple.withValues(alpha: isDark ? 0.2 : 0.08);
+    final labelColor = item.isDestructive
+        ? Colors.red
+        : (isDark ? Colors.white : AppColors.textDark);
 
     return InkWell(
       onTap: onTap,
@@ -152,7 +166,9 @@ class ProfileMenuTile extends StatelessWidget {
                 trailing ??
                     Icon(
                       Icons.chevron_right_rounded,
-                      color: AppColors.textMuted,
+                      color: isDark
+                          ? const Color(0xFF98A2B3)
+                          : AppColors.textMuted,
                       size: 20.sp,
                     ),
               ],
@@ -164,7 +180,9 @@ class ProfileMenuTile extends StatelessWidget {
               thickness: 0.6,
               indent: 16.w,
               endIndent: 16.w,
-              color: Colors.grey.shade200,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.grey.shade200,
             ),
         ],
       ),
@@ -180,13 +198,21 @@ class ProfileMenuGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: isDark
+            ? Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

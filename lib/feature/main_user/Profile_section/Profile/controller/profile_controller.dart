@@ -25,6 +25,9 @@ class ProfileController {
       case ProfileMenuAction.notifications:
         context.push(AppRouteNames.notificationScreen);
         break;
+      case ProfileMenuAction.darkMode:
+        // Dark mode switch is handled directly in ProfileScreen
+        break;
       case ProfileMenuAction.trustedCircle:
         context.push(AppRouteNames.trustedCircleScreen);
         break;

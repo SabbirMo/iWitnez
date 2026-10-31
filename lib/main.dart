@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/theme/app_theme.dart';
 import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/core/services/fcm_service.dart';
+import 'package:iwitnez/core/utils/theme_storage.dart';
 import 'package:iwitnez/firebase_options.dart';
 import 'package:iwitnez/router/app_pages.dart';
 
@@ -26,6 +27,9 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Load saved theme
+  final initialTheme = await ThemeStorage.getThemeMode();
+
   // Initialize FCM service and listeners
   try {
     await FcmService.instance.initialize();
@@ -33,7 +37,16 @@ void main() async {
     debugPrint('FCM initialization error in main: $e');
   }
 
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        themeModeProvider.overrideWith(
+          () => ThemeModeProvider(initialTheme: initialTheme),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends ConsumerWidget {

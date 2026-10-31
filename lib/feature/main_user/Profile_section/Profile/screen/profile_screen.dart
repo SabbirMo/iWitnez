@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/controller/profile_controller.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/model/profile_model.dart';
@@ -11,14 +13,14 @@ import 'package:iwitnez/feature/main_user/Profile_section/Profile/provider/profi
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/widget/profile_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen>
+class _ProfileScreenState extends ConsumerState<ProfileScreen>
     with WidgetsBindingObserver {
   final ProfileProvider _provider = ProfileProvider();
   final ProfileController _controller = ProfileController();
@@ -46,6 +48,11 @@ class _ProfileScreenState extends State<ProfileScreen>
       action: ProfileMenuAction.notifications,
       label: 'Notifications',
       icon: Icons.notifications_outlined,
+    ),
+    const ProfileMenuItem(
+      action: ProfileMenuAction.darkMode,
+      label: 'Dark Mode',
+      icon: Icons.dark_mode_outlined,
     ),
     const ProfileMenuItem(
       action: ProfileMenuAction.trustedCircle,
@@ -180,8 +187,11 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7FB),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0E15) : const Color(0xFFF7F7FB),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: _provider,
@@ -202,14 +212,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                 padding: EdgeInsets.symmetric(
                   horizontal: 20.w,
                   vertical: 16.h,
-                ).copyWith(bottom: 68.h + MediaQuery.of(context).padding.bottom),
+                ).copyWith(
+                  bottom: 68.h + MediaQuery.of(context).padding.bottom,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       AppString.profile,
                       style: CustomTextStyle.bold30(
-                        AppColors.textDark,
+                        isDark ? Colors.white : AppColors.textDark,
                       ).copyWith(fontSize: 24.sp),
                     ),
                     SizedBox(height: 20.h),
@@ -222,44 +234,72 @@ class _ProfileScreenState extends State<ProfileScreen>
                             final item = _mainMenu[i];
                             final isNotification =
                                 item.action == ProfileMenuAction.notifications;
+                            final isDarkModeItem =
+                                item.action == ProfileMenuAction.darkMode;
+
+                            Widget? trailing;
+                            VoidCallback? onTap;
+
+                            if (isNotification) {
+                              trailing = SizedBox(
+                                height: 32.h,
+                                child: Transform.scale(
+                                  scale: 0.85,
+                                  child: CupertinoSwitch(
+                                    activeTrackColor: const Color(0xFF9023FF),
+                                    value: _isNotificationEnabled,
+                                    onChanged: _isUpdatingNotification
+                                        ? null
+                                        : (val) => _toggleNotification(val),
+                                  ),
+                                ),
+                              );
+                              onTap = () => _toggleNotification(
+                                    !_isNotificationEnabled,
+                                  );
+                            } else if (isDarkModeItem) {
+                              trailing = SizedBox(
+                                height: 32.h,
+                                child: Transform.scale(
+                                  scale: 0.85,
+                                  child: CupertinoSwitch(
+                                    activeTrackColor: const Color(0xFF9023FF),
+                                    value: isDark,
+                                    onChanged: (val) {
+                                      ref.read(themeModeProvider.notifier).set(
+                                            val
+                                                ? ThemeMode.dark
+                                                : ThemeMode.light,
+                                          );
+                                    },
+                                  ),
+                                ),
+                              );
+                              onTap = () {
+                                ref
+                                    .read(themeModeProvider.notifier)
+                                    .toggleTheme();
+                              };
+                            } else {
+                              trailing = null;
+                              onTap = () async {
+                                await _controller.handleMenuTap(
+                                  context,
+                                  item.action,
+                                );
+                                if (item.action ==
+                                        ProfileMenuAction.personalInformation &&
+                                    mounted) {
+                                  _provider.fetchProfile();
+                                }
+                              };
+                            }
 
                             return ProfileMenuTile(
                               item: item,
                               showDivider: i != _mainMenu.length - 1,
-                              trailing: isNotification
-                                  ? SizedBox(
-                                      height: 32.h,
-                                      child: Transform.scale(
-                                        scale: 0.85,
-                                        child: CupertinoSwitch(
-                                          activeTrackColor: const Color(
-                                            0xFF9023FF,
-                                          ),
-                                          value: _isNotificationEnabled,
-                                          onChanged: _isUpdatingNotification
-                                              ? null
-                                              : (val) =>
-                                                  _toggleNotification(val),
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                              onTap: isNotification
-                                  ? () => _toggleNotification(
-                                      !_isNotificationEnabled,
-                                    )
-                                  : () async {
-                                      await _controller.handleMenuTap(
-                                        context,
-                                        item.action,
-                                      );
-                                      if (item.action ==
-                                              ProfileMenuAction
-                                                  .personalInformation &&
-                                          mounted) {
-                                        _provider.fetchProfile();
-                                      }
-                                    },
+                              trailing: trailing,
+                              onTap: onTap,
                             );
                           }(),
                         ],
