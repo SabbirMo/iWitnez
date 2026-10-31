@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -15,6 +15,8 @@ class AccountSettingsTile extends StatelessWidget {
     this.subtitleColor,
     this.onTap,
     this.showDivider = true,
+    this.isLoading = false,
+    this.trailing,
   });
 
   final IconData icon;
@@ -26,6 +28,8 @@ class AccountSettingsTile extends StatelessWidget {
   final Color? subtitleColor;
   final VoidCallback? onTap;
   final bool showDivider;
+  final bool isLoading;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +37,7 @@ class AccountSettingsTile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
-          onTap: onTap,
+          onTap: isLoading ? null : onTap,
           splashColor: iconColor.withValues(alpha: 0.08),
           highlightColor: iconColor.withValues(alpha: 0.04),
           child: Padding(
@@ -76,12 +80,23 @@ class AccountSettingsTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Chevron
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14.sp,
-                  color: const Color(0xFF9CA3AF),
-                ),
+                // Trailing / Chevron / Spinner
+                if (isLoading)
+                  SizedBox(
+                    width: 16.w,
+                    height: 16.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: iconColor,
+                    ),
+                  )
+                else
+                  trailing ??
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14.sp,
+                        color: const Color(0xFF9CA3AF),
+                      ),
               ],
             ),
           ),

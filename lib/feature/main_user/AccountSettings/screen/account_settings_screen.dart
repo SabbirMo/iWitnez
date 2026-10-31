@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -36,174 +36,109 @@ class AccountSettingsScreen extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 8.h),
+      body: RefreshIndicator(
+        onRefresh: () =>
+            ref.read(accountSettingsProvider.notifier).loadSettings(),
+        color: const Color(0xFF8B5CF6),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 8.h),
 
-            // ── Section label ──
-            Text(
-              'Account',
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF6B7280),
-                letterSpacing: 0.3,
+              // ── Section label ──
+              Text(
+                'Account',
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6B7280),
+                  letterSpacing: 0.3,
+                ),
               ),
-            ),
-            SizedBox(height: 10.h),
+              SizedBox(height: 10.h),
 
-            // ── Settings card ──
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Email Address
-                  AccountSettingsTile(
-                    icon: Icons.email_outlined,
-                    title: 'Email Address',
-                    subtitle: state.email,
-                    onTap: () => _showEditDialog(
-                      context,
-                      ref,
-                      title: 'Update Email',
-                      initialValue: state.email,
-                      keyboardType: TextInputType.emailAddress,
-                      onSave: (val) => ref
-                          .read(accountSettingsProvider.notifier)
-                          .updateEmail(val),
+              // ── Settings card ──
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-
-                  // Phone Number
-                  AccountSettingsTile(
-                    icon: Icons.phone_outlined,
-                    title: 'Phone Number',
-                    subtitle: state.phone,
-                    onTap: () => _showEditDialog(
-                      context,
-                      ref,
-                      title: 'Update Phone',
-                      initialValue: state.phone,
-                      keyboardType: TextInputType.phone,
-                      onSave: (val) => ref
-                          .read(accountSettingsProvider.notifier)
-                          .updatePhone(val),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Email Address (Read-only: cannot be changed)
+                    AccountSettingsTile(
+                      icon: Icons.email_outlined,
+                      title: 'Email Address',
+                      subtitle: state.email.isNotEmpty
+                          ? state.email
+                          : (state.isLoading ? '...' : ''),
+                      onTap: null,
                     ),
-                  ),
 
-                  // Password
-                  AccountSettingsTile(
-                    icon: Icons.lock_outline_rounded,
-                    title: 'Password',
-                    subtitle: '••••••••',
-                    onTap: () {
-                      context.push(AppRouteNames.changePasswordScreen);
-                    },
-                  ),
+                    // Phone Number (Read-only)
+                    AccountSettingsTile(
+                      icon: Icons.phone_outlined,
+                      title: 'Phone Number',
+                      subtitle: state.phone.isNotEmpty
+                          ? state.phone
+                          : (state.isLoading ? '...' : ''),
+                      onTap: null,
+                    ),
 
-                  // Two-Factor Authentication
-                  AccountSettingsTile(
-                    icon: Icons.verified_user_outlined,
-                    title: 'Two-Factor Authentication',
-                    subtitle: state.isTwoFactorEnabled ? 'On' : 'Off',
-                    onTap: () {
-                      ref
-                          .read(accountSettingsProvider.notifier)
-                          .toggleTwoFactor(!state.isTwoFactorEnabled);
-                    },
-                  ),
+                    // Password (Navigates to Change Password screen)
+                    AccountSettingsTile(
+                      icon: Icons.lock_outline_rounded,
+                      title: 'Password',
+                      subtitle: '••••••••',
+                      onTap: () {
+                        context.push(AppRouteNames.changePasswordScreen);
+                      },
+                    ),
 
-                  // Delete Account (destructive — red)
-                  AccountSettingsTile(
-                    icon: Icons.delete_outline_rounded,
-                    title: 'Delete Account',
-                    subtitle: 'Permanently delete your account',
-                    iconColor: const Color(0xFFEF4444),
-                    iconBgColor: const Color(0xFFFEE2E2),
-                    titleColor: const Color(0xFFEF4444),
-                    showDivider: false,
-                    onTap: () => _confirmDeleteAccount(context),
-                  ),
-                ],
+                    // Two-Factor Authentication
+                    AccountSettingsTile(
+                      icon: Icons.verified_user_outlined,
+                      title: 'Two-Factor Authentication',
+                      subtitle: state.isTwoFactorEnabled ? 'On' : 'Off',
+                      isLoading: state.isToggling2FA,
+                      onTap: state.isToggling2FA
+                          ? null
+                          : () {
+                              ref
+                                  .read(accountSettingsProvider.notifier)
+                                  .toggleTwoFactor(context);
+                            },
+                    ),
+
+                    // Delete Account (destructive — red)
+                    AccountSettingsTile(
+                      icon: Icons.delete_outline_rounded,
+                      title: 'Delete Account',
+                      subtitle: 'Permanently delete your account',
+                      iconColor: const Color(0xFFEF4444),
+                      iconBgColor: const Color(0xFFFEE2E2),
+                      titleColor: const Color(0xFFEF4444),
+                      showDivider: false,
+                      onTap: () => _confirmDeleteAccount(context),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            SizedBox(height: 30.h),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Inline edit dialog ──
-  void _showEditDialog(
-    BuildContext context,
-    WidgetRef ref, {
-    required String title,
-    required String initialValue,
-    required TextInputType keyboardType,
-    required void Function(String) onSave,
-  }) {
-    final controller = TextEditingController(text: initialValue);
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          title,
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-        ),
-        content: TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          autofocus: true,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: const BorderSide(
-                color: Color(0xFF8B5CF6),
-                width: 1.5,
-              ),
-            ),
+              SizedBox(height: 30.h),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-            onPressed: () {
-              onSave(controller.text.trim());
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
     );
   }
@@ -244,7 +179,6 @@ class AccountSettingsScreen extends ConsumerWidget {
             ),
             onPressed: () {
               Navigator.of(ctx).pop();
-              // TODO: call delete account API then navigate to login
               context.go(AppRouteNames.loginScreen);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),

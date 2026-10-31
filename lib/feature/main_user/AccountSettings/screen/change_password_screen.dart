@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
-import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import '../provider/change_password_provider.dart';
 
@@ -47,91 +46,33 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     FocusScope.of(context).unfocus();
-    notifier.setLoading(true);
 
-    // Simulate network request
-    await Future.delayed(const Duration(milliseconds: 600));
+    final success = await notifier.changePassword(
+      oldPassword: _currentPasswordController.text,
+      newPassword: _newPasswordController.text,
+      confirmPassword: _confirmPasswordController.text,
+    );
 
     if (!mounted) return;
-    notifier.setLoading(false);
 
-    _showSuccessDialog();
-  }
-
-  void _showSuccessDialog() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return PopScope(
-          canPop: false,
-          child: Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24.r),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 76.w,
-                    height: 76.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.green.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 54.w,
-                        height: 54.w,
-                        decoration: const BoxDecoration(
-                          color: AppColors.green,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 32.sp,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    'Password Updated!',
-                    textAlign: TextAlign.center,
-                    style: CustomTextStyle.bold30(
-                      AppColors.textDark,
-                    ).copyWith(fontSize: 22.sp),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'Your password has been changed successfully. You can now use your new password next time you sign in.',
-                    textAlign: TextAlign.center,
-                    style: CustomTextStyle.regular14(
-                      AppColors.onboardingDesc,
-                    ).copyWith(fontSize: 13.sp, height: 1.4),
-                  ),
-                  SizedBox(height: 24.h),
-                  CustomButton(
-                    text: 'Back to Settings',
-                    onTap: () {
-                      Navigator.of(dialogContext).pop();
-                      if (context.canPop()) {
-                        context.pop();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    if (success) {
+      final msg = ref.read(changePasswordProvider).successMessage ??
+          'Password changed successfully';
+      CustomSnackBar.showSuccess(
+        context,
+        message: msg,
+      );
+      if (context.canPop()) {
+        context.pop();
+      }
+    } else {
+      final errorMsg = ref.read(changePasswordProvider).errorMessage ??
+          'Failed to change password. Please try again.';
+      CustomSnackBar.showError(
+        context,
+        message: errorMsg,
+      );
+    }
   }
 
   @override
@@ -194,26 +135,32 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     const TextFieldHintText(text: 'Current Password'),
                     TextFormField(
                       controller: _currentPasswordController,
-                      validator: AppValidator.validatePassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter current password';
+                        }
+                        if (value.length < 8) {
+                          return 'Password must be at least 8 characters long';
+                        }
+                        return null;
+                      },
                       obscureText: !state.isCurrentPasswordVisible,
                       autocorrect: false,
                       enableSuggestions: false,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         hintText: 'Enter current password',
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(top: 15.h, bottom: 15.h),
-                          child: SvgPicture.asset(
-                            ImageAssets.lockSvg,
-                            width: 6.w,
-                          ),
+                        prefixIcon: Icon(
+                          Icons.key_outlined,
+                          size: 20.sp,
+                          color: AppColors.onboardingDesc,
                         ),
                         suffixIcon: IconButton(
                           onPressed: notifier.toggleCurrentPasswordVisibility,
                           icon: Icon(
                             state.isCurrentPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                             color: AppColors.onboardingDesc,
                           ),
                         ),
@@ -243,19 +190,17 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         hintText: 'Enter new password',
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(top: 15.h, bottom: 15.h),
-                          child: SvgPicture.asset(
-                            ImageAssets.lockSvg,
-                            width: 6.w,
-                          ),
+                        prefixIcon: Icon(
+                          Icons.key_outlined,
+                          size: 20.sp,
+                          color: AppColors.onboardingDesc,
                         ),
                         suffixIcon: IconButton(
                           onPressed: notifier.toggleNewPasswordVisibility,
                           icon: Icon(
                             state.isNewPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                             color: AppColors.onboardingDesc,
                           ),
                         ),
@@ -278,19 +223,17 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         hintText: 'Confirm new password',
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(top: 15.h, bottom: 15.h),
-                          child: SvgPicture.asset(
-                            ImageAssets.lockSvg,
-                            width: 6.w,
-                          ),
+                        prefixIcon: Icon(
+                          Icons.key_outlined,
+                          size: 20.sp,
+                          color: AppColors.onboardingDesc,
                         ),
                         suffixIcon: IconButton(
                           onPressed: notifier.toggleConfirmPasswordVisibility,
                           icon: Icon(
                             state.isConfirmPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                             color: AppColors.onboardingDesc,
                           ),
                         ),

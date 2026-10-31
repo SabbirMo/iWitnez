@@ -65,27 +65,13 @@ class CustomTextField extends StatelessWidget {
                                   : TextInputType.text))),
               maxLines: isMultiline ? 3 : 1,
               decoration: InputDecoration(
-                prefixIcon: isMultiline
-                    ? Align(
-                        alignment: Alignment.topCenter,
-                        heightFactor: 3.0,
-                        child: Icon(
-                          icon,
-                          color: enabled
-                              ? const Color(0xFF8B5CF6)
-                              : const Color(
-                                  0xFF8B5CF6,
-                                ).withValues(alpha: 0.4),
-                          size: 20,
-                        ),
-                      )
-                    : Icon(
-                        icon,
-                        color: enabled
-                            ? const Color(0xFF8B5CF6)
-                            : const Color(0xFF8B5CF6).withValues(alpha: 0.4),
-                        size: 20,
-                      ),
+                prefixIcon: Icon(
+                  icon,
+                  color: enabled
+                      ? const Color(0xFF8B5CF6)
+                      : const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                  size: 20,
+                ),
 
                 filled: true,
                 fillColor: enabled ? Colors.white : const Color(0xFFF3F4F6),

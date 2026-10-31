@@ -29,6 +29,12 @@ class ProfileRepository {
     _cachedProfile = null;
   }
 
+  void updateTwoFactorEnabled(bool enabled) {
+    if (_cachedProfile != null) {
+      _cachedProfile = _cachedProfile!.copyWith(twoFactorEnabled: enabled);
+    }
+  }
+
   /// Fetches user profile from GET /api/v1/auth/me/
   Future<UserProfileResponseModel?> getProfile({
     bool forceRefresh = false,

@@ -11,6 +11,8 @@ class ApiEndPoints {
   static const String forgotPassword = '/api/v1/auth/password/forgot/';
   static const String verifyPasswordOtp = '/api/v1/auth/password/verify-otp/';
   static const String resetPassword = '/api/v1/auth/password/reset/';
+  static const String changePassword = '/api/v1/auth/password/change/';
+  static const String toggleTwoFactor = '/api/v1/auth/account/2fa/toggle/';
   static const String getProfile = '/api/v1/auth/me/';
   static const String deviceSettings = '/api/v1/auth/device-settings/';
   static const String safetySettings = '/api/v1/auth/safety-settings/';
