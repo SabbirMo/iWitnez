@@ -112,8 +112,8 @@ class _TrustedContactSuccessScreenState
         ? widget.contactName!.trim()
         : 'Sarah ahmed';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _navigateToNextPage, // Allow tap to skip
@@ -154,8 +154,10 @@ class _TrustedContactSuccessScreenState
                         Text(
                           "Trusted Contact Added!",
                           textAlign: TextAlign.center,
-                          style: CustomTextStyle.ibold28(AppColors.black)
-                              .copyWith(
+                          style:
+                              CustomTextStyle.ibold28(
+                                isDark ? AppColors.white : AppColors.black,
+                              ).copyWith(
                                 fontSize: 26.sp,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -0.3,
@@ -168,8 +170,10 @@ class _TrustedContactSuccessScreenState
                             "$displayName has been added to your\ntrusted contacts.",
                             textAlign: TextAlign.center,
                             style: CustomTextStyle.regular14(
-                              AppColors.onboardingDesc,
-                            ).copyWith(height: 1.45, color: AppColors.gray),
+                              isDark
+                                  ? AppColors.white.withValues(alpha: 0.65)
+                                  : AppColors.onboardingDesc,
+                            ).copyWith(height: 1.45),
                           ),
                         ),
                       ],

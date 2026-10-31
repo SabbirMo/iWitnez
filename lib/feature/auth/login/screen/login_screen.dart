@@ -103,6 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final provider = ref.watch(loginProvider);
     final notifier = ref.read(loginProvider.notifier);
     final loginState = ref.watch(loginNotifierProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -122,13 +123,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           SizedBox(height: 16.h),
                           Text(
                             AppString.loginTitle,
-                            style: CustomTextStyle.bold30(AppColors.textDark),
+                            style: CustomTextStyle.bold30(
+                              isDark ? AppColors.white : AppColors.textDark,
+                            ),
                           ),
                           SizedBox(height: 4.h),
                           Text(
                             AppString.loginSubTitle,
                             style: CustomTextStyle.regular16(
-                              AppColors.gray,
+                              isDark
+                                  ? AppColors.white.withValues(alpha: 0.65)
+                                  : AppColors.gray,
                             ).copyWith(fontSize: 12.sp),
                           ),
                           SizedBox(height: 20.h),
@@ -222,7 +227,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           RichText(
                             text: TextSpan(
                               text: AppString.haveAnAccount,
-                              style: CustomTextStyle.regular14(AppColors.black),
+                              style: CustomTextStyle.regular14(
+                                isDark ? AppColors.white : AppColors.black,
+                              ),
                               children: [
                                 TextSpan(
                                   text: AppString.createAccount,

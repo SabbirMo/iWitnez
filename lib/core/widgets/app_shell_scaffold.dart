@@ -61,9 +61,11 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     const activeColor = Color(0xFF9124FF);
-    const inactiveIconColor = Color(0xFF1D2939);
-    const inactiveTextColor = Color(0xFF667085);
+    final inactiveIconColor = isDark ? Colors.white : const Color(0xFF1D2939);
+    final inactiveTextColor = isDark ? Colors.white : const Color(0xFF667085);
 
     final items = role == UserRole.trustedContact
         ? [
@@ -122,26 +124,43 @@ class _FloatingNavBar extends StatelessWidget {
       width: double.infinity,
       height: 62.h,
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.94),
+        color: isDark
+            ? const Color(0xFF0C0D17).withValues(alpha: 0.94)
+            : AppColors.white.withValues(alpha: 0.94),
         borderRadius: borderRadius,
         border: Border.all(
-          color: const Color(0xff000000).withValues(alpha: 0.15),
-          width: 0.7,
+          color: isDark
+              ? const Color(0xFF4C2ECC).withValues(alpha: 0.65)
+              : const Color(0xff000000).withValues(alpha: 0.15),
+          width: isDark ? 1.0 : 0.7,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 1),
-            spreadRadius: 0,
-          ),
-        ],
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF4C2ECC).withValues(alpha: 0.15),
+                  blurRadius: 16,
+                  offset: const Offset(0, 2),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 1),
+                  spreadRadius: 0,
+                ),
+              ],
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
