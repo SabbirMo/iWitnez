@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 
 class CheckInLocationCard extends StatelessWidget {
+  final double? latitude;
+  final double? longitude;
   final String address;
   final String accuracy;
+  final bool isUpdating;
   final VoidCallback onUpdateTap;
 
   const CheckInLocationCard({
     super.key,
+    this.latitude,
+    this.longitude,
     required this.address,
     required this.accuracy,
+    this.isUpdating = false,
     required this.onUpdateTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasCoordinates = latitude != null &&
+        longitude != null &&
+        latitude != 0.0 &&
+        longitude != 0.0;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -49,16 +61,26 @@ class CheckInLocationCard extends StatelessWidget {
               ),
               InkWell(
                 borderRadius: BorderRadius.circular(8.r),
-                onTap: onUpdateTap,
+                onTap: isUpdating ? null : onUpdateTap,
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.refresh_rounded,
-                        color: const Color(0xFF8B5CF6),
-                        size: 16.sp,
-                      ),
+                      if (isUpdating)
+                        SizedBox(
+                          width: 14.r,
+                          height: 14.r,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF8B5CF6),
+                          ),
+                        )
+                      else
+                        Icon(
+                          Icons.refresh_rounded,
+                          color: const Color(0xFF8B5CF6),
+                          size: 16.sp,
+                        ),
                       SizedBox(width: 4.w),
                       Text(
                         'Update',
@@ -76,7 +98,7 @@ class CheckInLocationCard extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // Map preview image
+          // Map preview (Google Map or Image fallback)
           Container(
             height: 140.h,
             width: double.infinity,
@@ -87,12 +109,32 @@ class CheckInLocationCard extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned.fill(
-                  child: Image.asset(
-                    ImageAssets.liveTrackingMap,
-                    fit: BoxFit.cover,
+                if (hasCoordinates)
+                  Positioned.fill(
+                    child: GoogleMap(
+                      key: ValueKey('${latitude}_$longitude'),
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(latitude!, longitude!),
+                        zoom: 15.0,
+                      ),
+                      liteModeEnabled: true,
+                      zoomControlsEnabled: false,
+                      myLocationButtonEnabled: false,
+                      compassEnabled: false,
+                      mapToolbarEnabled: false,
+                      rotateGesturesEnabled: false,
+                      tiltGesturesEnabled: false,
+                      scrollGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
+                    ),
+                  )
+                else
+                  Positioned.fill(
+                    child: Image.asset(
+                      ImageAssets.liveTrackingMap,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
 
                 // Center Pin with Radar Wave
                 Center(
@@ -104,9 +146,7 @@ class CheckInLocationCard extends StatelessWidget {
                         width: 56.r,
                         height: 56.r,
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF8B5CF6,
-                          ).withValues(alpha: 0.18),
+                          color: const Color(0xFF8B5CF6).withValues(alpha: 0.18),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -115,9 +155,7 @@ class CheckInLocationCard extends StatelessWidget {
                         width: 36.r,
                         height: 36.r,
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF8B5CF6,
-                          ).withValues(alpha: 0.28),
+                          color: const Color(0xFF8B5CF6).withValues(alpha: 0.28),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -150,7 +188,7 @@ class CheckInLocationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      address,
+                      address.isNotEmpty ? address : 'Fetching address...',
                       style: GoogleFonts.inter(
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w700,
@@ -161,7 +199,9 @@ class CheckInLocationCard extends StatelessWidget {
                     if (accuracy.isNotEmpty) ...[
                       SizedBox(height: 4.h),
                       Text(
-                        'Accuracy: $accuracy',
+                        accuracy.startsWith('Accuracy:')
+                            ? accuracy
+                            : 'Accuracy: $accuracy',
                         style: GoogleFonts.inter(
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w400,

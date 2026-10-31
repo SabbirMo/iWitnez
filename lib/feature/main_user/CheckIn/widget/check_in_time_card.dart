@@ -4,9 +4,17 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CheckInTimeCard extends StatelessWidget {
   final String timeText;
+  final bool isCompleted;
+  final String statusBadge;
   final VoidCallback? onTap;
 
-  const CheckInTimeCard({super.key, required this.timeText, this.onTap});
+  const CheckInTimeCard({
+    super.key,
+    required this.timeText,
+    this.isCompleted = false,
+    this.statusBadge = 'Checked In',
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +41,22 @@ class CheckInTimeCard extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
             child: Row(
               children: [
-                Icon(
-                  Icons.notifications_active_rounded,
-                  color: const Color(0xFF7C3AED),
-                  size: 20.sp,
+                Container(
+                  width: 36.r,
+                  height: 36.r,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF3E8FF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isCompleted
+                          ? Icons.calendar_today_rounded
+                          : Icons.notifications_active_rounded,
+                      color: const Color(0xFF7C3AED),
+                      size: 18.sp,
+                    ),
+                  ),
                 ),
                 SizedBox(width: 14.w),
                 Expanded(
@@ -44,7 +64,7 @@ class CheckInTimeCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Check-in Time',
+                        'Check-In Time',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -63,11 +83,42 @@ class CheckInTimeCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: const Color(0xFF9CA3AF),
-                  size: 22.sp,
-                ),
+                if (isCompleted)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.5.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_rounded,
+                          size: 13.sp,
+                          color: const Color(0xFF16A34A),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          statusBadge.isNotEmpty ? statusBadge : 'Checked In',
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF16A34A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: const Color(0xFF9CA3AF),
+                    size: 22.sp,
+                  ),
               ],
             ),
           ),

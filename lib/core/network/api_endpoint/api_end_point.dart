@@ -61,6 +61,8 @@ class ApiEndPoints {
   static const String supportFaqs = '/api/v1/support/faqs/';
 
   // Emergency Check-Ins Endpoints
+  static const String checkInPage = '/api/v1/emergency/check-ins/page/';
+  static const String checkInNow = '/api/v1/emergency/check-ins/check-in-now/';
   static const String checkInStartTimer =
       '/api/v1/emergency/check-ins/start-timer/';
 

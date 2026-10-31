@@ -61,9 +61,9 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
   void _onStartTimer() {
     ref.read(scheduledTimerProvider.notifier).startTimerApi(
       context: context,
-      onSuccess: () {
+      onSuccess: (checkIn) {
         if (context.canPop()) {
-          context.pop();
+          context.pop(checkIn);
         }
       },
     );

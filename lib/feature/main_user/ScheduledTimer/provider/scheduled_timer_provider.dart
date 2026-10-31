@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/widgets/custom_snackbar.dart';
+import 'package:iwitnez/feature/main_user/CheckIn/provider/check_in_provider.dart';
 import '../model/scheduled_check_in_model.dart';
 import '../repository/scheduled_timer_repository.dart';
 
@@ -14,10 +15,8 @@ class ScheduledTimerState {
   final bool notifyIfNotCheckedIn;
   final bool isTimerActive;
   final int? remainingSeconds;
-  final bool? _isLoading;
+  final bool isLoading;
   final ScheduledCheckInModel? activeCheckIn;
-
-  bool get isLoading => _isLoading ?? false;
 
   const ScheduledTimerState({
     this.hours = 1,
@@ -28,9 +27,9 @@ class ScheduledTimerState {
     this.notifyIfNotCheckedIn = true,
     this.isTimerActive = false,
     this.remainingSeconds,
-    bool? isLoading = false,
+    this.isLoading = false,
     this.activeCheckIn,
-  }) : _isLoading = isLoading ?? false;
+  });
 
   ScheduledTimerState copyWith({
     int? hours,
@@ -102,7 +101,7 @@ class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
 
   Future<bool> startTimerApi({
     required BuildContext context,
-    VoidCallback? onSuccess,
+    void Function(ScheduledCheckInModel checkIn)? onSuccess,
   }) async {
     final totalSec = state.totalDurationSeconds;
     if (totalSec <= 0) {
@@ -135,6 +134,17 @@ class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
             : totalSec,
       );
 
+      // Immediately sync with CheckIn provider so Screen 100 has fresh time
+      if (checkIn.scheduledTimeDisplay != null &&
+          checkIn.scheduledTimeDisplay!.isNotEmpty) {
+        try {
+          ref
+              .read(checkInProvider.notifier)
+              .updateCheckInTimeDisplay(checkIn.scheduledTimeDisplay!);
+          ref.read(checkInProvider.notifier).loadCheckInPage();
+        } catch (_) {}
+      }
+
       if (context.mounted) {
         CustomSnackBar.showSuccess(
           context,
@@ -142,7 +152,7 @@ class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
         );
       }
 
-      onSuccess?.call();
+      onSuccess?.call(checkIn);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false);
