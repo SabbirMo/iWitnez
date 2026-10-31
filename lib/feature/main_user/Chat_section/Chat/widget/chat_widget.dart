@@ -40,27 +40,47 @@ class _ChatSearchFieldState extends State<ChatSearchField> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       height: 46.h,
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: isDark ? Colors.transparent : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(
+          color: isDark
+              ? AppColors.white.withValues(alpha: 0.25)
+              : Colors.transparent,
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
-          Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20.sp),
+          Icon(
+            Icons.search_rounded,
+            color: isDark
+                ? AppColors.white.withValues(alpha: 0.6)
+                : AppColors.textMuted,
+            size: 20.sp,
+          ),
           SizedBox(width: 8.w),
           Expanded(
             child: TextField(
               controller: _controller,
               onChanged: widget.onChanged,
-              style: CustomTextStyle.regular14(AppColors.textDark),
+              style: CustomTextStyle.regular14(
+                isDark ? AppColors.white : AppColors.textDark,
+              ),
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
                 hintText: 'Search messages',
-                hintStyle: CustomTextStyle.regular14(AppColors.textMuted),
+                hintStyle: CustomTextStyle.regular14(
+                  isDark
+                      ? AppColors.white.withValues(alpha: 0.4)
+                      : AppColors.textMuted,
+                ),
                 errorBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -81,7 +101,9 @@ class _ChatSearchFieldState extends State<ChatSearchField> {
                   padding: EdgeInsets.only(left: 4.w),
                   child: Icon(
                     Icons.close_rounded,
-                    color: AppColors.textMuted,
+                    color: isDark
+                        ? AppColors.white.withValues(alpha: 0.6)
+                        : AppColors.textMuted,
                     size: 18.sp,
                   ),
                 ),
@@ -108,16 +130,18 @@ class ChatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasUnread = entry.unreadCount > 0;
 
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12.h),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildAvatar(),
+            _buildAvatar(isDark),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
@@ -128,7 +152,7 @@ class ChatTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: CustomTextStyle.regular16(
-                      AppColors.textDark,
+                      isDark ? AppColors.white : AppColors.textDark,
                     ).copyWith(fontWeight: FontWeight.w700, fontSize: 15.sp),
                   ),
                   SizedBox(height: 4.h),
@@ -136,7 +160,15 @@ class ChatTile extends StatelessWidget {
                     entry.lastMessagePreview,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: CustomTextStyle.regular14(AppColors.textMuted),
+                    style: CustomTextStyle.regular14(
+                      hasUnread
+                          ? (isDark ? AppColors.white : AppColors.textDark)
+                          : (isDark
+                              ? AppColors.white.withValues(alpha: 0.6)
+                              : AppColors.textMuted),
+                    ).copyWith(
+                      fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                    ),
                   ),
                 ],
               ),
@@ -149,8 +181,15 @@ class ChatTile extends StatelessWidget {
                   Text(
                     entry.formattedTime,
                     style: CustomTextStyle.regular14(
-                      AppColors.textMuted,
-                    ).copyWith(fontSize: 12.sp),
+                      hasUnread
+                          ? AppColors.buttonGradientStart
+                          : (isDark
+                              ? AppColors.white.withValues(alpha: 0.45)
+                              : AppColors.textMuted),
+                    ).copyWith(
+                      fontSize: 12.sp,
+                      fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                    ),
                   ),
                 SizedBox(height: 6.h),
                 if (hasUnread)
@@ -162,7 +201,7 @@ class ChatTile extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 5.w),
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF2E3FA5),
+                      color: AppColors.buttonGradientStart,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -182,7 +221,7 @@ class ChatTile extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(bool isDark) {
     final avatarUrl = entry.avatarUrl.trim();
     final cleanUrl = avatarUrl.startsWith('http://')
         ? avatarUrl.replaceFirst('http://', 'https://')
@@ -193,7 +232,7 @@ class ChatTile extends StatelessWidget {
       height: 52.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.grey.shade200,
+        color: isDark ? const Color(0xFF1E2235) : Colors.grey.shade200,
       ),
       child: ClipOval(
         child: cleanUrl.startsWith('http')
@@ -202,14 +241,15 @@ class ChatTile extends StatelessWidget {
                 width: 52.r,
                 height: 52.r,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _fallbackAvatar(),
+                errorBuilder: (context, error, stackTrace) =>
+                    _fallbackAvatar(isDark),
               )
-            : _fallbackAvatar(),
+            : _fallbackAvatar(isDark),
       ),
     );
   }
 
-  Widget _fallbackAvatar() {
+  Widget _fallbackAvatar(bool isDark) {
     final initial = entry.name.trim().isNotEmpty
         ? entry.name.trim()[0].toUpperCase()
         : '?';
@@ -217,12 +257,12 @@ class ChatTile extends StatelessWidget {
     return Container(
       width: 52.r,
       height: 52.r,
-      color: const Color(0xFFEDE9FE),
+      color: isDark ? const Color(0xFF281E48) : const Color(0xFFEDE9FE),
       alignment: Alignment.center,
       child: Text(
         initial,
         style: TextStyle(
-          color: const Color(0xFF6D28D9),
+          color: isDark ? const Color(0xFFC084FC) : const Color(0xFF6D28D9),
           fontSize: 20.sp,
           fontWeight: FontWeight.w700,
         ),

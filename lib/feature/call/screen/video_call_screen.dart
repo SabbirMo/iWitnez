@@ -19,6 +19,7 @@ class VideoCallScreen extends StatefulWidget {
 
 class _VideoCallScreenState extends State<VideoCallScreen> {
   late final CallSessionProvider _provider;
+  bool _hasEndedOrPopped = false;
 
   @override
   void initState() {
@@ -28,7 +29,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   void _onCallSessionChanged() {
-    if (_provider.status == CallStatus.ended && mounted) {
+    if (_provider.status == CallStatus.ended && mounted && !_hasEndedOrPopped) {
+      _hasEndedOrPopped = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           CallFlowController.endCall(context);
@@ -58,6 +60,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           canPop: true,
           onPopInvokedWithResult: (didPop, _) {
             if (didPop) {
+              _hasEndedOrPopped = true;
               RingtoneService.instance.stopRingtone();
               _provider.endCall();
             }
@@ -710,3 +713,4 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     );
   }
 }
+

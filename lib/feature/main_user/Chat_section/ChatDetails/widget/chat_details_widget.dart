@@ -34,8 +34,9 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: Colors.white,
+      color: isDark ? const Color(0xFF0D0E15) : Colors.white,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -69,15 +70,21 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
                             color: Colors.grey.shade200,
                           ),
                           child: ClipOval(
-                            child: avatarUrl.isNotEmpty && avatarUrl.startsWith('http')
+                            child:
+                                avatarUrl.isNotEmpty &&
+                                    avatarUrl.startsWith('http')
                                 ? Image.network(
                                     avatarUrl.startsWith('http://')
-                                        ? avatarUrl.replaceFirst('http://', 'https://')
+                                        ? avatarUrl.replaceFirst(
+                                            'http://',
+                                            'https://',
+                                          )
                                         : avatarUrl,
                                     width: 36.r,
                                     height: 36.r,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => _fallbackInitial(name),
+                                    errorBuilder: (_, _, _) =>
+                                        _fallbackInitial(name),
                                   )
                                 : _fallbackInitial(name),
                           ),
@@ -94,7 +101,9 @@ class ChatDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style:
                                     CustomTextStyle.regular16(
-                                      AppColors.textDark,
+                                      isDark
+                                          ? AppColors.white
+                                          : AppColors.textDark,
                                     ).copyWith(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15.sp,
@@ -151,12 +160,13 @@ class DateSeparatorChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 12.h),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E2433) : Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
@@ -223,8 +233,8 @@ class ChatMessageBubble extends StatelessWidget {
 
     final cleanAvatar = (avatarUrl != null && avatarUrl!.isNotEmpty)
         ? (avatarUrl!.startsWith('http://')
-            ? avatarUrl!.replaceFirst('http://', 'https://')
-            : avatarUrl!)
+              ? avatarUrl!.replaceFirst('http://', 'https://')
+              : avatarUrl!)
         : '';
 
     return Padding(
@@ -250,10 +260,8 @@ class ChatMessageBubble extends StatelessWidget {
                         width: 28.r,
                         height: 28.r,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _fallbackInitial(
-                          message.senderName ?? 'User',
-                          12,
-                        ),
+                        errorBuilder: (_, _, _) =>
+                            _fallbackInitial(message.senderName ?? 'User', 12),
                       )
                     : _fallbackInitial(message.senderName ?? 'User', 12),
               ),
@@ -275,6 +283,7 @@ class _ImageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final mediaPath = message.mediaPath;
     final isUrl = mediaPath != null && mediaPath.startsWith('http');
     final fileExists =
@@ -284,7 +293,9 @@ class _ImageBubble extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: 240.w),
       padding: EdgeInsets.all(4.r),
       decoration: BoxDecoration(
-        color: isMe ? _kAccentPurple : Colors.white,
+        color: isMe
+            ? _kAccentPurple
+            : (isDark ? const Color(0xFF1E2433) : Colors.white),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -363,11 +374,14 @@ class _TextBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       constraints: BoxConstraints(maxWidth: 240.w),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: isMe ? _kAccentPurple : Colors.white,
+        color: isMe
+            ? _kAccentPurple
+            : (isDark ? const Color(0xFF1E2433) : Colors.white),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -388,7 +402,9 @@ class _TextBubble extends StatelessWidget {
           Text(
             message.text,
             style: CustomTextStyle.regular14(
-              isMe ? Colors.white : AppColors.textDark,
+              isMe
+                  ? Colors.white
+                  : (isDark ? AppColors.white : AppColors.textDark),
             ).copyWith(fontSize: 13.5.sp),
           ),
           Row(
@@ -433,6 +449,7 @@ class _LiveLocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMe = message.isMe;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
       onTap: onTap,
@@ -441,7 +458,9 @@ class _LiveLocationCard extends StatelessWidget {
         width: 230.w,
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: isMe ? _kAccentPurple : Colors.white,
+          color: isMe
+              ? _kAccentPurple
+              : (isDark ? const Color(0xFF1E2433) : Colors.white),
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
@@ -637,8 +656,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: const Color(0xFFF7F9FC),
+      color: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF7F9FC),
       child: SafeArea(
         top: false,
         child: Column(
@@ -660,7 +680,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                       width: 46.w,
                       height: 46.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E2433) : Colors.white,
                         borderRadius: BorderRadius.circular(16.r),
                         boxShadow: [
                           BoxShadow(
@@ -685,7 +705,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                     child: Container(
                       height: 46.h,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E2433) : Colors.white,
                         borderRadius: BorderRadius.circular(18.r),
                         boxShadow: [
                           BoxShadow(
@@ -703,12 +723,14 @@ class _ChatInputBarState extends State<ChatInputBar> {
                               focusNode: _focusNode,
                               cursorColor: _kAccentPurple,
                               style: CustomTextStyle.regular14(
-                                AppColors.textDark,
+                                isDark ? AppColors.white : AppColors.textDark,
                               ),
                               decoration: InputDecoration(
                                 isDense: true,
                                 focusedBorder: InputBorder.none,
                                 border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
                                 hintText: 'Type a message...',
                                 hintStyle: CustomTextStyle.regular14(
                                   const Color(0xFF9CA3AF),

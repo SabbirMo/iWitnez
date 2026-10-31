@@ -92,9 +92,10 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen>
     final chatAsync = ref.watch(chatDetailsProvider(widget.chatId));
     final notifier = ref.read(chatDetailsProvider(widget.chatId).notifier);
     final resolvedReceiverId = _getResolvedReceiverId(chatAsync.asData?.value);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF7F9FC),
       appBar: ChatDetailsAppBar(
         name: widget.contactName,
         avatarUrl: widget.avatarUrl,
@@ -206,3 +207,4 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen>
     );
   }
 }
+

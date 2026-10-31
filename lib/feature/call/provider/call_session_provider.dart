@@ -35,6 +35,9 @@ class CallSessionProvider extends ChangeNotifier {
 
   AgoraService get agoraService => _agoraService;
 
+  bool _isDisposed = false;
+  bool get isDisposed => _isDisposed;
+
   String? _callId;
   String? _agoraAppId;
   String? _agoraChannelName;
@@ -68,8 +71,16 @@ class CallSessionProvider extends ChangeNotifier {
     return '$minutes:$seconds';
   }
 
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
+  }
+
   void _setupAgoraCallbacks() {
     _agoraService.onJoinChannelSuccess = () {
+      if (_isDisposed) return;
       debugPrint(
         '[CallSession] Joined channel, enabling speakerphone: $_isSpeakerOn',
       );
@@ -77,6 +88,7 @@ class CallSessionProvider extends ChangeNotifier {
     };
 
     _agoraService.onUserJoinedChannel = (remoteUid) {
+      if (_isDisposed) return;
       debugPrint('[CallSession] Remote user joined channel: $remoteUid');
       _dialingPollingTimer?.cancel();
       // Stop ringing once connected
@@ -89,14 +101,17 @@ class CallSessionProvider extends ChangeNotifier {
     };
 
     _agoraService.onUserOfflineChannel = (remoteUid) {
+      if (_isDisposed) return;
       debugPrint('[CallSession] Remote user left channel. Ending call.');
       RingtoneService.instance.stopRingtone();
       endCall();
     };
 
     _agoraService.onTokenWillExpire = () async {
+      if (_isDisposed) return;
       if (_callId != null && _callId!.isNotEmpty) {
         final tokenData = await _callRepo.fetchToken(_callId!);
+        if (_isDisposed) return;
         final newToken = tokenData?['agora_rtc_token']?.toString();
         if (newToken != null && newToken.isNotEmpty) {
           await _agoraService.renewToken(newToken);
@@ -109,6 +124,8 @@ class CallSessionProvider extends ChangeNotifier {
   void _startOutgoingCallFlow() async {
     final isVideo = arguments.callType == CallType.video;
     final hasPerm = await _agoraService.checkAndRequestPermissions(isVideo);
+    if (_isDisposed) return;
+
     if (!hasPerm) {
       debugPrint('[CallSession] Permissions denied for call');
       RingtoneService.instance.stopRingtone();
@@ -121,6 +138,7 @@ class CallSessionProvider extends ChangeNotifier {
     final initialAppId = _agoraAppId ?? '57a5f1d2e0dc4d8e985065d9c86afb0f';
     if (isVideo) {
       await _agoraService.initialize(appId: initialAppId, isVideo: true);
+      if (_isDisposed) return;
       notifyListeners();
     }
 
@@ -131,6 +149,7 @@ class CallSessionProvider extends ChangeNotifier {
       contactName: arguments.contactName,
       contactPhone: arguments.contactPhone,
     );
+    if (_isDisposed) return;
 
     if (res != null) {
       _callId = res.id;
@@ -144,12 +163,14 @@ class CallSessionProvider extends ChangeNotifier {
       if (_agoraChannelName != null && _agoraRtcToken != null) {
         if (_agoraService.engine == null) {
           await _agoraService.initialize(appId: _agoraAppId!, isVideo: isVideo);
+          if (_isDisposed) return;
         }
         await _agoraService.joinChannel(
           channelName: _agoraChannelName!,
           token: _agoraRtcToken!,
           isVideo: isVideo,
         );
+        if (_isDisposed) return;
       }
       notifyListeners();
     } else {
@@ -160,9 +181,12 @@ class CallSessionProvider extends ChangeNotifier {
   /// 2. Incoming Call Accept (Screen 136)
   Future<void> acceptCall() async {
     RingtoneService.instance.stopRingtone();
+    if (_isDisposed) return;
 
     final isVideo = arguments.callType == CallType.video;
     final hasPerm = await _agoraService.checkAndRequestPermissions(isVideo);
+    if (_isDisposed) return;
+
     if (!hasPerm) {
       debugPrint('[CallSession] Permissions denied for incoming call');
       return;
@@ -173,6 +197,7 @@ class CallSessionProvider extends ChangeNotifier {
 
     if (_callId != null && _callId!.isNotEmpty) {
       final res = await _callRepo.respondCall(_callId!, action: 'accept');
+      if (_isDisposed) return;
       if (res != null) {
         _agoraAppId = res.agoraAppId ?? _agoraAppId ?? defaultAppId;
         _agoraChannelName = res.agoraChannelName ?? _agoraChannelName;
@@ -184,15 +209,22 @@ class CallSessionProvider extends ChangeNotifier {
     if ((_agoraRtcToken == null || _agoraRtcToken!.isEmpty) &&
         _callId != null &&
         _callId!.isNotEmpty) {
-      debugPrint('[CallSession] Token missing after accept, fetching from /token/');
+      debugPrint(
+        '[CallSession] Token missing after accept, fetching from /token/',
+      );
       final tokenData = await _callRepo.fetchToken(_callId!);
+      if (_isDisposed) return;
       if (tokenData != null) {
         _agoraAppId =
-            tokenData['agora_app_id']?.toString() ?? _agoraAppId ?? defaultAppId;
+            tokenData['agora_app_id']?.toString() ??
+            _agoraAppId ??
+            defaultAppId;
         _agoraChannelName ??= tokenData['agora_channel_name']?.toString();
         _agoraRtcToken = tokenData['agora_rtc_token']?.toString();
       }
     }
+
+    if (_isDisposed) return;
 
     debugPrint(
       '[CallSession] Accept Connecting Agora with appId: $_agoraAppId, channel: $_agoraChannelName, hasToken: ${_agoraRtcToken != null}',
@@ -202,17 +234,20 @@ class CallSessionProvider extends ChangeNotifier {
         _agoraChannelName != null &&
         _agoraRtcToken != null) {
       await _agoraService.initialize(appId: _agoraAppId!, isVideo: isVideo);
+      if (_isDisposed) return;
       await _agoraService.joinChannel(
         channelName: _agoraChannelName!,
         token: _agoraRtcToken!,
         isVideo: isVideo,
       );
+      if (_isDisposed) return;
     } else {
       debugPrint(
         '[CallSession] WARNING: Credentials missing to join Agora (appId: $_agoraAppId, channel: $_agoraChannelName, token: $_agoraRtcToken)',
       );
     }
 
+    if (_isDisposed) return;
     _status = CallStatus.connected;
     _startDurationTimer();
     notifyListeners();
@@ -230,30 +265,38 @@ class CallSessionProvider extends ChangeNotifier {
   void _startDurationTimer() {
     _durationTimer?.cancel();
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_isDisposed) {
+        _durationTimer?.cancel();
+        return;
+      }
       _durationSeconds++;
       notifyListeners();
     });
   }
 
   void toggleMute() {
+    if (_isDisposed) return;
     _isMuted = !_isMuted;
     _agoraService.toggleMuteAudio(_isMuted);
     notifyListeners();
   }
 
   void toggleSpeaker() {
+    if (_isDisposed) return;
     _isSpeakerOn = !_isSpeakerOn;
     _agoraService.setSpeakerphone(_isSpeakerOn);
     notifyListeners();
   }
 
   void toggleVideo() {
+    if (_isDisposed) return;
     _isVideoEnabled = !_isVideoEnabled;
     _agoraService.toggleMuteVideo(!_isVideoEnabled);
     notifyListeners();
   }
 
   void switchCamera() {
+    if (_isDisposed) return;
     _isFrontCamera = !_isFrontCamera;
     _agoraService.switchCamera();
     notifyListeners();
@@ -265,6 +308,10 @@ class CallSessionProvider extends ChangeNotifier {
     _dialingPollingTimer = Timer.periodic(const Duration(seconds: 2), (
       timer,
     ) async {
+      if (_isDisposed) {
+        timer.cancel();
+        return;
+      }
       elapsedSeconds += 2;
       // If no answer after 60 seconds, end call as missed
       if (elapsedSeconds >= 60) {
@@ -279,6 +326,10 @@ class CallSessionProvider extends ChangeNotifier {
           _callId!.isNotEmpty &&
           _status == CallStatus.dialing) {
         final data = await _callRepo.fetchToken(_callId!);
+        if (_isDisposed) {
+          timer.cancel();
+          return;
+        }
         if (data != null) {
           final callStatus = data['call_status']?.toString().toLowerCase();
           if (callStatus == 'ongoing' && _status == CallStatus.dialing) {
@@ -308,9 +359,14 @@ class CallSessionProvider extends ChangeNotifier {
 
   /// End Call (Red Button)
   void endCall() {
+    if (_isDisposed) return;
     RingtoneService.instance.stopRingtone();
     _dialingPollingTimer?.cancel();
+    _dialingPollingTimer = null;
     _durationTimer?.cancel();
+    _durationTimer = null;
+
+    if (_status == CallStatus.ended) return;
     _status = CallStatus.ended;
 
     if (_callId != null && _callId!.isNotEmpty) {
@@ -323,9 +379,17 @@ class CallSessionProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
     RingtoneService.instance.stopRingtone();
     _dialingPollingTimer?.cancel();
+    _dialingPollingTimer = null;
     _durationTimer?.cancel();
+    _durationTimer = null;
+    _agoraService.onJoinChannelSuccess = null;
+    _agoraService.onUserJoinedChannel = null;
+    _agoraService.onUserOfflineChannel = null;
+    _agoraService.onTokenWillExpire = null;
     _agoraService.leaveAndCleanUp();
     super.dispose();
   }

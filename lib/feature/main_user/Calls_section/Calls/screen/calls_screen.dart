@@ -46,8 +46,8 @@ class _CallsScreenState extends State<CallsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -62,7 +62,7 @@ class _CallsScreenState extends State<CallsScreen> {
                 style: TextStyle(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A),
+                  color: isDark ? AppColors.white : const Color(0xFF0F172A),
                   letterSpacing: -0.4,
                 ),
               ),

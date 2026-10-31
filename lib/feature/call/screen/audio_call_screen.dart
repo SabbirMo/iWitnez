@@ -20,6 +20,7 @@ class AudioCallScreen extends StatefulWidget {
 
 class _AudioCallScreenState extends State<AudioCallScreen> {
   late final CallSessionProvider _provider;
+  bool _hasEndedOrPopped = false;
 
   @override
   void initState() {
@@ -29,7 +30,8 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
   }
 
   void _onCallSessionChanged() {
-    if (_provider.status == CallStatus.ended && mounted) {
+    if (_provider.status == CallStatus.ended && mounted && !_hasEndedOrPopped) {
+      _hasEndedOrPopped = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           CallFlowController.endCall(context);
@@ -60,6 +62,7 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
           canPop: true,
           onPopInvokedWithResult: (didPop, _) {
             if (didPop) {
+              _hasEndedOrPopped = true;
               RingtoneService.instance.stopRingtone();
               _provider.endCall();
             }
@@ -640,3 +643,4 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
     );
   }
 }
+

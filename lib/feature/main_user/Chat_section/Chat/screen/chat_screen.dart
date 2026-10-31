@@ -41,8 +41,10 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +54,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               child: Text(
                 AppString.chat,
                 style: CustomTextStyle.bold30(
-                  AppColors.textDark,
+                  isDark ? AppColors.white : AppColors.textDark,
                 ).copyWith(fontSize: 24.sp),
               ),
             ),
@@ -66,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               child: Text(
                 'Recent',
                 style: CustomTextStyle.regular16(
-                  AppColors.textDark,
+                  isDark ? AppColors.white : AppColors.textDark,
                 ).copyWith(fontWeight: FontWeight.w700, fontSize: 13.sp),
               ),
             ),
@@ -91,7 +93,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                   ? 'No messages found for "${_provider.searchQuery}"'
                                   : 'No conversations found',
                               style: CustomTextStyle.regular14(
-                                AppColors.textMuted,
+                                isDark
+                                    ? AppColors.white.withValues(alpha: 0.6)
+                                    : AppColors.textMuted,
                               ),
                             ),
                           ),
@@ -115,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                       separatorBuilder: (_, _) => Divider(
                         height: 1,
                         thickness: 0.6,
-                        color: Colors.grey.shade200,
+                        color: isDark ? Colors.white12 : Colors.grey.shade200,
                       ),
                       itemBuilder: (context, index) {
                         final chat = _provider.chats[index];

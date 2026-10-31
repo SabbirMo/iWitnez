@@ -17,12 +17,16 @@ class CallSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 44.h,
       padding: EdgeInsets.symmetric(horizontal: 14.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F3F5),
+        color: isDark ? Colors.transparent : const Color(0xFFF1F3F5),
         borderRadius: BorderRadius.circular(12.r),
+        border: isDark
+            ? Border.all(color: AppColors.white.withValues(alpha: 0.65))
+            : null,
       ),
       child: Row(
         children: [
@@ -31,7 +35,10 @@ class CallSearchField extends StatelessWidget {
           Expanded(
             child: TextField(
               onChanged: onChanged,
-              style: TextStyle(fontSize: 14.sp, color: _kTextDark),
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: isDark ? AppColors.white : _kTextDark,
+              ),
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
@@ -67,24 +74,28 @@ class CallFilterTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 42.h,
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F3F5),
+        color: isDark ? Colors.transparent : const Color(0xFFF1F3F5),
         borderRadius: BorderRadius.circular(12.r),
+        border: isDark
+            ? Border.all(color: AppColors.white.withValues(alpha: 0.65))
+            : null,
       ),
       child: Row(
         children: [
-          _buildTab(CallFilterTab.all, 'All'),
-          _buildTab(CallFilterTab.missed, 'Missed'),
-          _buildTab(CallFilterTab.recent, 'Recent'),
+          _buildTab(CallFilterTab.all, 'All', isDark),
+          _buildTab(CallFilterTab.missed, 'Missed', isDark),
+          _buildTab(CallFilterTab.recent, 'Recent', isDark),
         ],
       ),
     );
   }
 
-  Widget _buildTab(CallFilterTab tab, String label) {
+  Widget _buildTab(CallFilterTab tab, String label, bool isDark) {
     final isSelected = currentTab == tab;
     return Expanded(
       child: GestureDetector(
@@ -102,7 +113,11 @@ class CallFilterTabs extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.5.sp,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? Colors.white : AppColors.callsGray,
+              color: isSelected
+                  ? Colors.white
+                  : isDark
+                  ? AppColors.white
+                  : AppColors.callsGray,
             ),
           ),
         ),
@@ -119,6 +134,7 @@ class CallsSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -127,7 +143,7 @@ class CallsSectionHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
-            color: _kTextDark,
+            color: isDark ? AppColors.white : _kTextDark,
           ),
         ),
         GestureDetector(
@@ -184,6 +200,7 @@ class CallLogTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10.r),
@@ -224,7 +241,7 @@ class CallLogTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: _kTextDark,
+                      color: isDark ? AppColors.white : _kTextDark,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -234,8 +251,8 @@ class CallLogTile extends StatelessWidget {
                         _isMissed
                             ? Icons.call_received_rounded
                             : (entry.isOutgoing
-                                ? Icons.call_made_rounded
-                                : Icons.call_received_rounded),
+                                  ? Icons.call_made_rounded
+                                  : Icons.call_received_rounded),
                         size: 13.sp,
                         color: _isMissed ? _kRed : _kGreen,
                       ),
@@ -351,10 +368,10 @@ class MessengerCallBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMissed = entry.direction == CallDirection.missed;
-
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.textDark : Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
@@ -408,7 +425,7 @@ class MessengerCallBottomSheet extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
+                color: isDark ? AppColors.white : const Color(0xFF111827),
               ),
             ),
             SizedBox(height: 3.h),
@@ -418,7 +435,9 @@ class MessengerCallBottomSheet extends StatelessWidget {
               '${entry.date} • ${entry.time}',
               style: TextStyle(
                 fontSize: 12.5.sp,
-                color: AppColors.callsGray,
+                color: isDark
+                    ? AppColors.white.withValues(alpha: 0.65)
+                    : AppColors.callsGray,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -431,30 +450,42 @@ class MessengerCallBottomSheet extends StatelessWidget {
                 _buildActionButton(
                   icon: Icons.call_rounded,
                   label: 'Audio',
-                  bgColor: const Color(0xFFF3F0FF),
-                  iconColor: AppColors.callsPurple,
+                  bgColor: isDark
+                      ? Colors.transparent
+                      : const Color(0xFFF3F0FF),
+                  iconColor: isDark ? AppColors.white : AppColors.callsPurple,
                   onTap: onAudioCall,
+                  isDark: isDark,
                 ),
                 _buildActionButton(
                   icon: Icons.videocam_rounded,
                   label: 'Video',
-                  bgColor: const Color(0xFFF3F0FF),
-                  iconColor: AppColors.callsPurple,
+                  bgColor: isDark
+                      ? Colors.transparent
+                      : const Color(0xFFF3F0FF),
+                  iconColor: isDark ? AppColors.white : AppColors.callsPurple,
                   onTap: onVideoCall,
+                  isDark: isDark,
                 ),
                 _buildActionButton(
                   icon: Icons.chat_bubble_rounded,
                   label: 'Message',
-                  bgColor: const Color(0xFFF1F5F9),
-                  iconColor: const Color(0xFF334155),
+                  bgColor: isDark
+                      ? Colors.transparent
+                      : const Color(0xFFF1F5F9),
+                  iconColor: isDark ? AppColors.white : const Color(0xFF334155),
                   onTap: onMessage,
+                  isDark: isDark,
                 ),
                 _buildActionButton(
                   icon: Icons.person_rounded,
                   label: 'Profile',
-                  bgColor: const Color(0xFFF1F5F9),
-                  iconColor: const Color(0xFF334155),
+                  bgColor: isDark
+                      ? Colors.transparent
+                      : const Color(0xFFF1F5F9),
+                  iconColor: isDark ? AppColors.white : const Color(0xFF334155),
                   onTap: onProfile,
+                  isDark: isDark,
                 ),
               ],
             ),
@@ -465,9 +496,11 @@ class MessengerCallBottomSheet extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: isDark ? Colors.transparent : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
+                border: isDark
+                    ? Border.all(color: AppColors.white.withValues(alpha: 0.65))
+                    : null,
               ),
               child: Row(
                 children: [
@@ -503,7 +536,9 @@ class MessengerCallBottomSheet extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13.5.sp,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1E293B),
+                            color: isDark
+                                ? AppColors.white
+                                : const Color(0xFF1E293B),
                           ),
                         ),
                         SizedBox(height: 2.h),
@@ -536,6 +571,7 @@ class MessengerCallBottomSheet extends StatelessWidget {
     required Color bgColor,
     required Color iconColor,
     required VoidCallback onTap,
+    bool isDark = false,
   }) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -546,7 +582,13 @@ class MessengerCallBottomSheet extends StatelessWidget {
           Container(
             width: 50.r,
             height: 50.r,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: bgColor,
+              shape: BoxShape.circle,
+              border: isDark
+                  ? Border.all(color: AppColors.white.withValues(alpha: 0.65))
+                  : null,
+            ),
             alignment: Alignment.center,
             child: Icon(icon, color: iconColor, size: 22.sp),
           ),
@@ -556,7 +598,7 @@ class MessengerCallBottomSheet extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF334155),
+              color: isDark ? AppColors.white : const Color(0xFF334155),
             ),
           ),
         ],
