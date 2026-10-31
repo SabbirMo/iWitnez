@@ -516,7 +516,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
       context,
       place: placeToDisplay,
       onRefresh: () {
-        ref.read(safetyTrackingProvider.notifier).fetchSafetyTracking();
+        if (mounted) {
+          ref.read(safetyTrackingProvider.notifier).fetchSafetyTracking();
+        }
       },
     );
 

@@ -48,8 +48,8 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen> {
 
     // 1. Check if GPS / Location services are enabled on device
     final serviceEnabled = await locationService.isServiceEnabled();
+    if (!mounted) return;
     if (!serviceEnabled) {
-      if (!mounted) return;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -108,8 +108,10 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen> {
 
     // 2. Check and request location permission
     var permission = await locationService.checkPermission();
+    if (!mounted) return;
     if (permission == LocationPermission.denied) {
       permission = await locationService.requestPermission();
+      if (!mounted) return;
       if (permission == LocationPermission.denied) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -184,6 +186,8 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen> {
 
     // 3. Obtain real device GPS position
     final result = await locationService.getCurrentLocation();
+    if (!mounted) return;
+
     if (result.isSuccess && result.position != null) {
       final pos = result.position!;
       final realTarget = LatLng(pos.latitude, pos.longitude);
