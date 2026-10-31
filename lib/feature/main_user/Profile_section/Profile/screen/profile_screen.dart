@@ -105,7 +105,12 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<void> _toggleNotification(bool value) async {
     if (_isUpdatingNotification) return;
-    setState(() => _isUpdatingNotification = true);
+
+    final prevValue = _isNotificationEnabled;
+    setState(() {
+      _isNotificationEnabled = value;
+      _isUpdatingNotification = true;
+    });
 
     if (value) {
       final isGranted = await FcmService.instance.setNotificationEnabled(true);
@@ -115,15 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           _isUpdatingNotification = false;
         });
 
-        if (isGranted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Notifications enabled successfully'),
-              duration: Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        } else {
+        if (!isGranted) {
           final status = await Permission.notification.status;
           if (status.isPermanentlyDenied && mounted) {
             _showPermissionSettingsDialog();
@@ -131,20 +128,20 @@ class _ProfileScreenState extends State<ProfileScreen>
         }
       }
     } else {
-      final success = await FcmService.instance.setNotificationEnabled(false);
-      if (mounted) {
-        setState(() {
-          _isNotificationEnabled = !success;
-          _isUpdatingNotification = false;
-        });
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Notifications disabled'),
-              duration: Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+      try {
+        await FcmService.instance.setNotificationEnabled(false);
+        if (mounted) {
+          setState(() {
+            _isNotificationEnabled = false;
+            _isUpdatingNotification = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isNotificationEnabled = prevValue;
+            _isUpdatingNotification = false;
+          });
         }
       }
     }

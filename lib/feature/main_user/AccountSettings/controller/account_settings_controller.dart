@@ -75,4 +75,15 @@ class AccountSettingsController extends StateNotifier<AccountSettingsState> {
       }
     }
   }
+
+  Future<String?> deleteAccount({required String password}) async {
+    try {
+      final msg = await _repository.deleteAccount(password: password);
+      _profileRepository.clearCache();
+      return msg;
+    } catch (e) {
+      debugPrint('[AccountSettingsController] deleteAccount error: $e');
+      rethrow;
+    }
+  }
 }

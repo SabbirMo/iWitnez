@@ -13,6 +13,7 @@ class ApiEndPoints {
   static const String resetPassword = '/api/v1/auth/password/reset/';
   static const String changePassword = '/api/v1/auth/password/change/';
   static const String toggleTwoFactor = '/api/v1/auth/account/2fa/toggle/';
+  static const String deleteAccount = '/api/v1/auth/account/delete/';
   static const String getProfile = '/api/v1/auth/me/';
   static const String deviceSettings = '/api/v1/auth/device-settings/';
   static const String safetySettings = '/api/v1/auth/safety-settings/';
@@ -48,9 +49,12 @@ class ApiEndPoints {
   static String callEnd(String callId) => '/api/v1/calls/$callId/end/';
 
   // Contact Profile & Actions
-  static String contactDetails(String contactId) => '/api/v1/contacts/$contactId/';
-  static String contactMove(String contactId) => '/api/v1/contacts/$contactId/move/';
-  static const String locationManageSharing = '/api/v1/location/manage-sharing/';
+  static String contactDetails(String contactId) =>
+      '/api/v1/contacts/$contactId/';
+  static String contactMove(String contactId) =>
+      '/api/v1/contacts/$contactId/move/';
+  static const String locationManageSharing =
+      '/api/v1/location/manage-sharing/';
 
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';
@@ -58,5 +62,6 @@ class ApiEndPoints {
   static String sosCancel(String id) => '/api/v1/emergency/sos/$id/cancel/';
   static const String sosActive = '/api/v1/emergency/sos/active/';
   static String sosStop(String id) => '/api/v1/emergency/sos/$id/stop/';
-  static String sosUploadRecording(String id) => '/api/v1/emergency/sos/$id/recording/';
+  static String sosUploadRecording(String id) =>
+      '/api/v1/emergency/sos/$id/recording/';
 }

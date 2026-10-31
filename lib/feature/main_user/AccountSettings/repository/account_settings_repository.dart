@@ -88,6 +88,32 @@ class AccountSettingsRepository {
     }
     return enabled;
   }
+
+  /// POST /api/v1/auth/account/delete/
+  /// Body:
+  /// {
+  ///   "password": "..."
+  /// }
+  Future<String?> deleteAccount({required String password}) async {
+    final response = await _apiServices.post(
+      ApiEndPoints.deleteAccount,
+      data: {
+        'password': password,
+      },
+      requireAuth: true,
+    );
+
+    await TokenStorage.clearTokens();
+
+    final resData = response.data;
+    if (resData is Map<String, dynamic>) {
+      final msg = resData['message'] as String?;
+      if (msg != null && msg.isNotEmpty) {
+        return msg;
+      }
+    }
+    return 'Your account has been deleted successfully.';
+  }
 }
 
 final accountSettingsRepositoryProvider =
