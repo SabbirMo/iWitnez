@@ -1,271 +1,362 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:iwitnez/core/network/error/api_error_handler.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/monitored_live_location_model.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/repository/directions_repository.dart';
 
-class RouteOption {
-  final String duration;
-  final String distance;
-  final String routeType;
-  final String trafficStatus;
-  final Color trafficColor;
-  final bool hasCurve;
-  final bool isFastest;
+final directionsProvider =
+    NotifierProvider<DirectionsNotifier, DirectionsState>(
+      DirectionsNotifier.new,
+    );
 
-  const RouteOption({
-    required this.duration,
-    required this.distance,
-    required this.routeType,
-    required this.trafficStatus,
-    required this.trafficColor,
-    required this.hasCurve,
-    required this.isFastest,
-  });
-}
+class DirectionsNotifier extends Notifier<DirectionsState> {
+  bool _disposed = false;
+  DirectionsArgs? _args;
 
-class TransportMode {
-  final String title;
-  final String duration;
-  final IconData icon;
+  DirectionsRepository get _repository =>
+      ref.read(directionsRepositoryProvider);
 
-  const TransportMode({
-    required this.title,
-    required this.duration,
-    required this.icon,
-  });
-}
+  @override
+  DirectionsState build() {
+    _disposed = false;
+    ref.onDispose(() {
+      _disposed = true;
+    });
 
-class GetDirectionsProvider extends ChangeNotifier {
-  // Origin & Destination
-  String _originTitle = 'Your Location';
-  String _originSubtitle = 'Near East 75th Street, Manhattan, NY';
-  String _destinationTitle = 'Work';
-  String _destinationSubtitle = '10 Wall Street, New York, NY 10005';
-
-  String get originTitle => _originTitle;
-  String get originSubtitle => _originSubtitle;
-  String get destinationTitle => _destinationTitle;
-  String get destinationSubtitle => _destinationSubtitle;
-
-  void swapLocations() {
-    final tempTitle = _originTitle;
-    final tempSub = _originSubtitle;
-    _originTitle = _destinationTitle;
-    _originSubtitle = _destinationSubtitle;
-    _destinationTitle = tempTitle;
-    _destinationSubtitle = tempSub;
-    notifyListeners();
+    return DirectionsState.initial();
   }
 
-  // Transport Modes
-  int _selectedTransportIndex = 0;
-  int get selectedTransportIndex => _selectedTransportIndex;
-
-  final List<TransportMode> _transportModes = const [
-    TransportMode(
-      title: 'Drive',
-      duration: '24 min',
-      icon: Icons.directions_car_rounded,
-    ),
-    TransportMode(
-      title: 'Transit',
-      duration: '35 min',
-      icon: Icons.directions_bus_rounded,
-    ),
-    TransportMode(
-      title: 'Walk',
-      duration: '1 hr 12 min',
-      icon: Icons.directions_walk_rounded,
-    ),
-    TransportMode(
-      title: 'Bike',
-      duration: '28 min',
-      icon: Icons.directions_bike_rounded,
-    ),
-  ];
-  List<TransportMode> get transportModes => _transportModes;
-
-  void selectTransport(int index) {
-    if (_selectedTransportIndex != index) {
-      _selectedTransportIndex = index;
-      _updateRoutesForTransport(index);
-      notifyListeners();
+  Future<void> retry() async {
+    if (_args != null) {
+      await initialize(_args!);
     }
   }
 
-  // Routes
-  int _selectedRouteIndex = 0;
-  int get selectedRouteIndex => _selectedRouteIndex;
+  Future<(double, double)> _resolveCoordinates(
+    String address,
+    double lat,
+    double lng,
+  ) async {
+    if (lat != 0.0 || lng != 0.0 || address.isEmpty) {
+      return (lat, lng);
+    }
+    try {
+      final geocoding = Geocoding();
+      final locations = await geocoding.locationFromAddress(address);
+      if (locations.isNotEmpty) {
+        return (locations.first.latitude, locations.first.longitude);
+      }
+    } catch (e) {
+      debugPrint('Geocoding error for address "$address": $e');
+    }
+    return (lat, lng);
+  }
 
-  List<RouteOption> _routes = [
-    const RouteOption(
-      duration: '24 min',
-      distance: '8.4 km',
-      routeType: 'Fastest route',
-      trafficStatus: 'Light traffic',
-      trafficColor: Color(0xFF12B76A),
-      hasCurve: true,
-      isFastest: true,
-    ),
-    const RouteOption(
-      duration: '28 min',
-      distance: '9.1 km',
-      routeType: 'Alternative route',
-      trafficStatus: 'Moderate traffic',
-      trafficColor: Color(0xFFF79009),
-      hasCurve: true,
-      isFastest: false,
-    ),
-    const RouteOption(
-      duration: '32 min',
-      distance: '8.7 km',
-      routeType: 'Fdr Drive',
-      trafficStatus: 'Light traffic',
-      trafficColor: Color(0xFF12B76A),
-      hasCurve: false,
-      isFastest: false,
-    ),
-  ];
-  List<RouteOption> get routes => _routes;
-  RouteOption get selectedRoute => _routes[_selectedRouteIndex];
+  Future<void> initialize(DirectionsArgs args) async {
+    _args = args;
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    double destLat = args.destinationLatitude;
+    double destLng = args.destinationLongitude;
+
+    if (destLat == 0.0 && destLng == 0.0 && args.destinationAddress.isNotEmpty) {
+      final (resolvedLat, resolvedLng) = await _resolveCoordinates(
+        args.destinationAddress,
+        0.0,
+        0.0,
+      );
+      destLat = resolvedLat;
+      destLng = resolvedLng;
+    }
+
+    // If destination coordinates are not known, display initial state without sending 0,0
+    if (destLat == 0.0 && destLng == 0.0) {
+      state = state.copyWith(
+        isLoading: false,
+        clearError: true,
+        data: DirectionsData(
+          originLatitude: args.originLatitude,
+          originLongitude: args.originLongitude,
+          originName: args.originName,
+          originAddress: args.originAddress,
+          destinationLatitude: 0.0,
+          destinationLongitude: 0.0,
+          destinationName: args.destinationName,
+          destinationAddress: args.destinationAddress,
+          mode: args.mode,
+          travelModes: TravelModeItem.defaultModes,
+          routes: const [],
+        ),
+      );
+      return;
+    }
+
+    final initialReq = DirectionsRequest(
+      originLatitude: args.originLatitude,
+      originLongitude: args.originLongitude,
+      originName: args.originName,
+      originAddress: args.originAddress,
+      destinationLatitude: destLat,
+      destinationLongitude: destLng,
+      destinationName: args.destinationName,
+      destinationAddress: args.destinationAddress,
+      mode: args.mode,
+    );
+
+    await fetchDirections(initialReq);
+  }
+
+  Future<void> setDestination({
+    required String name,
+    required String address,
+    required double latitude,
+    required double longitude,
+  }) async {
+    final currentData = state.data;
+    final originLat =
+        currentData?.originLatitude ?? _args?.originLatitude ?? 0.0;
+    final originLng =
+        currentData?.originLongitude ?? _args?.originLongitude ?? 0.0;
+    final originName = currentData?.originName.isNotEmpty == true
+        ? currentData!.originName
+        : (_args?.originName ?? 'Your Location');
+    final originAddress = currentData?.originAddress.isNotEmpty == true
+        ? currentData!.originAddress
+        : (_args?.originAddress ?? '');
+
+    double destLat = latitude;
+    double destLng = longitude;
+
+    if (destLat == 0.0 && destLng == 0.0 && address.isNotEmpty) {
+      final (resolvedLat, resolvedLng) = await _resolveCoordinates(
+        address,
+        0.0,
+        0.0,
+      );
+      destLat = resolvedLat;
+      destLng = resolvedLng;
+    }
+
+    if (destLat == 0.0 && destLng == 0.0) {
+      state = state.copyWith(
+        errorMessage: 'Unable to find coordinates for this destination. Please select a valid place.',
+      );
+      return;
+    }
+
+    final mode = currentData?.mode ?? _args?.mode ?? 'drive';
+
+    final req = DirectionsRequest(
+      originLatitude: originLat,
+      originLongitude: originLng,
+      originName: originName,
+      originAddress: originAddress,
+      destinationLatitude: destLat,
+      destinationLongitude: destLng,
+      destinationName: name.isNotEmpty ? name : 'Destination',
+      destinationAddress: address,
+      mode: mode,
+    );
+
+    await fetchDirections(req);
+  }
+
+  Future<void> fetchDirections(DirectionsRequest request) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    try {
+      final response = await _repository.getDirections(request);
+      if (!_disposed) {
+        if (response.success && response.data != null) {
+          final modeIndex = _getModeIndex(request.mode);
+          state = state.copyWith(
+            isLoading: false,
+            data: response.data,
+            selectedTransportIndex: modeIndex,
+            selectedRouteIndex: 0,
+            clearError: true,
+          );
+        } else {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: response.message.isNotEmpty
+                ? response.message
+                : 'Failed to retrieve directions.',
+          );
+        }
+      }
+    } catch (e) {
+      if (!_disposed) {
+        final apiError = ApiErrorHandler.handle(e);
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: apiError.message,
+        );
+      }
+    }
+  }
+
+  int _getModeIndex(String mode) {
+    switch (mode.toLowerCase()) {
+      case 'transit':
+      case 'bus':
+        return 1;
+      case 'walk':
+      case 'walking':
+        return 2;
+      case 'bike':
+      case 'bicycling':
+      case 'cycling':
+        return 3;
+      case 'drive':
+      case 'driving':
+      default:
+        return 0;
+    }
+  }
+
+  String _getModeString(int index) {
+    switch (index) {
+      case 1:
+        return 'transit';
+      case 2:
+        return 'walk';
+      case 3:
+        return 'bike';
+      case 0:
+      default:
+        return 'drive';
+    }
+  }
+
+  Future<void> selectTransport(int index) async {
+    final newMode = _getModeString(index);
+    state = state.copyWith(
+      selectedTransportIndex: index,
+      selectedRouteIndex: 0,
+    );
+
+    final currentData = state.data;
+    final originLat =
+        currentData?.originLatitude ?? _args?.originLatitude ?? 0.0;
+    final originLng =
+        currentData?.originLongitude ?? _args?.originLongitude ?? 0.0;
+    final originName = currentData?.originName.isNotEmpty == true
+        ? currentData!.originName
+        : (_args?.originName ?? '');
+    final originAddress = currentData?.originAddress.isNotEmpty == true
+        ? currentData!.originAddress
+        : (_args?.originAddress ?? '');
+
+    final rawDestLat =
+        currentData?.destinationLatitude ?? _args?.destinationLatitude ?? 0.0;
+    final rawDestLng =
+        currentData?.destinationLongitude ?? _args?.destinationLongitude ?? 0.0;
+    final destName = currentData?.destinationName.isNotEmpty == true
+        ? currentData!.destinationName
+        : (_args?.destinationName ?? '');
+    final destAddress = currentData?.destinationAddress.isNotEmpty == true
+        ? currentData!.destinationAddress
+        : (_args?.destinationAddress ?? '');
+
+    // If destination not selected yet, simply update mode in state
+    if (rawDestLat == 0.0 && rawDestLng == 0.0 && destAddress.isEmpty) {
+      if (currentData != null) {
+        state = state.copyWith(
+          data: DirectionsData(
+            originName: currentData.originName,
+            originAddress: currentData.originAddress,
+            originLatitude: currentData.originLatitude,
+            originLongitude: currentData.originLongitude,
+            destinationName: currentData.destinationName,
+            destinationAddress: currentData.destinationAddress,
+            destinationLatitude: currentData.destinationLatitude,
+            destinationLongitude: currentData.destinationLongitude,
+            mode: newMode,
+            travelModes: currentData.travelModes,
+            routes: currentData.routes,
+          ),
+        );
+      }
+      return;
+    }
+
+    final (destLat, destLng) = await _resolveCoordinates(
+      destAddress,
+      rawDestLat,
+      rawDestLng,
+    );
+
+    final req = DirectionsRequest(
+      originLatitude: originLat,
+      originLongitude: originLng,
+      originName: originName,
+      originAddress: originAddress,
+      destinationLatitude: destLat,
+      destinationLongitude: destLng,
+      destinationName: destName,
+      destinationAddress: destAddress,
+      mode: newMode,
+    );
+
+    await fetchDirections(req);
+  }
 
   void selectRoute(int index) {
-    if (_selectedRouteIndex != index) {
-      _selectedRouteIndex = index;
-      notifyListeners();
+    if (state.selectedRouteIndex != index) {
+      state = state.copyWith(selectedRouteIndex: index);
     }
   }
 
-  void _updateRoutesForTransport(int transportIndex) {
-    _selectedRouteIndex = 0;
-    switch (transportIndex) {
-      case 0: // Drive
-        _routes = [
-          const RouteOption(
-            duration: '24 min',
-            distance: '8.4 km',
-            routeType: 'Fastest route',
-            trafficStatus: 'Light traffic',
-            trafficColor: Color(0xFF12B76A),
-            hasCurve: true,
-            isFastest: true,
-          ),
-          const RouteOption(
-            duration: '28 min',
-            distance: '9.1 km',
-            routeType: 'Alternative route',
-            trafficStatus: 'Moderate traffic',
-            trafficColor: Color(0xFFF79009),
-            hasCurve: true,
-            isFastest: false,
-          ),
-          const RouteOption(
-            duration: '32 min',
-            distance: '8.7 km',
-            routeType: 'Fdr Drive',
-            trafficStatus: 'Light traffic',
-            trafficColor: Color(0xFF12B76A),
-            hasCurve: false,
-            isFastest: false,
-          ),
-        ];
-        break;
-      case 1: // Transit
-        _routes = [
-          const RouteOption(
-            duration: '35 min',
-            distance: '8.2 km',
-            routeType: 'Subway Line 4, 5',
-            trafficStatus: 'On time',
-            trafficColor: Color(0xFF12B76A),
-            hasCurve: true,
-            isFastest: true,
-          ),
-          const RouteOption(
-            duration: '42 min',
-            distance: '8.9 km',
-            routeType: 'Express Bus M15',
-            trafficStatus: 'Light delay',
-            trafficColor: Color(0xFFF79009),
-            hasCurve: false,
-            isFastest: false,
-          ),
-        ];
-        break;
-      case 2: // Walk
-        _routes = [
-          const RouteOption(
-            duration: '1 hr 12 min',
-            distance: '7.8 km',
-            routeType: 'Via Broadway',
-            trafficStatus: 'Pedestrian friendly',
-            trafficColor: Color(0xFF12B76A),
-            hasCurve: true,
-            isFastest: true,
-          ),
-        ];
-        break;
-      case 3: // Bike
-        _routes = [
-          const RouteOption(
-            duration: '28 min',
-            distance: '8.1 km',
-            routeType: 'East River Greenway',
-            trafficStatus: 'Dedicated bike lane',
-            trafficColor: Color(0xFF12B76A),
-            hasCurve: true,
-            isFastest: true,
-          ),
-        ];
-        break;
-    }
+  Future<void> swapLocations() async {
+    final currentData = state.data;
+    final originLat =
+        currentData?.originLatitude ?? _args?.originLatitude ?? 0.0;
+    final originLng =
+        currentData?.originLongitude ?? _args?.originLongitude ?? 0.0;
+    final originName = currentData?.originName.isNotEmpty == true
+        ? currentData!.originName
+        : (_args?.originName ?? '');
+    final originAddress = currentData?.originAddress.isNotEmpty == true
+        ? currentData!.originAddress
+        : (_args?.originAddress ?? '');
+
+    final destLat =
+        currentData?.destinationLatitude ?? _args?.destinationLatitude ?? 0.0;
+    final destLng =
+        currentData?.destinationLongitude ?? _args?.destinationLongitude ?? 0.0;
+    final destName = currentData?.destinationName.isNotEmpty == true
+        ? currentData!.destinationName
+        : (_args?.destinationName ?? '');
+    final destAddress = currentData?.destinationAddress.isNotEmpty == true
+        ? currentData!.destinationAddress
+        : (_args?.destinationAddress ?? '');
+
+    if (destLat == 0.0 && destLng == 0.0) return;
+
+    final swappedReq = DirectionsRequest(
+      originLatitude: destLat,
+      originLongitude: destLng,
+      originName: destName,
+      originAddress: destAddress,
+      destinationLatitude: originLat,
+      destinationLongitude: originLng,
+      destinationName: originName,
+      destinationAddress: originAddress,
+      mode: currentData?.mode ?? _getModeString(state.selectedTransportIndex),
+    );
+
+    await fetchDirections(swappedReq);
   }
 
-  // Interactive Map State
-  Offset _mapOffset = Offset.zero;
-  double _zoomScale = 1.0;
-  double _baseScale = 1.0;
-
-  Offset get mapOffset => _mapOffset;
-  double get zoomScale => _zoomScale;
-
-  void onScaleStart(ScaleStartDetails details) {
-    _baseScale = _zoomScale;
-  }
-
-  void onScaleUpdate(ScaleUpdateDetails details) {
-    _mapOffset += details.focalPointDelta;
-    if (details.scale != 1.0) {
-      _zoomScale = (_baseScale * details.scale).clamp(0.7, 3.0);
-    }
-    notifyListeners();
-  }
-
-  void resetMap() {
-    _mapOffset = Offset.zero;
-    _zoomScale = 1.0;
-    _baseScale = 1.0;
-    notifyListeners();
-  }
-
-  void zoomIn() {
-    _zoomScale = (_zoomScale + 0.25).clamp(0.7, 3.0);
-    _baseScale = _zoomScale;
-    notifyListeners();
-  }
-
-  void zoomOut() {
-    _zoomScale = (_zoomScale - 0.25).clamp(0.7, 3.0);
-    _baseScale = _zoomScale;
-    notifyListeners();
-  }
-
-  // Sheet Extent State
-  double _currentSheetExtent = 0.13;
-  double get currentSheetExtent => _currentSheetExtent;
-  bool get isSheetExpanded => _currentSheetExtent > 0.28;
-
-  void updateSheetExtent(double extent) {
-    if ((extent - _currentSheetExtent).abs() > 0.02) {
-      _currentSheetExtent = extent;
-      notifyListeners();
-    }
+  Future<void> selectDestinationPlace(SafePlaceEtaItem place) async {
+    await setDestination(
+      name: place.name,
+      address: place.address,
+      latitude: place.latitude,
+      longitude: place.longitude,
+    );
   }
 }

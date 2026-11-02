@@ -1,31 +1,33 @@
+import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/monitored_live_location_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/provider/get_directions_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/provider/monitored_live_location_provider.dart';
 
-class GetDirectionsScreen extends StatelessWidget {
-  const GetDirectionsScreen({super.key});
+class GetDirectionsScreen extends ConsumerStatefulWidget {
+  const GetDirectionsScreen({super.key, this.args});
 
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GetDirectionsProvider(),
-      child: const _GetDirectionsView(),
-    );
-  }
-}
-
-class _GetDirectionsView extends StatefulWidget {
-  const _GetDirectionsView();
+  final DirectionsArgs? args;
 
   @override
-  State<_GetDirectionsView> createState() => _GetDirectionsViewState();
+  ConsumerState<GetDirectionsScreen> createState() =>
+      _GetDirectionsScreenState();
 }
 
-class _GetDirectionsViewState extends State<_GetDirectionsView> {
+class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
   late final DraggableScrollableController _sheetController;
+  GoogleMapController? _mapController;
+  bool _isNavigating = false;
+
+  bool get _isSheetExpanded =>
+      _sheetController.isAttached && _sheetController.size > 0.28;
 
   @override
   void initState() {
@@ -33,23 +35,58 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
     _sheetController = DraggableScrollableController();
 
     _sheetController.addListener(() {
-      if (mounted) {
-        context.read<GetDirectionsProvider>().updateSheetExtent(
-          _sheetController.size,
-        );
+      if (mounted) setState(() {});
+    });
+
+    Future.microtask(() {
+      if (widget.args != null) {
+        ref.read(directionsProvider.notifier).initialize(widget.args!);
+      } else {
+        final monitoredData = ref.read(monitoredLiveLocationProvider).data;
+        if (monitoredData != null && monitoredData.location != null) {
+          final loc = monitoredData.location!;
+          final user = monitoredData.monitoredUser;
+          final safePlaces = monitoredData.safePlaces;
+          SafePlaceEtaItem? destPlace;
+          for (final p in safePlaces) {
+            if (p.badge.toLowerCase().contains('eta') ||
+                p.name.toLowerCase() == 'work') {
+              destPlace = p;
+              break;
+            }
+          }
+          destPlace ??= safePlaces.isNotEmpty ? safePlaces.first : null;
+
+          final fallbackArgs = DirectionsArgs(
+            originLatitude: loc.latitude,
+            originLongitude: loc.longitude,
+            originName: user?.name.isNotEmpty == true
+                ? "${user!.name}'s Location"
+                : 'Your Location',
+            originAddress: loc.address,
+            destinationLatitude: destPlace?.latitude ?? 0.0,
+            destinationLongitude: destPlace?.longitude ?? 0.0,
+            destinationName: destPlace?.name ?? '',
+            destinationAddress: destPlace?.address ?? '',
+            mode: 'drive',
+            availableDestinations: safePlaces,
+          );
+          ref.read(directionsProvider.notifier).initialize(fallbackArgs);
+        }
       }
     });
   }
 
   @override
   void dispose() {
+    _mapController?.dispose();
     _sheetController.dispose();
     super.dispose();
   }
 
-  void _toggleSheet(GetDirectionsProvider provider) {
+  void _toggleSheet() {
     if (!_sheetController.isAttached) return;
-    if (provider.currentSheetExtent < 0.3) {
+    if (_sheetController.size < 0.3) {
       _sheetController.animateTo(
         0.65,
         duration: const Duration(milliseconds: 320),
@@ -64,11 +101,158 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
     }
   }
 
+  void _fitRouteBounds(List<LatLng> points, LatLng? origin, LatLng? dest) {
+    if (_mapController == null) return;
+
+    final allCoords = <LatLng>[
+      ...points,
+      if (origin != null && origin.latitude != 0.0) origin,
+      if (dest != null && dest.latitude != 0.0) dest,
+    ];
+
+    if (allCoords.isEmpty) return;
+
+    if (allCoords.length == 1) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(allCoords.first, 15),
+      );
+      return;
+    }
+
+    double minLat = allCoords.first.latitude;
+    double maxLat = allCoords.first.latitude;
+    double minLng = allCoords.first.longitude;
+    double maxLng = allCoords.first.longitude;
+
+    for (final p in allCoords) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    final bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+
+    _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 64.0));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<GetDirectionsProvider>();
-    final selectedRoute = provider.selectedRoute;
-    final isExpanded = provider.isSheetExpanded;
+    final state = ref.watch(directionsProvider);
+    final notifier = ref.read(directionsProvider.notifier);
+    final data = state.data;
+    final selectedRoute = state.selectedRoute;
+    final isExpanded = _isSheetExpanded;
+
+    final polylines = <Polyline>{};
+    final markers = <Marker>{};
+
+    LatLng? originLatLng;
+    LatLng? destLatLng;
+
+    if (data != null) {
+      if (data.originLatitude != 0.0 && data.originLongitude != 0.0) {
+        originLatLng = LatLng(data.originLatitude, data.originLongitude);
+        markers.add(
+          Marker(
+            markerId: const MarkerId('direction_origin'),
+            position: originLatLng,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueAzure,
+            ),
+            infoWindow: InfoWindow(
+              title: data.originName.isNotEmpty
+                  ? data.originName
+                  : 'Start Location',
+              snippet: data.originAddress,
+            ),
+          ),
+        );
+      }
+
+      if (data.destinationLatitude != 0.0 && data.destinationLongitude != 0.0) {
+        destLatLng = LatLng(
+          data.destinationLatitude,
+          data.destinationLongitude,
+        );
+        markers.add(
+          Marker(
+            markerId: const MarkerId('direction_destination'),
+            position: destLatLng,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueViolet,
+            ),
+            infoWindow: InfoWindow(
+              title: data.destinationName.isNotEmpty
+                  ? data.destinationName
+                  : 'Destination',
+              snippet: data.destinationAddress,
+            ),
+          ),
+        );
+      }
+
+      final activeRoutes = state.routes;
+      for (int i = 0; i < activeRoutes.length; i++) {
+        final r = activeRoutes[i];
+        final isSelected = (i == state.selectedRouteIndex);
+
+        if (r.points.isNotEmpty) {
+          polylines.add(
+            Polyline(
+              polylineId: PolylineId(r.id),
+              points: r.points,
+              color: isSelected
+                  ? const Color(0xFF7F56D9)
+                  : const Color(0xFF98A2B3),
+              width: isSelected ? 6 : 4,
+              zIndex: isSelected ? 10 : 2,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+              onTap: () {
+                notifier.selectRoute(i);
+                _fitRouteBounds(r.points, originLatLng, destLatLng);
+              },
+            ),
+          );
+        }
+      }
+
+      if (polylines.isEmpty && originLatLng != null && destLatLng != null) {
+        polylines.add(
+          Polyline(
+            polylineId: const PolylineId('fallback_route'),
+            points: [originLatLng, destLatLng],
+            color: const Color(0xFF7F56D9),
+            width: 5,
+            zIndex: 10,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+          ),
+        );
+      }
+    }
+
+    ref.listen(directionsProvider, (prev, next) {
+      if (next.data != null &&
+          (prev?.data != next.data ||
+              prev?.selectedRouteIndex != next.selectedRouteIndex)) {
+        final pts = next.selectedRoute?.points ?? [];
+        _fitRouteBounds(pts, originLatLng, destLatLng);
+      }
+    });
+
+    final initialCenter =
+        originLatLng ?? destLatLng ?? const LatLng(23.8103, 90.4125);
+
+    final hasDestination =
+        data != null &&
+        data.destinationLatitude != 0.0 &&
+        data.destinationLongitude != 0.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -83,88 +267,83 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
             color: const Color(0xFF111827),
           ),
           onPressed: () {
-            if (Navigator.of(context).canPop()) {
+            if (_isNavigating) {
+              setState(() {
+                _isNavigating = false;
+              });
+              final pts = selectedRoute?.points ?? [];
+              _fitRouteBounds(pts, originLatLng, destLatLng);
+            } else if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             }
           },
         ),
         centerTitle: true,
         title: Text(
-          'Get Directions',
+          _isNavigating ? 'Navigation' : 'Get Directions',
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
           ),
         ),
-      ),
-      body: Stack(
-        children: [
-          // 1. Moveable & Zoomable Map Canvas (Pan in any direction with finger)
-          Positioned.fill(
-            child: ClipRect(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onScaleStart: provider.onScaleStart,
-                onScaleUpdate: provider.onScaleUpdate,
-                child: Transform.translate(
-                  offset: provider.mapOffset,
-                  child: Transform.scale(
-                    scale: provider.zoomScale,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Base Live Tracking Map
-                        Image.asset(
-                          ImageAssets.liveTrackingMap,
-                          fit: BoxFit.cover,
-                        ),
-
-                        // Aligned Traffic Route Overlay
-                        Positioned(
-                          left: 16.w,
-                          right: 16.w,
-                          top: 170.h,
-                          bottom: 120.h,
-                          child: IgnorePointer(
-                            child: Image.asset(
-                              ImageAssets.traffic,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+        actions: [
+          if (state.isLoading)
+            Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF7F56D9),
                   ),
                 ),
               ),
             ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // 1. Real Google Map with Route Polylines and Markers
+          Positioned.fill(
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: initialCenter,
+                zoom: 14.0,
+              ),
+              polylines: polylines,
+              markers: markers,
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: false,
+              compassEnabled: false,
+              mapToolbarEnabled: false,
+              onMapCreated: (controller) {
+                _mapController = controller;
+                final pts = selectedRoute?.points ?? [];
+                _fitRouteBounds(pts, originLatLng, destLatLng);
+              },
+            ),
           ),
 
           // 2. Floating Map Quick Controls (Recenter & Zoom in/out)
-          Positioned(
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeInOutCubic,
             right: 16.w,
-            top: 215.h,
+            top: _isNavigating ? 80.h : 240.h,
             child: Column(
               children: [
-                // Recenter to Route Button
                 _buildCircleButton(
                   icon: Icons.my_location_rounded,
                   tooltip: 'Recenter route',
                   onTap: () {
-                    provider.resetMap();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Centered on destination route'),
-                        duration: Duration(milliseconds: 1000),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    final pts = selectedRoute?.points ?? [];
+                    _fitRouteBounds(pts, originLatLng, destLatLng);
                   },
                 ),
                 SizedBox(height: 10.h),
-
-                // Zoom In / Zoom Out Controls Pill
                 Container(
                   width: 38.r,
                   decoration: BoxDecoration(
@@ -181,7 +360,9 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
                   child: Column(
                     children: [
                       InkWell(
-                        onTap: provider.zoomIn,
+                        onTap: () => _mapController?.animateCamera(
+                          CameraUpdate.zoomIn(),
+                        ),
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(19.r),
                         ),
@@ -202,7 +383,9 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
                         color: Color(0xFFE5E7EB),
                       ),
                       InkWell(
-                        onTap: provider.zoomOut,
+                        onTap: () => _mapController?.animateCamera(
+                          CameraUpdate.zoomOut(),
+                        ),
                         borderRadius: BorderRadius.vertical(
                           bottom: Radius.circular(19.r),
                         ),
@@ -224,11 +407,13 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
             ),
           ),
 
-          // 3. Top Floating Location Card & Transport Mode Selector
-          Positioned(
+          // 3. Top Floating Location Card & Transport Mode Selector (Hides during navigation)
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeInOutCubic,
             left: 0,
             right: 0,
-            top: 0,
+            top: _isNavigating ? -360.h : 0,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -247,216 +432,483 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Origin / Destination Box
-                  _buildLocationsBox(provider),
+                  _buildLocationsBox(data, notifier),
                   SizedBox(height: 12.h),
-
-                  // Mode of Transport Selector
-                  _buildTransportModesRow(provider),
+                  _buildTransportModesRow(data, state, notifier),
                 ],
               ),
             ),
           ),
 
-          // 4. Draggable Pull-Up Bottom Sheet for Route Options
-          DraggableScrollableSheet(
-            controller: _sheetController,
-            initialChildSize: 0.13,
-            minChildSize: 0.11,
-            maxChildSize: 0.65,
-            snap: true,
-            snapSizes: const [0.13, 0.65],
-            builder: (context, scrollController) {
-              return Container(
+          // 4. Active Navigation Floating Header (Appears when navigating)
+          if (_isNavigating && selectedRoute != null)
+            Positioned(
+              left: 16.w,
+              right: 16.w,
+              top: 10.h,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(22.r),
-                  ),
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 18,
-                      offset: const Offset(0, -4),
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  physics: const ClampingScrollPhysics(),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 20.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Top Drag Handle (Tap or pull to expand/collapse)
-                        Center(
-                          child: GestureDetector(
-                            onTap: () => _toggleSheet(provider),
-                            behavior: HitTestBehavior.opaque,
-                            child: Container(
-                              width: 44.w,
-                              height: 5.h,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD0D5DD),
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36.r,
+                      height: 36.r,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF7F56D9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.navigation_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            data?.destinationName.isNotEmpty == true
+                                ? data!.destinationName
+                                : 'Heading to destination',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 13.5.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            '${selectedRoute.duration} • ${selectedRoute.distance}${selectedRoute.trafficStatus.isNotEmpty ? " • ${selectedRoute.trafficStatus}" : ""}',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF94A3B8),
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _isNavigating = false;
+                        });
+                        final pts = selectedRoute.points;
+                        _fitRouteBounds(pts, originLatLng, destLatLng);
+                      },
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 6.h,
                         ),
-                        SizedBox(height: 10.h),
-
-                        // Selected Route Compact Teaser Header
-                        GestureDetector(
-                          onTap: () => _toggleSheet(provider),
-                          behavior: HitTestBehavior.opaque,
-                          child: Row(
-                            children: [
-                              // Car Icon Badge
-                              Container(
-                                width: 38.r,
-                                height: 38.r,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF4F3FF),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.directions_car_rounded,
-                                  color: const Color(0xFF7F56D9),
-                                  size: 20.sp,
-                                ),
-                              ),
-                              SizedBox(width: 10.w),
-
-                              // Quick Summary Text
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          selectedRoute.duration,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w700,
-                                            color: const Color(0xFF111827),
-                                          ),
-                                        ),
-                                        SizedBox(width: 8.w),
-                                        Text(
-                                          '• ${selectedRoute.distance}',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 13.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFF667085),
-                                          ),
-                                        ),
-                                        SizedBox(width: 8.w),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 6.w,
-                                            vertical: 2.h,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: selectedRoute.trafficColor
-                                                .withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(
-                                              6.r,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            selectedRoute.trafficStatus,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 10.5.sp,
-                                              fontWeight: FontWeight.w600,
-                                              color: selectedRoute.trafficColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 2.h),
-                                    Text(
-                                      isExpanded
-                                          ? 'Tap to collapse'
-                                          : 'Pull up for ${provider.routes.length} route choices & start',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11.5.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color(0xFF7F56D9),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Up / Down Arrow Toggle
-                              Container(
-                                padding: EdgeInsets.all(6.r),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF9FAFB),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isExpanded
-                                      ? Icons.keyboard_arrow_down_rounded
-                                      : Icons.keyboard_arrow_up_rounded,
-                                  color: const Color(0xFF667085),
-                                  size: 22.sp,
-                                ),
-                              ),
-                            ],
-                          ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
-
-                        // Expanded Section (Recommended Routes & Start Button)
-                        SizedBox(height: 16.h),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              'Select Route',
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF344054),
-                              ),
+                            const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                              size: 15,
                             ),
+                            SizedBox(width: 4.w),
                             Text(
-                              '${provider.routes.length} routes found',
+                              'End',
                               style: GoogleFonts.inter(
-                                fontSize: 11.5.sp,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF667085),
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10.h),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-                        // Route Cards List
-                        for (int i = 0; i < provider.routes.length; i++) ...[
-                          if (i > 0) SizedBox(height: 10.h),
-                          _buildRouteCard(
-                            index: i,
-                            route: provider.routes[i],
-                            isSelected: provider.selectedRouteIndex == i,
-                            onTap: () => provider.selectRoute(i),
-                          ),
-                        ],
-                        SizedBox(height: 16.h),
+          // Error Overlay if directions failed
+          if (state.errorMessage != null && !state.isLoading && !_isNavigating)
+            Positioned(
+              left: 16.w,
+              right: 16.w,
+              top: 240.h,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3F2),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFFFECDCA)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      color: const Color(0xFFD92D20),
+                      size: 20.sp,
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: Text(
+                        state.errorMessage!,
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          color: const Color(0xFFB42318),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => notifier.retry(),
+                      child: Text(
+                        'Retry',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF7F56D9),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-                        // Start Navigation Button
-                        _buildStartNavigationButton(context),
-                        SizedBox(height: 10.h),
-                      ],
+          // 5. Draggable Pull-Up Bottom Sheet for Route Options (Hidden during navigation)
+          if (!_isNavigating)
+            DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: 0.13,
+              minChildSize: 0.11,
+              maxChildSize: 0.65,
+              snap: true,
+              snapSizes: const [0.13, 0.65],
+              builder: (context, scrollController) {
+                final routes = state.routes;
+                final currentMode =
+                    data?.travelModes != null &&
+                        state.selectedTransportIndex < data!.travelModes.length
+                    ? data.travelModes[state.selectedTransportIndex].mode
+                    : (data?.mode ?? 'drive');
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(22.r),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 18,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      physics: const ClampingScrollPhysics(),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 20.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Top Drag Handle
+                            Center(
+                              child: GestureDetector(
+                                onTap: _toggleSheet,
+                                behavior: HitTestBehavior.opaque,
+                                child: Container(
+                                  width: 44.w,
+                                  height: 5.h,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFD0D5DD),
+                                    borderRadius: BorderRadius.circular(10.r),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10.h),
+
+                            // Selected Route Compact Teaser Header
+                            if (selectedRoute != null)
+                              GestureDetector(
+                                onTap: _toggleSheet,
+                                behavior: HitTestBehavior.opaque,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 38.r,
+                                      height: 38.r,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF4F3FF),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        TravelModeItem.getIconForMode(
+                                          currentMode,
+                                        ),
+                                        color: const Color(0xFF7F56D9),
+                                        size: 20.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                selectedRoute.duration,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: const Color(
+                                                    0xFF111827,
+                                                  ),
+                                                ),
+                                              ),
+                                              if (selectedRoute
+                                                  .distance
+                                                  .isNotEmpty) ...[
+                                                SizedBox(width: 8.w),
+                                                Text(
+                                                  '• ${selectedRoute.distance}',
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 13.sp,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: const Color(
+                                                      0xFF667085,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                              if (selectedRoute
+                                                  .trafficStatus
+                                                  .isNotEmpty) ...[
+                                                SizedBox(width: 8.w),
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 6.w,
+                                                    vertical: 2.h,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: selectedRoute
+                                                        .trafficColor
+                                                        .withValues(
+                                                          alpha: 0.12,
+                                                        ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          6.r,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    selectedRoute.trafficStatus,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 10.5.sp,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: selectedRoute
+                                                          .trafficColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                          SizedBox(height: 2.h),
+                                          Text(
+                                            isExpanded
+                                                ? 'Tap to collapse'
+                                                : 'Pull up for ${routes.length} route choices & start',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 11.5.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xFF7F56D9),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(6.r),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF9FAFB),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        isExpanded
+                                            ? Icons.keyboard_arrow_down_rounded
+                                            : Icons.keyboard_arrow_up_rounded,
+                                        color: const Color(0xFF667085),
+                                        size: 22.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (state.isLoading)
+                              Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF7F56D9),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Calculating Google Maps travel times...',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      color: const Color(0xFF667085),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else if (!hasDestination)
+                              InkWell(
+                                onTap: () =>
+                                    _showDestinationPicker(context, notifier),
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4.h),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 36.r,
+                                        height: 36.r,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFF4F3FF),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.search_rounded,
+                                          color: Color(0xFF7F56D9),
+                                          size: 20,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Select Destination',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.5.sp,
+                                                fontWeight: FontWeight.w700,
+                                                color: const Color(0xFF111827),
+                                              ),
+                                            ),
+                                            Text(
+                                              'Search a place or address to see Google Maps travel times',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 11.5.sp,
+                                                color: const Color(0xFF667085),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                            // Expanded Section (Recommended Routes & Start Button)
+                            if (routes.isNotEmpty) ...[
+                              SizedBox(height: 16.h),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Select Route',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF344054),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${routes.length} routes found',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11.5.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF667085),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10.h),
+
+                              for (int i = 0; i < routes.length; i++) ...[
+                                if (i > 0) SizedBox(height: 10.h),
+                                _buildRouteCard(
+                                  index: i,
+                                  route: routes[i],
+                                  isSelected: state.selectedRouteIndex == i,
+                                  mode: currentMode,
+                                  onTap: () {
+                                    notifier.selectRoute(i);
+                                    _fitRouteBounds(
+                                      routes[i].points,
+                                      originLatLng,
+                                      destLatLng,
+                                    );
+                                  },
+                                ),
+                              ],
+                              SizedBox(height: 16.h),
+
+                              _buildStartNavigationButton(selectedRoute),
+                              SizedBox(height: 10.h),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -494,7 +946,25 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
     );
   }
 
-  Widget _buildLocationsBox(GetDirectionsProvider provider) {
+  Widget _buildLocationsBox(DirectionsData? data, DirectionsNotifier notifier) {
+    final originTitle = data?.originName.isNotEmpty == true
+        ? data!.originName
+        : (widget.args?.originName ?? 'Your Location');
+    final originSubtitle = data?.originAddress.isNotEmpty == true
+        ? data!.originAddress
+        : (widget.args?.originAddress ?? '');
+
+    final destinationTitle = data?.destinationName.isNotEmpty == true
+        ? data!.destinationName
+        : (widget.args?.destinationName.isNotEmpty == true
+              ? widget.args!.destinationName
+              : 'Choose Destination');
+    final destinationSubtitle = data?.destinationAddress.isNotEmpty == true
+        ? data!.destinationAddress
+        : (widget.args?.destinationAddress.isNotEmpty == true
+              ? widget.args!.destinationAddress
+              : 'Tap to search destination place');
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -547,9 +1017,8 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Origin
                 Text(
-                  provider.originTitle,
+                  originTitle,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -558,7 +1027,7 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  provider.originSubtitle,
+                  originSubtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
@@ -569,24 +1038,49 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
                 ),
                 SizedBox(height: 12.h),
 
-                // Destination
-                Text(
-                  provider.destinationTitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  provider.destinationSubtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF667085),
+                InkWell(
+                  onTap: () => _showDestinationPicker(context, notifier),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              destinationTitle,
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF111827),
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              destinationSubtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontSize: 11.5.sp,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF667085),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(6.r),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF4F3FF),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.search_rounded,
+                          color: const Color(0xFF7F56D9),
+                          size: 18.sp,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -596,16 +1090,7 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
 
           // Swap Icon
           InkWell(
-            onTap: () {
-              provider.swapLocations();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Swapped origin and destination'),
-                  duration: Duration(milliseconds: 1000),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
+            onTap: () => notifier.swapLocations(),
             borderRadius: BorderRadius.circular(8.r),
             child: Padding(
               padding: EdgeInsets.all(6.r),
@@ -621,12 +1106,45 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
     );
   }
 
-  Widget _buildTransportModesRow(GetDirectionsProvider provider) {
+  void _showDestinationPicker(
+    BuildContext context,
+    DirectionsNotifier notifier,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
+      ),
+      builder: (ctx) {
+        return _DestinationSearchSheet(
+          safePlaces: widget.args?.availableDestinations ?? const [],
+          onSelectPlace: (name, address, lat, lng) {
+            notifier.setDestination(
+              name: name,
+              address: address,
+              latitude: lat,
+              longitude: lng,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTransportModesRow(
+    DirectionsData? data,
+    DirectionsState state,
+    DirectionsNotifier notifier,
+  ) {
+    final modes = data?.travelModes ?? TravelModeItem.defaultModes;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(provider.transportModes.length, (index) {
-        final mode = provider.transportModes[index];
-        final isSelected = provider.selectedTransportIndex == index;
+      children: List.generate(modes.length, (index) {
+        final mode = modes[index];
+        final isSelected = state.selectedTransportIndex == index;
 
         const activeColor = Color(0xFF7F56D9);
         const inactiveColor = Color(0xFF667085);
@@ -635,7 +1153,7 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 3.w),
             child: InkWell(
-              onTap: () => provider.selectTransport(index),
+              onTap: () => notifier.selectTransport(index),
               borderRadius: BorderRadius.circular(10.r),
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
@@ -668,17 +1186,20 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
                         color: isSelected ? activeColor : inactiveColor,
                       ),
                     ),
-                    Text(
-                      mode.duration,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 9.5.sp,
-                        fontWeight: FontWeight.w400,
-                        color: isSelected
-                            ? activeColor
-                            : inactiveColor.withValues(alpha: 0.8),
+                    if (mode.duration.isNotEmpty)
+                      Text(
+                        mode.duration,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 9.5.sp,
+                          fontWeight: FontWeight.w400,
+                          color: isSelected
+                              ? activeColor
+                              : inactiveColor.withValues(alpha: 0.8),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -689,16 +1210,24 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
     );
   }
 
-  Widget _buildStartNavigationButton(BuildContext context) {
+  Widget _buildStartNavigationButton(RouteOptionItem? route) {
     return InkWell(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Starting turn-by-turn navigation...'),
-            duration: Duration(milliseconds: 1500),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        setState(() {
+          _isNavigating = true;
+        });
+
+        if (route != null && route.points.isNotEmpty) {
+          _mapController?.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: route.points.first,
+                zoom: 17.5,
+                tilt: 45.0,
+              ),
+            ),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(100.r),
       child: Container(
@@ -740,8 +1269,9 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
 
   Widget _buildRouteCard({
     required int index,
-    required RouteOption route,
+    required RouteOptionItem route,
     required bool isSelected,
+    required String mode,
     required VoidCallback onTap,
   }) {
     final borderColor = isSelected
@@ -779,20 +1309,17 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Left Mode Icon
             Container(
               width: 38.r,
               height: 38.r,
               decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
               child: Icon(
-                Icons.directions_car_rounded,
+                TravelModeItem.getIconForMode(mode),
                 color: iconColor,
                 size: 20.sp,
               ),
             ),
             SizedBox(width: 12.w),
-
-            // Route Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -806,30 +1333,35 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    '${route.distance} • ${route.routeType}',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF667085),
+                  if (route.distance.isNotEmpty ||
+                      route.routeType.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      route.distance.isNotEmpty
+                          ? '${route.distance} • ${route.routeType}'
+                          : route.routeType,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF667085),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    route.trafficStatus,
-                    style: GoogleFonts.inter(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: route.trafficColor,
+                  ],
+                  if (route.trafficStatus.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      route.trafficStatus,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: route.trafficColor,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
             SizedBox(width: 8.w),
-
-            // Right Curve Sparkline & Chevron
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -857,7 +1389,6 @@ class _GetDirectionsViewState extends State<_GetDirectionsView> {
   }
 }
 
-/// Mini elevation/traffic curve painter for route cards
 class _MiniRouteCurvePainter extends CustomPainter {
   final Color color;
   final bool isCurved;
@@ -893,4 +1424,397 @@ class _MiniRouteCurvePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _MiniRouteCurvePainter oldDelegate) =>
       oldDelegate.color != color || oldDelegate.isCurved != isCurved;
+}
+
+class _SearchPlaceResult {
+  final String name;
+  final String address;
+  final double lat;
+  final double lng;
+
+  const _SearchPlaceResult({
+    required this.name,
+    required this.address,
+    required this.lat,
+    required this.lng,
+  });
+}
+
+class _DestinationSearchSheet extends StatefulWidget {
+  final List<SafePlaceEtaItem> safePlaces;
+  final void Function(String name, String address, double lat, double lng)
+  onSelectPlace;
+
+  const _DestinationSearchSheet({
+    required this.safePlaces,
+    required this.onSelectPlace,
+  });
+
+  @override
+  State<_DestinationSearchSheet> createState() =>
+      _DestinationSearchSheetState();
+}
+
+class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
+  final TextEditingController _controller = TextEditingController();
+  Timer? _debounceTimer;
+  bool _isSearching = false;
+  List<_SearchPlaceResult> _suggestions = [];
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _debounceTimer?.cancel();
+    if (query.trim().isEmpty) {
+      setState(() {
+        _isSearching = false;
+        _suggestions = [];
+      });
+      return;
+    }
+
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      _executeSearch(query.trim());
+    });
+  }
+
+  Future<void> _executeSearch(String query) async {
+    setState(() => _isSearching = true);
+
+    try {
+      final dio = Dio();
+      final res = await dio.get(
+        'https://nominatim.openstreetmap.org/search',
+        queryParameters: {
+          'q': query,
+          'format': 'json',
+          'limit': 6,
+          'accept-language': 'en',
+          'addressdetails': 1,
+        },
+        options: Options(
+          headers: {'User-Agent': 'iWitnezApp/1.0'},
+          receiveTimeout: const Duration(seconds: 4),
+          sendTimeout: const Duration(seconds: 4),
+        ),
+      );
+
+      if (res.data is List && (res.data as List).isNotEmpty) {
+        final list = <_SearchPlaceResult>[];
+        for (final item in (res.data as List)) {
+          if (item is Map<String, dynamic>) {
+            final lat = double.tryParse(item['lat']?.toString() ?? '') ?? 0.0;
+            final lon = double.tryParse(item['lon']?.toString() ?? '') ?? 0.0;
+            final fullName = item['display_name'] as String? ?? '';
+            final shortName = fullName.split(',').first.trim();
+            if (lat != 0.0 && lon != 0.0) {
+              list.add(
+                _SearchPlaceResult(
+                  name: shortName,
+                  address: fullName,
+                  lat: lat,
+                  lng: lon,
+                ),
+              );
+            }
+          }
+        }
+        if (mounted && list.isNotEmpty) {
+          setState(() {
+            _suggestions = list;
+            _isSearching = false;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final geocoding = Geocoding();
+      final locations = await geocoding.locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        final list = <_SearchPlaceResult>[];
+        for (final loc in locations.take(5)) {
+          String addr = query;
+          try {
+            final placemarks = await geocoding.placemarkFromCoordinates(
+              loc.latitude,
+              loc.longitude,
+            );
+            if (placemarks.isNotEmpty) {
+              final p = placemarks.first;
+              final parts =
+                  [p.name, p.street, p.subLocality, p.locality, p.country]
+                      .where((s) => s != null && s.trim().isNotEmpty)
+                      .map((s) => s!)
+                      .toList();
+              if (parts.isNotEmpty) addr = parts.join(', ');
+            }
+          } catch (_) {}
+
+          list.add(
+            _SearchPlaceResult(
+              name: addr.split(',').first.trim(),
+              address: addr,
+              lat: loc.latitude,
+              lng: loc.longitude,
+            ),
+          );
+        }
+        if (mounted) {
+          setState(() {
+            _suggestions = list;
+            _isSearching = false;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() => _isSearching = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
+      ),
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, bottomInset + 16.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD0D5DD),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 14.h),
+          Text(
+            'Search Destination',
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111827),
+            ),
+          ),
+          SizedBox(height: 12.h),
+
+          // Search Field
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: TextField(
+              controller: _controller,
+              autofocus: true,
+              onChanged: _onSearchChanged,
+              onSubmitted: _executeSearch,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: const Color(0xFF111827),
+              ),
+              decoration: InputDecoration(
+                hintText: 'Type place name, street or area...',
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF98A2B3),
+                ),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: Color(0xFF7F56D9),
+                  size: 20,
+                ),
+                suffixIcon: _controller.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.clear_rounded,
+                          size: 18,
+                          color: Color(0xFF98A2B3),
+                        ),
+                        onPressed: () {
+                          _controller.clear();
+                          _onSearchChanged('');
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 12.h,
+                  horizontal: 12.w,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 12.h),
+
+          if (_isSearching)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF7F56D9),
+                  ),
+                ),
+              ),
+            ),
+
+          // Search Results List
+          if (_suggestions.isNotEmpty)
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: _suggestions.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, color: Color(0xFFF2F4F7)),
+                itemBuilder: (ctx, index) {
+                  final place = _suggestions[index];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      width: 36.r,
+                      height: 36.r,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF4F3FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.location_on_outlined,
+                        color: Color(0xFF7F56D9),
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      place.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                    subtitle: Text(
+                      place.address,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5.sp,
+                        color: const Color(0xFF667085),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.onSelectPlace(
+                        place.name,
+                        place.address,
+                        place.lat,
+                        place.lng,
+                      );
+                    },
+                  );
+                },
+              ),
+            )
+          else if (!_isSearching &&
+              _controller.text.isEmpty &&
+              widget.safePlaces.isNotEmpty) ...[
+            Text(
+              'Saved Places',
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF667085),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: widget.safePlaces.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, color: Color(0xFFF2F4F7)),
+                itemBuilder: (ctx, index) {
+                  final p = widget.safePlaces[index];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      width: 36.r,
+                      height: 36.r,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF4F3FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        p.icon.toLowerCase() == 'home'
+                            ? Icons.home_rounded
+                            : Icons.business_center_rounded,
+                        color: const Color(0xFF7F56D9),
+                        size: 20.sp,
+                      ),
+                    ),
+                    title: Text(
+                      p.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                    subtitle: Text(
+                      p.address.isNotEmpty ? p.address : p.timeDisplay,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: const Color(0xFF667085),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (p.latitude != 0.0 && p.longitude != 0.0) {
+                        widget.onSelectPlace(
+                          p.name,
+                          p.address,
+                          p.latitude,
+                          p.longitude,
+                        );
+                      } else {
+                        // If safe place coordinates not stored, search its address/name
+                        widget.onSelectPlace(
+                          p.name,
+                          p.address.isNotEmpty ? p.address : p.name,
+                          0.0,
+                          0.0,
+                        );
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }

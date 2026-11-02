@@ -63,6 +63,7 @@ import 'package:iwitnez/feature/trusted_contact/Home_section/Home/screen/home_sc
     as trusted_home;
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/screen/trusted_live_location_screen.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/screen/get_directions_screen.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
 import 'package:iwitnez/feature/trusted_contact/Profile_section/Profile/screen/profile_screen.dart'
     as trusted_profile;
 import 'package:iwitnez/feature/trusted_contact/Notifications/screen/trusted_notification_screen.dart';
@@ -452,7 +453,11 @@ final appPages = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRouteNames.getDirectionsScreen,
         pageBuilder: (context, state) =>
-            CupertinoPage(child: const GetDirectionsScreen()),
+            CupertinoPage(
+              child: GetDirectionsScreen(
+                args: state.extra as DirectionsArgs?,
+              ),
+            ),
       ),
       // Trusted Contact Journey & ETA Screen
       GoRoute(

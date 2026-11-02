@@ -66,6 +66,8 @@ class SafePlaceEtaItem {
   final String timeDisplay;
   final String badge;
   final String badgeColor;
+  final double latitude;
+  final double longitude;
 
   const SafePlaceEtaItem({
     this.name = '',
@@ -74,16 +76,20 @@ class SafePlaceEtaItem {
     this.timeDisplay = '',
     this.badge = '',
     this.badgeColor = '',
+    this.latitude = 0.0,
+    this.longitude = 0.0,
   });
 
   factory SafePlaceEtaItem.fromJson(Map<String, dynamic> json) {
     return SafePlaceEtaItem(
-      name: json['name'] as String? ?? '',
+      name: json['name'] as String? ?? json['title'] as String? ?? '',
       address: json['address'] as String? ?? '',
       icon: json['icon'] as String? ?? '',
       timeDisplay: json['time_display'] as String? ?? '',
       badge: json['badge'] as String? ?? '',
       badgeColor: json['badge_color'] as String? ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

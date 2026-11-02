@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
+import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/monitored_live_location_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/provider/monitored_live_location_provider.dart';
 import 'package:iwitnez/router/app_route_names.dart';
@@ -474,11 +475,21 @@ class _TrustedLiveLocationScreenState
                         children: [
                           // Card A: Current street address + Get Directions
                           if (location.address.isNotEmpty)
-                            _buildCurrentLocationCard(context, location),
+                            _buildCurrentLocationCard(
+                              context,
+                              location,
+                              monitoredUser,
+                              safePlaces,
+                            ),
                           if (safePlaces.isNotEmpty) ...[
                             SizedBox(height: 12.h),
                             // Card B: Safe Places ETA
-                            _buildSafePlacesEtaCard(safePlaces),
+                            _buildSafePlacesEtaCard(
+                              context,
+                              safePlaces,
+                              location,
+                              monitoredUser,
+                            ),
                           ],
                         ],
                       ),
@@ -537,6 +548,8 @@ class _TrustedLiveLocationScreenState
   Widget _buildCurrentLocationCard(
     BuildContext context,
     MonitoredLocationData location,
+    MonitoredUserLiveLocation? user,
+    List<SafePlaceEtaItem> safePlaces,
   ) {
     final parts = location.address.split(',');
     final line1 = parts.isNotEmpty ? parts.first.trim() : location.address;
@@ -612,7 +625,33 @@ class _TrustedLiveLocationScreenState
           // "Get Directions" Pill Button
           InkWell(
             onTap: () {
-              context.push(AppRouteNames.getDirectionsScreen);
+              SafePlaceEtaItem? destPlace;
+              for (final p in safePlaces) {
+                if (p.badge.toLowerCase().contains('eta') ||
+                    p.name.toLowerCase() == 'work') {
+                  destPlace = p;
+                  break;
+                }
+              }
+              destPlace ??= safePlaces.isNotEmpty ? safePlaces.first : null;
+
+              context.push(
+                AppRouteNames.getDirectionsScreen,
+                extra: DirectionsArgs(
+                  originLatitude: location.latitude,
+                  originLongitude: location.longitude,
+                  originName: user?.name.isNotEmpty == true
+                      ? "${user!.name}'s Location"
+                      : 'Your Location',
+                  originAddress: location.address,
+                  destinationLatitude: destPlace?.latitude ?? 0.0,
+                  destinationLongitude: destPlace?.longitude ?? 0.0,
+                  destinationName: destPlace?.name ?? '',
+                  destinationAddress: destPlace?.address ?? '',
+                  mode: 'drive',
+                  availableDestinations: safePlaces,
+                ),
+              );
             },
             borderRadius: BorderRadius.circular(100.r),
             child: Container(
@@ -651,7 +690,12 @@ class _TrustedLiveLocationScreenState
     );
   }
 
-  Widget _buildSafePlacesEtaCard(List<SafePlaceEtaItem> safePlaces) {
+  Widget _buildSafePlacesEtaCard(
+    BuildContext context,
+    List<SafePlaceEtaItem> safePlaces,
+    MonitoredLocationData location,
+    MonitoredUserLiveLocation? user,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
@@ -670,7 +714,29 @@ class _TrustedLiveLocationScreenState
         children: [
           for (int i = 0; i < safePlaces.length; i++) ...[
             if (i > 0) _buildDottedConnector(),
-            _buildSafePlaceRow(safePlaces[i]),
+            InkWell(
+              onTap: () {
+                final place = safePlaces[i];
+                context.push(
+                  AppRouteNames.getDirectionsScreen,
+                  extra: DirectionsArgs(
+                    originLatitude: location.latitude,
+                    originLongitude: location.longitude,
+                    originName: user?.name.isNotEmpty == true
+                        ? "${user!.name}'s Location"
+                        : 'Your Location',
+                    originAddress: location.address,
+                    destinationLatitude: place.latitude,
+                    destinationLongitude: place.longitude,
+                    destinationName: place.name,
+                    destinationAddress: place.address,
+                    mode: 'drive',
+                    availableDestinations: safePlaces,
+                  ),
+                );
+              },
+              child: _buildSafePlaceRow(safePlaces[i]),
+            ),
           ],
         ],
       ),
