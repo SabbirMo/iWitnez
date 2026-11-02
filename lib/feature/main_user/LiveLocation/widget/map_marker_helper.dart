@@ -72,23 +72,27 @@ class MapMarkerHelper {
     String? avatarUrl,
     Color fallbackColor = const Color(0xFF8B2CF5),
     bool isLive = true,
+    double size = 48.0,
   }) async {
-    final cacheKey = 'avatar_${name}_${avatarUrl ?? ''}_$isLive';
+    final cacheKey = 'avatar_${name}_${avatarUrl ?? ''}_${isLive}_$size';
     if (_cache.containsKey(cacheKey)) {
       return _cache[cacheKey]!;
     }
 
-    const size = 70.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
+
+    final center = Offset(size / 2, size / 2);
+    final borderWidth = (size * 0.05).clamp(2.0, 3.5);
+    final shadowBlur = (size * 0.05).clamp(2.0, 3.5);
 
     // 1. Drop shadow
     final shadowPaint = Paint()
       ..color = const Color(0x33000000)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowBlur);
     canvas.drawCircle(
-      const Offset(size / 2, size / 2 + 2),
-      size / 2 - 6,
+      Offset(size / 2, size / 2 + 1.5),
+      size / 2 - 2.5,
       shadowPaint,
     );
 
@@ -97,12 +101,13 @@ class MapMarkerHelper {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(
-      const Offset(size / 2, size / 2),
-      size / 2 - 5,
+      center,
+      size / 2 - 2.0,
       borderPaint,
     );
 
     // 3. Avatar Image or Initial letter
+    final innerRadius = size / 2 - 2.0 - borderWidth;
     ui.Image? loadedImage;
     if (avatarUrl != null &&
         avatarUrl.isNotEmpty &&
@@ -120,8 +125,8 @@ class MapMarkerHelper {
           final bytes = await consolidateHttpClientResponseBytes(response);
           final codec = await ui.instantiateImageCodec(
             bytes,
-            targetWidth: (size - 14).toInt(),
-            targetHeight: (size - 14).toInt(),
+            targetWidth: (innerRadius * 2).toInt(),
+            targetHeight: (innerRadius * 2).toInt(),
           );
           final frame = await codec.getNextFrame();
           loadedImage = frame.image;
@@ -134,8 +139,8 @@ class MapMarkerHelper {
     final clipPath = Path()
       ..addOval(
         Rect.fromCircle(
-          center: const Offset(size / 2, size / 2),
-          radius: size / 2 - 8,
+          center: center,
+          radius: innerRadius,
         ),
       );
     canvas.save();
@@ -151,8 +156,8 @@ class MapMarkerHelper {
       // Fallback background color
       final bgPaint = Paint()..color = fallbackColor;
       canvas.drawCircle(
-        const Offset(size / 2, size / 2),
-        size / 2 - 8,
+        center,
+        innerRadius,
         bgPaint,
       );
 
@@ -161,9 +166,9 @@ class MapMarkerHelper {
       final textPainter = TextPainter(
         text: TextSpan(
           text: initial,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 24,
+            fontSize: size * 0.40,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -178,11 +183,13 @@ class MapMarkerHelper {
 
     // 4. Live green dot on bottom-right
     if (isLive) {
-      const dotOffset = Offset(size - 13, size - 13);
+      final dotRadius = (size * 0.12).clamp(3.5, 6.0);
+      final dotBgRadius = dotRadius + 1.5;
+      final dotOffset = Offset(size - dotBgRadius - 1, size - dotBgRadius - 1);
       final dotBg = Paint()..color = Colors.white;
-      canvas.drawCircle(dotOffset, 7.5, dotBg);
+      canvas.drawCircle(dotOffset, dotBgRadius, dotBg);
       final dotPaint = Paint()..color = const Color(0xFF22C55E);
-      canvas.drawCircle(dotOffset, 5.5, dotPaint);
+      canvas.drawCircle(dotOffset, dotRadius, dotPaint);
     }
 
     final picture = recorder.endRecording();

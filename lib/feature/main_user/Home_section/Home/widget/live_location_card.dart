@@ -100,6 +100,7 @@ class _LiveLocationCardState extends State<LiveLocationCard>
             fallbackColor:
                 _contactAvatarColors[i % _contactAvatarColors.length],
             isLive: person.isLive,
+            size: 48.0,
           );
 
           markers.add(

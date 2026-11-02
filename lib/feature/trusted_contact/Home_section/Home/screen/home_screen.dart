@@ -112,6 +112,8 @@ class HomeScreen extends ConsumerWidget {
                             address: state.wardAddress,
                             wardAvatarUrl: state.wardAvatarUrl,
                             isOnline: state.monitoredUser?.isOnline ?? true,
+                            latitude: state.liveLocation?.latitude,
+                            longitude: state.liveLocation?.longitude,
                             onViewFullMapTap: () =>
                                 _controller.onViewFullMapTap(context),
                           ),

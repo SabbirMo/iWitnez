@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
 
 class TrustedLiveLocationCard extends StatefulWidget {
   const TrustedLiveLocationCard({
@@ -11,6 +12,8 @@ class TrustedLiveLocationCard extends StatefulWidget {
     required this.address,
     required this.wardAvatarUrl,
     this.isOnline = true,
+    this.latitude,
+    this.longitude,
     this.onViewFullMapTap,
   });
 
@@ -19,6 +22,8 @@ class TrustedLiveLocationCard extends StatefulWidget {
   final String address;
   final String wardAvatarUrl;
   final bool isOnline;
+  final double? latitude;
+  final double? longitude;
   final VoidCallback? onViewFullMapTap;
 
   @override
@@ -26,32 +31,79 @@ class TrustedLiveLocationCard extends StatefulWidget {
       _TrustedLiveLocationCardState();
 }
 
-class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
-  late final Animation<double> _pulseAnimation;
+class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
+  final Set<Marker> _markers = {};
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
-    _pulseAnimation = CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeOut,
-    );
+    _buildMarkers();
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
   @override
+  void didUpdateWidget(covariant TrustedLiveLocationCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.latitude != widget.latitude ||
+        oldWidget.longitude != widget.longitude ||
+        oldWidget.wardName != widget.wardName ||
+        oldWidget.wardAvatarUrl != widget.wardAvatarUrl ||
+        oldWidget.isOnline != widget.isOnline) {
+      _buildMarkers();
+      if (widget.latitude != null &&
+          widget.longitude != null &&
+          _mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(widget.latitude!, widget.longitude!),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _buildMarkers() async {
+    if (widget.latitude == null || widget.longitude == null) return;
+    if (widget.latitude == 0.0 && widget.longitude == 0.0) return;
+
+    final pos = LatLng(widget.latitude!, widget.longitude!);
+
+    final markerIcon = await MapMarkerHelper.createAvatarMarker(
+      name: widget.wardName.isNotEmpty ? widget.wardName : 'User',
+      avatarUrl: widget.wardAvatarUrl,
+      fallbackColor: const Color(0xFF8B2CF5),
+      isLive: widget.isOnline,
+      size: 48.0,
+    );
+
+    if (mounted) {
+      setState(() {
+        _markers
+          ..clear()
+          ..add(
+            Marker(
+              markerId: const MarkerId('monitored_user_marker'),
+              position: pos,
+              icon: markerIcon,
+              anchor: const Offset(0.5, 0.5),
+            ),
+          );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final hasValidCoords = widget.latitude != null &&
+        widget.longitude != null &&
+        (widget.latitude != 0.0 || widget.longitude != 0.0);
+
     return Container(
       width: double.infinity,
       height: 172.h,
@@ -185,215 +237,70 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
               ),
             ),
 
-            // Right Panel — Interactive Map with radar pulse & avatar pin
+            // Right Panel — Real Google Map Preview with user avatar marker
             Expanded(
-              child: InkWell(
-                onTap: widget.onViewFullMapTap,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(16.r),
-                    bottomRight: Radius.circular(16.r),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Live Tracking Map Image
-                      Positioned.fill(
-                        child: Image.asset(
-                          ImageAssets.liveTrackingMap,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                      // Radar Rings & Pulsing Center Point
-                      Positioned(
-                        left: 28.w,
-                        bottom: 12.h,
-                        child: AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            final wave = _pulseAnimation.value;
-                            return Stack(
-                              alignment: Alignment.center,
-                              clipBehavior: Clip.none,
-                              children: [
-                                // Outer large radar concentric circle
-                                Container(
-                                  width: 90.r,
-                                  height: 90.r,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: const Color(0xFF8B5CF6)
-                                          .withValues(alpha: 0.12),
-                                      width: 1.2.w,
-                                    ),
-                                    color: const Color(0xFF8B5CF6)
-                                        .withValues(alpha: 0.04),
-                                  ),
-                                ),
-
-                                // Mid radar concentric circle
-                                Container(
-                                  width: 62.r,
-                                  height: 62.r,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: const Color(0xFF3B82F6)
-                                          .withValues(alpha: 0.18),
-                                      width: 1.2.w,
-                                    ),
-                                    color: const Color(0xFF3B82F6)
-                                        .withValues(alpha: 0.06),
-                                  ),
-                                ),
-
-                                // Dynamic pulse wave
-                                Container(
-                                  width: (34 + wave * 22).r,
-                                  height: (34 + wave * 22).r,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF3B82F6).withValues(
-                                      alpha: (1.0 - wave) * 0.28,
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-
-                                // Inner fixed halo
-                                Container(
-                                  width: 32.r,
-                                  height: 32.r,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF93C5FD)
-                                        .withValues(alpha: 0.35),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-
-                                // Blue location center dot with white rim
-                                Container(
-                                  width: 18.r,
-                                  height: 18.r,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF3B82F6),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2.2.w,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFF3B82F6)
-                                            .withValues(alpha: 0.4),
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Container(
-                                      width: 6.r,
-                                      height: 6.r,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-
-                      // Avatar Pin on the map
-                      Positioned(
-                        right: 32.w,
-                        top: 14.h,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              width: 30.r,
-                              height: 30.r,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2.w,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.18),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ClipOval(
-                                child: widget.wardAvatarUrl.isNotEmpty
-                                    ? Image.network(
-                                        widget.wardAvatarUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                _buildPinAvatarFallback(),
-                                      )
-                                    : _buildPinAvatarFallback(),
-                              ),
-                            ),
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Container(
-                                width: 8.r,
-                                height: 8.r,
-                                decoration: BoxDecoration(
-                                  color: widget.isOnline
-                                      ? const Color(0xFF22C55E)
-                                      : const Color(0xFF9CA3AF),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1.5.w,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(16.r),
+                  bottomRight: Radius.circular(16.r),
                 ),
+                child: hasValidCoords
+                    ? Stack(
+                        children: [
+                          GoogleMap(
+                            key: ValueKey(
+                              '${widget.latitude}_${widget.longitude}',
+                            ),
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                widget.latitude!,
+                                widget.longitude!,
+                              ),
+                              zoom: 15.0,
+                            ),
+                            markers: _markers,
+                            liteModeEnabled: false,
+                            zoomControlsEnabled: false,
+                            myLocationButtonEnabled: false,
+                            compassEnabled: false,
+                            mapToolbarEnabled: false,
+                            rotateGesturesEnabled: false,
+                            tiltGesturesEnabled: false,
+                            scrollGesturesEnabled: false,
+                            zoomGesturesEnabled: false,
+                            onMapCreated: (controller) {
+                              _mapController = controller;
+                            },
+                          ),
+
+                          // Transparent tap overlay to trigger onViewFullMapTap
+                          Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: widget.onViewFullMapTap,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(
+                        color: const Color(0xFFF8FAFC),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF8B2CF5),
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                      ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildPinAvatarFallback() {
-    return Container(
-      color: const Color(0xFFFDA4AF),
-      child: Center(
-        child: widget.wardName.isNotEmpty
-            ? Text(
-                widget.wardName[0].toUpperCase(),
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              )
-            : Icon(
-                Icons.person_rounded,
-                color: Colors.white,
-                size: 16.sp,
-              ),
       ),
     );
   }
