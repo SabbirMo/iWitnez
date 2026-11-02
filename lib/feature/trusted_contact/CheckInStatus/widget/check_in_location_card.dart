@@ -281,14 +281,16 @@ class _CheckInLocationCardState extends State<CheckInLocationCard>
                         height: 1.25,
                       ),
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      widget.updateTimeText,
-                      style: GoogleFonts.inter(
-                        fontSize: 10.5.sp,
-                        color: const Color(0xFF9CA3AF),
+                    if (widget.updateTimeText.isNotEmpty) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        widget.updateTimeText,
+                        style: GoogleFonts.inter(
+                          fontSize: 10.5.sp,
+                          color: const Color(0xFF9CA3AF),
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

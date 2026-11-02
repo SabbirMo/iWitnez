@@ -156,9 +156,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
                           isLive: false,
                           address: data.location.address,
                           statusText: 'Last Known',
-                          updateTimeText: data.location.updatedAgo.isNotEmpty
-                              ? data.location.updatedAgo
-                              : 'Updated recently',
+                          updateTimeText: data.location.updatedAgo,
                           latitude: data.location.latitude != 0.0
                               ? data.location.latitude
                               : null,
@@ -186,9 +184,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
                           isLive: true,
                           address: data.location.address,
                           statusText: 'Live',
-                          updateTimeText: data.location.updatedAgo.isNotEmpty
-                              ? data.location.updatedAgo
-                              : 'Updated just now',
+                          updateTimeText: data.location.updatedAgo,
                           latitude: data.location.latitude != 0.0
                               ? data.location.latitude
                               : null,

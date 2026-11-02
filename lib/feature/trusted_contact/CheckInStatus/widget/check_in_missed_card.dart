@@ -20,14 +20,16 @@ class CheckInMissedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayTitle = (title != null && title!.isNotEmpty)
         ? title!
-        : "$wardName hasn't Checked In";
+        : (wardName.isNotEmpty
+            ? "$wardName hasn't Checked In"
+            : "Not Checked In");
     final displaySubtitle = (subtitle != null && subtitle!.isNotEmpty)
         ? subtitle!
-        : "We'll notify you when they check in.";
+        : '';
     final displayTime =
         (lastCheckInTime != null && lastCheckInTime!.isNotEmpty)
             ? lastCheckInTime!
-            : 'Yesterday, 08:15 PM';
+            : '';
 
     return Container(
       width: double.infinity,
@@ -56,7 +58,6 @@ class CheckInMissedCard extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Sparkle accents
                 Positioned(
                   left: 6.w,
                   top: 18.h,
@@ -99,8 +100,6 @@ class CheckInMissedCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Outer Halo
                 Container(
                   width: 62.r,
                   height: 62.r,
@@ -109,8 +108,6 @@ class CheckInMissedCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-
-                // Inner Orange Circle
                 Container(
                   width: 44.r,
                   height: 44.r,
@@ -139,59 +136,58 @@ class CheckInMissedCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 4.h),
 
           // Subtitle
-          Text(
-            displaySubtitle,
-            style: GoogleFonts.inter(
-              fontSize: 12.5.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+          if (displaySubtitle.isNotEmpty) ...[
+            SizedBox(height: 4.h),
+            Text(
+              displaySubtitle,
+              style: GoogleFonts.inter(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF6B7280),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 18.h),
+          ],
 
-          // Divider
-          const Divider(
-            color: Color(0xFFF3F4F6),
-            height: 1,
-            thickness: 1,
-          ),
-          SizedBox(height: 14.h),
-
-          // Last Check In Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.access_time_rounded,
-                size: 14.sp,
+          if (displayTime.isNotEmpty) ...[
+            SizedBox(height: 18.h),
+            const Divider(
+              color: Color(0xFFF3F4F6),
+              height: 1,
+              thickness: 1,
+            ),
+            SizedBox(height: 14.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 14.sp,
+                  color: const Color(0xFFF97316),
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'Last Check In',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 5.h),
+            Text(
+              displayTime,
+              style: GoogleFonts.inter(
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w700,
                 color: const Color(0xFFF97316),
               ),
-              SizedBox(width: 6.w),
-              Text(
-                'Last Check In',
-                style: GoogleFonts.inter(
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF6B7280),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 5.h),
-
-          // Time text
-          Text(
-            displayTime,
-            style: GoogleFonts.inter(
-              fontSize: 13.5.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFFF97316),
             ),
-          ),
+          ],
         ],
       ),
     );

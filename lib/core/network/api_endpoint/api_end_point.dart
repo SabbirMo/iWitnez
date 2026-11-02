@@ -35,6 +35,8 @@ class ApiEndPoints {
       '/api/v1/contacts/monitored/live-location/';
   static const String monitoredCheckInStatus =
       '/api/v1/contacts/monitored/check-in-status/';
+  static const String monitoredJourney =
+      '/api/v1/contacts/monitored/journey/';
   static const String locationDirections = '/api/v1/location/directions/';
 
   // Chat Endpoints

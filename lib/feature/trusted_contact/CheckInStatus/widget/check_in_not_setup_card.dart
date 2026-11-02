@@ -21,7 +21,11 @@ class CheckInNotSetupCard extends StatelessWidget {
         : 'Check-In Not Set Up';
     final displaySubtitle = (subtitle != null && subtitle!.isNotEmpty)
         ? subtitle!
-        : "$wardName hasn't set up check-in yet.\nYou'll be notified when they set it up.";
+        : (wardName.isNotEmpty
+            ? "$wardName hasn't set up check-in yet.\nYou'll be notified when they set it up."
+            : "Check-in is not set up yet.\nYou'll be notified when it is set up.");
+
+    final alertName = wardName.isNotEmpty ? wardName : 'they';
 
     return Container(
       width: double.infinity,
@@ -43,7 +47,6 @@ class CheckInNotSetupCard extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 20.h),
       child: Column(
         children: [
-          // Clipboard Vector Graphic
           _buildClipboardGraphic(),
           SizedBox(height: 18.h),
 
@@ -57,19 +60,21 @@ class CheckInNotSetupCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 6.h),
 
           // Subtitle
-          Text(
-            displaySubtitle,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 12.5.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
-              height: 1.35,
+          if (displaySubtitle.isNotEmpty) ...[
+            SizedBox(height: 6.h),
+            Text(
+              displaySubtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF6B7280),
+                height: 1.35,
+              ),
             ),
-          ),
+          ],
           SizedBox(height: 20.h),
 
           // Alert Info Pill
@@ -98,7 +103,7 @@ class CheckInNotSetupCard extends StatelessWidget {
                 SizedBox(width: 10.w),
                 Expanded(
                   child: Text(
-                    "You'll get alerts when $wardName sets up check-in or marks herself safe.",
+                    "You'll get alerts when $alertName sets up check-in or marks safe.",
                     style: GoogleFonts.inter(
                       fontSize: 11.5.sp,
                       color: const Color(0xFF4B5563),
@@ -121,7 +126,6 @@ class CheckInNotSetupCard extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Soft lavender background circle / foliage
           Container(
             width: 120.r,
             height: 120.r,
@@ -130,8 +134,6 @@ class CheckInNotSetupCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-
-          // Side leaf accents
           Positioned(
             left: 8.w,
             top: 40.h,
@@ -153,8 +155,6 @@ class CheckInNotSetupCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Clipboard body
           Container(
             width: 80.w,
             height: 98.h,
@@ -176,7 +176,6 @@ class CheckInNotSetupCard extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(height: 14.h),
-                // Circular question mark
                 Container(
                   width: 32.r,
                   height: 32.r,
@@ -196,8 +195,6 @@ class CheckInNotSetupCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8.h),
-
-                // Checklist lines
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Column(
@@ -247,8 +244,6 @@ class CheckInNotSetupCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Top Clip of Clipboard
           Positioned(
             top: 10.h,
             child: Container(
@@ -260,8 +255,6 @@ class CheckInNotSetupCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Warning badge at bottom right
           Positioned(
             right: 20.w,
             bottom: 8.h,

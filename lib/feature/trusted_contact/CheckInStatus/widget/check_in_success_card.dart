@@ -20,13 +20,13 @@ class CheckInSuccessCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayTitle = (title != null && title!.isNotEmpty)
         ? title!
-        : '$wardName is Checked In';
+        : (wardName.isNotEmpty ? '$wardName is Checked In' : 'Checked In');
     final displaySubtitle = (subtitle != null && subtitle!.isNotEmpty)
         ? subtitle!
-        : 'She marked herself safe';
+        : '';
     final displayTime = (checkInTime != null && checkInTime!.isNotEmpty)
         ? checkInTime!
-        : 'Today, 10:30 AM';
+        : '';
 
     return Container(
       width: double.infinity,
@@ -55,7 +55,6 @@ class CheckInSuccessCard extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Sparkle accents
                 Positioned(
                   left: 6.w,
                   top: 18.h,
@@ -98,8 +97,6 @@ class CheckInSuccessCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Outer Halo
                 Container(
                   width: 62.r,
                   height: 62.r,
@@ -108,8 +105,6 @@ class CheckInSuccessCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-
-                // Inner Green Button
                 Container(
                   width: 44.r,
                   height: 44.r,
@@ -138,59 +133,58 @@ class CheckInSuccessCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 4.h),
 
           // Subtitle
-          Text(
-            displaySubtitle,
-            style: GoogleFonts.inter(
-              fontSize: 12.5.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 18.h),
-
-          // Divider
-          const Divider(
-            color: Color(0xFFF3F4F6),
-            height: 1,
-            thickness: 1,
-          ),
-          SizedBox(height: 14.h),
-
-          // Checked In At Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.calendar_month_outlined,
-                size: 14.sp,
-                color: const Color(0xFF10B981),
+          if (displaySubtitle.isNotEmpty) ...[
+            SizedBox(height: 4.h),
+            Text(
+              displaySubtitle,
+              style: GoogleFonts.inter(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF6B7280),
               ),
-              SizedBox(width: 6.w),
-              Text(
-                'Checked In At',
-                style: GoogleFonts.inter(
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF6B7280),
+              textAlign: TextAlign.center,
+            ),
+          ],
+
+          if (displayTime.isNotEmpty) ...[
+            SizedBox(height: 18.h),
+            const Divider(
+              color: Color(0xFFF3F4F6),
+              height: 1,
+              thickness: 1,
+            ),
+            SizedBox(height: 14.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.calendar_month_outlined,
+                  size: 14.sp,
+                  color: const Color(0xFF10B981),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 5.h),
-
-          // Time text
-          Text(
-            displayTime,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF16A34A),
+                SizedBox(width: 6.w),
+                Text(
+                  'Checked In At',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+              ],
             ),
-          ),
+            SizedBox(height: 5.h),
+            Text(
+              displayTime,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF16A34A),
+              ),
+            ),
+          ],
         ],
       ),
     );

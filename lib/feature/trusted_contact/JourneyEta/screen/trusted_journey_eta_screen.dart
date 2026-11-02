@@ -3,24 +3,56 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/provider/safety_tracking_provider.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/widget/safety_history_date_card.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/widget/safety_history_map_view.dart';
-import 'package:iwitnez/feature/main_user/SafetyTracking/widget/safety_history_timeline_card.dart';
+import '../provider/journey_eta_provider.dart';
+import '../widget/journey_date_card.dart';
+import '../widget/journey_map_view.dart';
+import '../widget/journey_timeline_card.dart';
 
 class TrustedJourneyEtaScreen extends ConsumerWidget {
   const TrustedJourneyEtaScreen({super.key});
 
+  String _formatDisplayDate(DateTime date) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(safetyTrackingProvider);
-    final notifier = ref.read(safetyTrackingProvider.notifier);
-    final historyData = state.historyData;
-    final isToday = historyData?.isToday ?? true;
-    final sectionTitle =
-        (!isToday && historyData != null && historyData.dateDisplay.isNotEmpty)
-        ? historyData.dateDisplay
-        : 'Today';
+    final state = ref.watch(journeyEtaProvider);
+    final notifier = ref.read(journeyEtaProvider.notifier);
+    final journeyData = state.data;
+    final isToday = journeyData?.isToday ?? false;
+
+    final String sectionTitle = state.selectedDate != null
+        ? _formatDisplayDate(state.selectedDate!)
+        : (journeyData != null && journeyData.dateDisplay.isNotEmpty
+            ? journeyData.dateDisplay
+            : (isToday ? 'Today' : ''));
+
+    ref.listen<JourneyEtaState>(journeyEtaProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: const Color(0xFFEF4444),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFC),
@@ -55,80 +87,156 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 1. History Route Map with Start and End pins
-              SizedBox(height: 250.h, child: const SafetyHistoryMapView()),
+        child: Builder(
+          builder: (context) {
+            // 1. Initial Loading
+            if (state.isLoading && journeyData == null) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF6C48F5),
+                ),
+              );
+            }
 
-              // 2. Content below map
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16.w,
-                  14.h,
-                  16.w,
-                  40.h + MediaQuery.of(context).padding.bottom,
+            // 2. Error State
+            if (state.error != null && journeyData == null) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.cloud_off_rounded,
+                        size: 54.sp,
+                        color: const Color(0xFF9CA3AF),
+                      ),
+                      SizedBox(height: 14.h),
+                      Text(
+                        state.error!,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF4B5563),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 18.h),
+                      ElevatedButton(
+                        onPressed: () => notifier.fetchJourney(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6C48F5),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24.w,
+                            vertical: 10.h,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Retry',
+                          style: GoogleFonts.inter(
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return RefreshIndicator(
+              color: const Color(0xFF6C48F5),
+              onRefresh: () async {
+                await notifier.refresh();
+              },
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Section Title: "Today" or selected date
-                    Text(
-                      sectionTitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
+                    // 1. History Route Map with Start and End pins
+                    SizedBox(
+                      height: 250.h,
+                      child: const JourneyMapView(),
+                    ),
+
+                    // 2. Content below map
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        16.w,
+                        14.h,
+                        16.w,
+                        40.h + MediaQuery.of(context).padding.bottom,
                       ),
-                    ),
-                    SizedBox(height: 12.h),
-
-                    // Timeline Card
-                    SafetyHistoryTimelineCard(
-                      items: historyData?.timeline ?? const [],
-                      isToday: isToday,
-                      dateDisplay: historyData?.dateDisplay ?? 'Today',
-                      isLoading: state.isLoadingHistory,
-                    ),
-                    SizedBox(height: 14.h),
-
-                    // Select Date Card (scrolls with the page)
-                    SafetyHistoryDateCard(
-                      selectedDate: state.selectedDate,
-                      dateDisplay: historyData?.dateDisplay,
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: state.selectedDate,
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime(2030),
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: const ColorScheme.light(
-                                  primary: Color(0xFF6C48F5),
-                                  onPrimary: Colors.white,
-                                  onSurface: Color(0xFF111827),
-                                ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (sectionTitle.isNotEmpty) ...[
+                            Text(
+                              sectionTitle,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF111827),
                               ),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (picked != null) {
-                          notifier.setDate(picked);
-                        }
-                      },
+                            ),
+                            SizedBox(height: 12.h),
+                          ],
+
+                          // Timeline Card
+                          JourneyTimelineCard(
+                            items: journeyData?.timeline ?? const [],
+                            isToday: isToday,
+                            dateDisplay: sectionTitle,
+                            isLoading: state.isLoading,
+                          ),
+                          SizedBox(height: 14.h),
+
+                          // Select Date Card (scrolls with the page)
+                          JourneyDateCard(
+                            selectedDate: state.selectedDate,
+                            dateDisplay: sectionTitle,
+                            onTap: () async {
+                              final initialDate =
+                                  state.selectedDate ?? DateTime.now();
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: initialDate,
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2030),
+                                builder: (context, child) {
+                                  return Theme(
+                                    data: Theme.of(context).copyWith(
+                                      colorScheme: const ColorScheme.light(
+                                        primary: Color(0xFF6C48F5),
+                                        onPrimary: Colors.white,
+                                        onSurface: Color(0xFF111827),
+                                      ),
+                                    ),
+                                    child: child!,
+                                  );
+                                },
+                              );
+                              if (picked != null) {
+                                notifier.setDate(picked);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

@@ -45,7 +45,7 @@ class CheckInMonitoredUser {
   factory CheckInMonitoredUser.fromJson(Map<String, dynamic> json) {
     return CheckInMonitoredUser(
       id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? json['user_name'] as String? ?? 'Emma',
+      name: json['name'] as String? ?? json['user_name'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String? ??
           json['avatar'] as String? ??
           json['image'] as String? ??
@@ -96,7 +96,7 @@ class CheckInStatusData {
   final String checkedInAtDisplay;
 
   const CheckInStatusData({
-    this.state = 'checked_in',
+    this.state = '',
     this.monitoredUser = const CheckInMonitoredUser(),
     this.statusBadge = '',
     this.badgeSubtext = '',
@@ -111,19 +111,18 @@ class CheckInStatusData {
   bool get isNotSetUp => state.toLowerCase() == 'not_set_up';
   bool get isMissed => state.toLowerCase() == 'missed';
 
-  String get wardName =>
-      monitoredUser.name.isNotEmpty ? monitoredUser.name : 'Emma';
+  String get wardName => monitoredUser.name;
 
   factory CheckInStatusData.fromJson(Map<String, dynamic> json) {
     return CheckInStatusData(
-      state: json['state'] as String? ?? 'checked_in',
+      state: json['state'] as String? ?? '',
       monitoredUser: json['monitored_user'] != null &&
               json['monitored_user'] is Map
           ? CheckInMonitoredUser.fromJson(
               Map<String, dynamic>.from(json['monitored_user'] as Map),
             )
           : CheckInMonitoredUser(
-              name: json['user_name'] as String? ?? 'Emma',
+              name: json['user_name'] as String? ?? '',
             ),
       statusBadge: json['status_badge'] as String? ?? '',
       badgeSubtext: json['badge_subtext'] as String? ?? '',
