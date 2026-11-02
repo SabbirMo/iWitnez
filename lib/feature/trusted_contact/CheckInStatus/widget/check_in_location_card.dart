@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
@@ -10,6 +11,8 @@ class CheckInLocationCard extends StatefulWidget {
   final String address;
   final String statusText;
   final String updateTimeText;
+  final double? latitude;
+  final double? longitude;
 
   const CheckInLocationCard({
     super.key,
@@ -17,6 +20,8 @@ class CheckInLocationCard extends StatefulWidget {
     required this.address,
     required this.statusText,
     required this.updateTimeText,
+    this.latitude,
+    this.longitude,
   });
 
   @override
@@ -27,6 +32,13 @@ class _CheckInLocationCardState extends State<CheckInLocationCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final Animation<double> _pulseAnimation;
+  GoogleMapController? _mapController;
+
+  bool get _hasValidCoords =>
+      widget.latitude != null &&
+      widget.longitude != null &&
+      widget.latitude != 0.0 &&
+      widget.longitude != 0.0;
 
   @override
   void initState() {
@@ -42,8 +54,23 @@ class _CheckInLocationCardState extends State<CheckInLocationCard>
   }
 
   @override
+  void didUpdateWidget(covariant CheckInLocationCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_hasValidCoords &&
+        (widget.latitude != oldWidget.latitude ||
+            widget.longitude != oldWidget.longitude)) {
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLng(
+          LatLng(widget.latitude!, widget.longitude!),
+        ),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _pulseController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -127,10 +154,29 @@ class _CheckInLocationCardState extends State<CheckInLocationCard>
                 fit: StackFit.expand,
                 alignment: Alignment.center,
                 children: [
-                  Image.asset(
-                    ImageAssets.liveTrackingMap,
-                    fit: BoxFit.cover,
-                  ),
+                  if (_hasValidCoords)
+                    GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(widget.latitude!, widget.longitude!),
+                        zoom: 15.0,
+                      ),
+                      onMapCreated: (ctrl) => _mapController = ctrl,
+                      zoomControlsEnabled: false,
+                      myLocationButtonEnabled: false,
+                      compassEnabled: false,
+                      mapToolbarEnabled: false,
+                      scrollGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
+                      tiltGesturesEnabled: false,
+                      rotateGesturesEnabled: false,
+                    )
+                  else
+                    Image.asset(
+                      ImageAssets.liveTrackingMap,
+                      fit: BoxFit.cover,
+                    ),
+
+                  // Radar Pulse Overlay centered on location
                   AnimatedBuilder(
                     animation: _pulseAnimation,
                     builder: (context, child) {
@@ -193,7 +239,8 @@ class _CheckInLocationCardState extends State<CheckInLocationCard>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.25),
+                                    color:
+                                        Colors.black.withValues(alpha: 0.25),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),

@@ -4,16 +4,30 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CheckInSuccessCard extends StatelessWidget {
   final String wardName;
-  final String checkInTime;
+  final String? title;
+  final String? subtitle;
+  final String? checkInTime;
 
   const CheckInSuccessCard({
     super.key,
     required this.wardName,
-    required this.checkInTime,
+    this.title,
+    this.subtitle,
+    this.checkInTime,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayTitle = (title != null && title!.isNotEmpty)
+        ? title!
+        : '$wardName is Checked In';
+    final displaySubtitle = (subtitle != null && subtitle!.isNotEmpty)
+        ? subtitle!
+        : 'She marked herself safe';
+    final displayTime = (checkInTime != null && checkInTime!.isNotEmpty)
+        ? checkInTime!
+        : 'Today, 10:30 AM';
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -116,23 +130,25 @@ class CheckInSuccessCard extends StatelessWidget {
 
           // Title
           Text(
-            '$wardName is Checked In',
+            displayTitle,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF111827),
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 4.h),
 
           // Subtitle
           Text(
-            'She marked herself safe',
+            displaySubtitle,
             style: GoogleFonts.inter(
               fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF6B7280),
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 18.h),
 
@@ -168,7 +184,7 @@ class CheckInSuccessCard extends StatelessWidget {
 
           // Time text
           Text(
-            checkInTime,
+            displayTime,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,

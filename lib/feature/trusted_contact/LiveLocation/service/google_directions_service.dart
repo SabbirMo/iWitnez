@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
 
 class GoogleDirectionsResult {
@@ -34,10 +33,11 @@ class GoogleDirectionsService {
   final String _apiKey;
 
   GoogleDirectionsService({Dio? dio, String? apiKey})
-      : _dio = dio ?? Dio(),
-        _apiKey = apiKey ??
-            dotenv.env['GOOGLE_MAPS_API_KEY'] ??
-            'AIzaSyBbNXEsdj53mZw0Mzz-k8ZyjOWaL0qmgQ0';
+    : _dio = dio ?? Dio(),
+      _apiKey =
+          apiKey ??
+          dotenv.env['GOOGLE_MAPS_API_KEY'] ??
+          'AIzaSyBbNXEsdj53mZw0Mzz-k8ZyjOWaL0qmgQ0';
 
   String _cleanDuration(String text) {
     if (text.isEmpty) return '';
@@ -83,8 +83,8 @@ class GoogleDirectionsService {
       final map = response.data is Map<String, dynamic>
           ? response.data as Map<String, dynamic>
           : (response.data is String
-              ? jsonDecode(response.data as String) as Map<String, dynamic>
-              : null);
+                ? jsonDecode(response.data as String) as Map<String, dynamic>
+                : null);
 
       if (map == null || map['status'] != 'OK') {
         return GoogleDirectionsResult.empty;
@@ -108,18 +108,21 @@ class GoogleDirectionsService {
             ? legs.first as Map<String, dynamic>
             : null;
 
-        final rawDuration = leg?['duration_in_traffic']?['text'] as String? ??
+        final rawDuration =
+            leg?['duration_in_traffic']?['text'] as String? ??
             leg?['duration']?['text'] as String? ??
             '';
         final durText = _cleanDuration(rawDuration);
 
-        final durValSec = (leg?['duration_in_traffic']?['value'] as num?)?.toInt() ??
+        final durValSec =
+            (leg?['duration_in_traffic']?['value'] as num?)?.toInt() ??
             (leg?['duration']?['value'] as num?)?.toInt() ??
             0;
         final durMins = (durValSec / 60).round();
 
         final distText = leg?['distance']?['text'] as String? ?? '';
-        final distValM = (leg?['distance']?['value'] as num?)?.toDouble() ?? 0.0;
+        final distValM =
+            (leg?['distance']?['value'] as num?)?.toDouble() ?? 0.0;
         final distKm = distValM / 1000.0;
 
         if (i == 0) {
@@ -133,8 +136,8 @@ class GoogleDirectionsService {
         final routeType = summary.isNotEmpty
             ? (i == 0 ? '$summary (Fastest)' : summary)
             : (i == 0
-                ? 'Fastest route'
-                : (i == 1 ? 'Alternative route' : 'Fewer turns'));
+                  ? 'Fastest route'
+                  : (i == 1 ? 'Alternative route' : 'Fewer turns'));
 
         // Traffic status evaluation
         String trafficStatus = '';
@@ -142,7 +145,9 @@ class GoogleDirectionsService {
 
         if (googleMode == 'driving') {
           final normSec = (leg?['duration']?['value'] as num?)?.toInt() ?? 1;
-          final trafSec = (leg?['duration_in_traffic']?['value'] as num?)?.toInt() ?? normSec;
+          final trafSec =
+              (leg?['duration_in_traffic']?['value'] as num?)?.toInt() ??
+              normSec;
           if (trafSec > normSec * 1.25) {
             trafficStatus = 'Heavy traffic';
             trafficColor = const Color(0xFFF04438);
@@ -181,7 +186,9 @@ class GoogleDirectionsService {
         distanceKm: firstDistKm,
       );
     } catch (e) {
-      debugPrint('GoogleDirectionsService._queryGoogleMode ($googleMode) error: $e');
+      debugPrint(
+        'GoogleDirectionsService._queryGoogleMode ($googleMode) error: $e',
+      );
       return GoogleDirectionsResult.empty;
     }
   }
@@ -248,13 +255,13 @@ class GoogleDirectionsService {
     final double refDistanceKm = driveRes.distanceKm > 0
         ? driveRes.distanceKm
         : (walkRes.distanceKm > 0
-            ? walkRes.distanceKm
-            : PolylineDecoder.calculateDistanceKm(
-                originLat,
-                originLng,
-                destLat,
-                destLng,
-              ));
+              ? walkRes.distanceKm
+              : PolylineDecoder.calculateDistanceKm(
+                  originLat,
+                  originLng,
+                  destLat,
+                  destLng,
+                ));
 
     // Durations for the 4 modes
     final String driveDur = driveRes.durationText.isNotEmpty
@@ -273,10 +280,10 @@ class GoogleDirectionsService {
         ? transitRes.durationText
         : PolylineDecoder.formatMinutesToDuration(
             ((driveRes.durationMinutes > 0
-                        ? driveRes.durationMinutes
-                        : (refDistanceKm / 22.0 * 60).round()) *
-                    1.35 +
-                8)
+                            ? driveRes.durationMinutes
+                            : (refDistanceKm / 22.0 * 60).round()) *
+                        1.35 +
+                    8)
                 .round()
                 .clamp(5, 7200),
           );
@@ -331,8 +338,8 @@ class GoogleDirectionsService {
       final targetDuration = reqMode == 'walk'
           ? walkDur
           : (reqMode == 'transit'
-              ? transitDur
-              : (reqMode == 'bike' ? bikeDur : driveDur));
+                ? transitDur
+                : (reqMode == 'bike' ? bikeDur : driveDur));
 
       activeRoutes = driveRes.routes.map((r) {
         return r.copyWith(
@@ -394,4 +401,3 @@ class GoogleDirectionsService {
     );
   }
 }
-

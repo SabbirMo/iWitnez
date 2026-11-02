@@ -4,16 +4,31 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CheckInMissedCard extends StatelessWidget {
   final String wardName;
-  final String lastCheckInTime;
+  final String? title;
+  final String? subtitle;
+  final String? lastCheckInTime;
 
   const CheckInMissedCard({
     super.key,
     required this.wardName,
-    required this.lastCheckInTime,
+    this.title,
+    this.subtitle,
+    this.lastCheckInTime,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayTitle = (title != null && title!.isNotEmpty)
+        ? title!
+        : "$wardName hasn't Checked In";
+    final displaySubtitle = (subtitle != null && subtitle!.isNotEmpty)
+        ? subtitle!
+        : "We'll notify you when they check in.";
+    final displayTime =
+        (lastCheckInTime != null && lastCheckInTime!.isNotEmpty)
+            ? lastCheckInTime!
+            : 'Yesterday, 08:15 PM';
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -116,23 +131,25 @@ class CheckInMissedCard extends StatelessWidget {
 
           // Title
           Text(
-            "$wardName hasn't Checked In",
+            displayTitle,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF111827),
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 4.h),
 
           // Subtitle
           Text(
-            "We'll notify you when they check in.",
+            displaySubtitle,
             style: GoogleFonts.inter(
               fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF6B7280),
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 18.h),
 
@@ -167,26 +184,12 @@ class CheckInMissedCard extends StatelessWidget {
           SizedBox(height: 5.h),
 
           // Time text
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Yesterday, ',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-                TextSpan(
-                  text: '08:15 PM',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFF97316),
-                  ),
-                ),
-              ],
+          Text(
+            displayTime,
+            style: GoogleFonts.inter(
+              fontSize: 13.5.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFF97316),
             ),
           ),
         ],

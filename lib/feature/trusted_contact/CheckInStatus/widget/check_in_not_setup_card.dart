@@ -4,14 +4,25 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CheckInNotSetupCard extends StatelessWidget {
   final String wardName;
+  final String? title;
+  final String? subtitle;
 
   const CheckInNotSetupCard({
     super.key,
     required this.wardName,
+    this.title,
+    this.subtitle,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayTitle = (title != null && title!.isNotEmpty)
+        ? title!
+        : 'Check-In Not Set Up';
+    final displaySubtitle = (subtitle != null && subtitle!.isNotEmpty)
+        ? subtitle!
+        : "$wardName hasn't set up check-in yet.\nYou'll be notified when they set it up.";
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -38,18 +49,19 @@ class CheckInNotSetupCard extends StatelessWidget {
 
           // Title
           Text(
-            'Check-In Not Set Up',
+            displayTitle,
             style: GoogleFonts.inter(
               fontSize: 17.5.sp,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF111827),
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 6.h),
 
           // Subtitle
           Text(
-            "$wardName hasn't set up check-in yet.\nYou'll be notified when they set it up.",
+            displaySubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 12.5.sp,

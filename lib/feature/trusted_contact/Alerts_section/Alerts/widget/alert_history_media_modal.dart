@@ -257,7 +257,7 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                         width: double.infinity,
                         height: double.infinity,
                         headers: const {'ngrok-skip-browser-warning': 'true'},
-                        errorBuilder: (_, __, ___) => Image.asset(
+                        errorBuilder: (_, _, _) => Image.asset(
                           ImageAssets.historyVideoThumbnail,
                           fit: BoxFit.cover,
                         ),

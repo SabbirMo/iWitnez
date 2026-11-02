@@ -11,11 +11,37 @@ class CheckInProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const badgeColor = Color(0xFFE8F8EE);
-    const badgeTextColor = Color(0xFF16A34A);
-    const badgeIcon = Icons.check_circle;
-    const badgeText = 'Checked In';
-    const subtitle = 'Just now';
+    Color badgeColor;
+    Color badgeTextColor;
+    IconData badgeIcon;
+    String badgeText;
+    String subtitle;
+
+    if (data.isNotSetUp) {
+      badgeColor = const Color(0xFFF1F5F9);
+      badgeTextColor = const Color(0xFF64748B);
+      badgeIcon = Icons.info_outline_rounded;
+      badgeText = data.statusBadge.isNotEmpty ? data.statusBadge : 'Not Set Up';
+      subtitle = data.badgeSubtext.isNotEmpty ? data.badgeSubtext : 'Pending';
+    } else if (data.isMissed) {
+      badgeColor = const Color(0xFFFFF1E6);
+      badgeTextColor = const Color(0xFFF97316);
+      badgeIcon = Icons.warning_amber_rounded;
+      badgeText = data.statusBadge.isNotEmpty ? data.statusBadge : 'Missed';
+      subtitle =
+          data.badgeSubtext.isNotEmpty ? data.badgeSubtext : 'Action Needed';
+    } else {
+      // checked_in (default)
+      badgeColor = const Color(0xFFE8F8EE);
+      badgeTextColor = const Color(0xFF16A34A);
+      badgeIcon = Icons.check_circle_rounded;
+      badgeText =
+          data.statusBadge.isNotEmpty ? data.statusBadge : 'Checked In';
+      subtitle = data.badgeSubtext.isNotEmpty ? data.badgeSubtext : 'Just now';
+    }
+
+    final hasNetworkAvatar = data.monitoredUser.avatarUrl.isNotEmpty &&
+        data.monitoredUser.avatarUrl.startsWith('http');
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -33,32 +59,37 @@ class CheckInProfileCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Emma Avatar
+          // Ward / Emma Avatar
           Container(
             width: 48.r,
             height: 48.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: NetworkImage(data.wardAvatarUrl),
+                image: hasNetworkAvatar
+                    ? NetworkImage(data.monitoredUser.avatarUrl)
+                    : const AssetImage(ImageAssets.emmaAvatar) as ImageProvider,
                 fit: BoxFit.cover,
-                onError: (error, stackTrace) =>
-                    const AssetImage(ImageAssets.emmaAvatar),
+                onError: (error, stackTrace) {},
               ),
             ),
           ),
           SizedBox(width: 14.w),
 
           // Name
-          Text(
-            data.wardName,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
+          Expanded(
+            child: Text(
+              data.wardName,
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF111827),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
+          SizedBox(width: 8.w),
 
           // Badge & Subtitle Column
           Column(
