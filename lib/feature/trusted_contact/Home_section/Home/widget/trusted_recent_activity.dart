@@ -81,34 +81,81 @@ class TrustedRecentActivitySection extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            children: [
-              for (int i = 0; i < activities.length; i++) ...[
-                if (i > 0) SizedBox(height: 18.h),
-                _buildActivityTile(activities[i]),
-              ],
-            ],
-          ),
+          child: activities.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    child: Text(
+                      'No recent activity',
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF98A2B3),
+                      ),
+                    ),
+                  ),
+                )
+              : Column(
+                  children: [
+                    for (int i = 0; i < activities.length; i++) ...[
+                      if (i > 0) SizedBox(height: 18.h),
+                      _buildActivityTile(activities[i]),
+                    ],
+                  ],
+                ),
         ),
       ],
     );
   }
 
   Widget _buildActivityTile(TrustedActivityItem item) {
-    final isCheckIn = item.type == TrustedActivityType.checkIn;
+    final isCheckIn = item.type == TrustedActivityType.checkIn ||
+        item.activityType == 'check_in';
+    final isSafePlace = item.activityType == 'safe_place' ||
+        item.badgeText.toLowerCase() == 'home';
 
-    final circleColor =
-        isCheckIn ? const Color(0xFFD1FADF) : const Color(0xFFFFE4E6);
-    final iconColor =
-        isCheckIn ? const Color(0xFF039855) : const Color(0xFFE11D48);
-    final iconData = isCheckIn
-        ? Icons.check_circle_outline_rounded
-        : Icons.notifications_none_rounded;
+    // Left Circle styling
+    final Color circleColor;
+    final Color iconColor;
+    final IconData iconData;
 
-    final badgeBg =
-        isCheckIn ? const Color(0xFFD1FADF) : const Color(0xFFF4F3FF);
-    final badgeTextColor =
-        isCheckIn ? const Color(0xFF039855) : const Color(0xFF6941C6);
+    if (isCheckIn) {
+      circleColor = const Color(0xFFD1FADF);
+      iconColor = const Color(0xFF039855);
+      iconData = Icons.check_circle_outline_rounded;
+    } else {
+      circleColor = const Color(0xFFFFE4E6);
+      iconColor = const Color(0xFFE11D48);
+      iconData = Icons.notifications_none_rounded;
+    }
+
+    // Right Badge styling based on badgeColor ("green", "purple", "red", etc.)
+    final Color badgeBg;
+    final Color badgeTextColor;
+
+    switch (item.badgeColor.toLowerCase()) {
+      case 'green':
+        badgeBg = const Color(0xFFD1FADF);
+        badgeTextColor = const Color(0xFF039855);
+        break;
+      case 'purple':
+        badgeBg = const Color(0xFFF4F3FF);
+        badgeTextColor = const Color(0xFF6941C6);
+        break;
+      case 'red':
+        badgeBg = const Color(0xFFFFE4E6);
+        badgeTextColor = const Color(0xFFE11D48);
+        break;
+      case 'blue':
+        badgeBg = const Color(0xFFEFF8FF);
+        badgeTextColor = const Color(0xFF007AFF);
+        break;
+      default:
+        badgeBg =
+            isCheckIn ? const Color(0xFFD1FADF) : const Color(0xFFF4F3FF);
+        badgeTextColor =
+            isCheckIn ? const Color(0xFF039855) : const Color(0xFF6941C6);
+    }
 
     return InkWell(
       onTap: () => onItemTap?.call(item),
@@ -170,9 +217,9 @@ class TrustedRecentActivitySection extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (item.badgeIcon != null) ...[
+                if (item.badgeIcon != null || isSafePlace) ...[
                   Icon(
-                    item.badgeIcon,
+                    item.badgeIcon ?? Icons.home_rounded,
                     size: 13.sp,
                     color: badgeTextColor,
                   ),

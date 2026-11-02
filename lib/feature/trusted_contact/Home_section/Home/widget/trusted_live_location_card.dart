@@ -10,6 +10,7 @@ class TrustedLiveLocationCard extends StatefulWidget {
     required this.wardStatus,
     required this.address,
     required this.wardAvatarUrl,
+    this.isOnline = true,
     this.onViewFullMapTap,
   });
 
@@ -17,6 +18,7 @@ class TrustedLiveLocationCard extends StatefulWidget {
   final String wardStatus;
   final String address;
   final String wardAvatarUrl;
+  final bool isOnline;
   final VoidCallback? onViewFullMapTap;
 
   @override
@@ -93,7 +95,9 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
                           SizedBox(width: 4.w),
                           Expanded(
                             child: Text(
-                              "${widget.wardName}'s\nLive Location",
+                              widget.wardName.isNotEmpty
+                                  ? "${widget.wardName}'s\nLive Location"
+                                  : "Live Location",
                               style: GoogleFonts.inter(
                                 color: const Color(0xFF111827),
                                 fontSize: 11.5.sp,
@@ -105,42 +109,52 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
                           ),
                         ],
                       ),
-                      SizedBox(height: 6.h),
-
-                      // Status: "Online • moving"
-                      Row(
-                        children: [
-                          Container(
-                            width: 6.r,
-                            height: 6.r,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF22C55E),
-                              shape: BoxShape.circle,
+                      if (widget.wardStatus.isNotEmpty) ...[
+                        SizedBox(height: 6.h),
+                        Row(
+                          children: [
+                            Container(
+                              width: 6.r,
+                              height: 6.r,
+                              decoration: BoxDecoration(
+                                color: widget.isOnline
+                                    ? const Color(0xFF22C55E)
+                                    : const Color(0xFF9CA3AF),
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            widget.wardStatus,
-                            style: GoogleFonts.inter(
-                              color: const Color(0xFF16A34A),
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w600,
+                            SizedBox(width: 4.w),
+                            Expanded(
+                              child: Text(
+                                widget.wardStatus,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  color: widget.isOnline
+                                      ? const Color(0xFF16A34A)
+                                      : const Color(0xFF6B7280),
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-
-                      // Address
-                      Text(
-                        widget.address,
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFF111827),
-                          fontSize: 8.6.sp,
-                          fontWeight: FontWeight.w700,
-                          height: 1.25,
+                          ],
                         ),
-                      ),
+                      ],
+                      if (widget.address.isNotEmpty) ...[
+                        SizedBox(height: 10.h),
+                        Text(
+                          widget.address,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF111827),
+                            fontSize: 8.6.sp,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
 
@@ -171,7 +185,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
               ),
             ),
 
-            // Right Panel — Interactive Dummy Map with radar pulse & avatar pin
+            // Right Panel — Interactive Map with radar pulse & avatar pin
             Expanded(
               child: InkWell(
                 onTap: widget.onViewFullMapTap,
@@ -294,7 +308,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
                         ),
                       ),
 
-                      // Emma's Avatar Pin on the map
+                      // Avatar Pin on the map
                       Positioned(
                         right: 32.w,
                         top: 14.h,
@@ -319,26 +333,15 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
                                 ],
                               ),
                               child: ClipOval(
-                                child: Image.network(
-                                  widget.wardAvatarUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                    color: const Color(0xFFFDA4AF),
-                                    child: Center(
-                                      child: Text(
-                                        widget.wardName.isNotEmpty
-                                            ? widget.wardName[0]
-                                            : 'E',
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                child: widget.wardAvatarUrl.isNotEmpty
+                                    ? Image.network(
+                                        widget.wardAvatarUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                _buildPinAvatarFallback(),
+                                      )
+                                    : _buildPinAvatarFallback(),
                               ),
                             ),
                             Positioned(
@@ -348,7 +351,9 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
                                 width: 8.r,
                                 height: 8.r,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF22C55E),
+                                  color: widget.isOnline
+                                      ? const Color(0xFF22C55E)
+                                      : const Color(0xFF9CA3AF),
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: Colors.white,
@@ -367,6 +372,28 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPinAvatarFallback() {
+    return Container(
+      color: const Color(0xFFFDA4AF),
+      child: Center(
+        child: widget.wardName.isNotEmpty
+            ? Text(
+                widget.wardName[0].toUpperCase(),
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              )
+            : Icon(
+                Icons.person_rounded,
+                color: Colors.white,
+                size: 16.sp,
+              ),
       ),
     );
   }

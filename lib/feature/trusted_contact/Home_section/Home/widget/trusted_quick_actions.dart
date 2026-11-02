@@ -3,19 +3,24 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/feature/trusted_contact/Home_section/Home/model/home_model.dart';
 
 class TrustedQuickActions extends StatelessWidget {
   const TrustedQuickActions({
     super.key,
+    required this.actions,
     this.onCheckInStatusTap,
     this.onJourneyEtaTap,
   });
 
+  final List<QuickActionModel> actions;
   final VoidCallback? onCheckInStatusTap;
   final VoidCallback? onJourneyEtaTap;
 
   @override
   Widget build(BuildContext context) {
+    if (actions.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -30,40 +35,46 @@ class TrustedQuickActions extends StatelessWidget {
         SizedBox(height: 14.h),
         Row(
           children: [
-            // Check In Status
-            Expanded(
-              child: _buildActionCard(
-                label: 'Check In Status',
-                circleColor: const Color(0xFFE8FDF0),
-                svgAsset: ImageAssets.quickCheckIn,
-                fallbackIcon: Icons.check_box_rounded,
-                fallbackColor: const Color(0xFF22C55E),
-                onTap: onCheckInStatusTap,
+            for (int i = 0; i < actions.length; i++) ...[
+              if (i > 0) SizedBox(width: 14.w),
+              Expanded(
+                child: _buildActionItem(actions[i]),
               ),
-            ),
-            SizedBox(width: 14.w),
-
-            // Journey & ETA
-            Expanded(
-              child: _buildActionCard(
-                label: 'Journey & ETA',
-                circleColor: const Color(0xFFEFF8FF),
-                svgAsset: ImageAssets.quickTimer,
-                fallbackIcon: Icons.calendar_today_rounded,
-                fallbackColor: const Color(0xFF007AFF),
-                onTap: onJourneyEtaTap,
-              ),
-            ),
+            ],
           ],
         ),
       ],
     );
   }
 
+  Widget _buildActionItem(QuickActionModel action) {
+    final isCheckIn = action.id == 'check_in_status';
+    final isJourney = action.id == 'journey_eta';
+
+    return _buildActionCard(
+      label: action.title,
+      circleColor: isCheckIn
+          ? const Color(0xFFE8FDF0)
+          : (isJourney ? const Color(0xFFEFF8FF) : const Color(0xFFF4F3FF)),
+      svgAsset: isCheckIn
+          ? ImageAssets.quickCheckIn
+          : (isJourney ? ImageAssets.quickTimer : null),
+      fallbackIcon: isCheckIn
+          ? Icons.check_box_rounded
+          : (isJourney ? Icons.calendar_today_rounded : Icons.flash_on_rounded),
+      fallbackColor: isCheckIn
+          ? const Color(0xFF22C55E)
+          : (isJourney ? const Color(0xFF007AFF) : const Color(0xFF8B2CF5)),
+      onTap: isCheckIn
+          ? onCheckInStatusTap
+          : (isJourney ? onJourneyEtaTap : null),
+    );
+  }
+
   Widget _buildActionCard({
     required String label,
     required Color circleColor,
-    required String svgAsset,
+    required String? svgAsset,
     required IconData fallbackIcon,
     required Color fallbackColor,
     required VoidCallback? onTap,
@@ -102,13 +113,22 @@ class TrustedQuickActions extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: SvgPicture.asset(
-                      svgAsset,
-                      width: 26.r,
-                      height: 26.r,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(fallbackIcon, color: fallbackColor, size: 24.sp),
-                    ),
+                    child: svgAsset != null
+                        ? SvgPicture.asset(
+                            svgAsset,
+                            width: 26.r,
+                            height: 26.r,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              fallbackIcon,
+                              color: fallbackColor,
+                              size: 24.sp,
+                            ),
+                          )
+                        : Icon(
+                            fallbackIcon,
+                            color: fallbackColor,
+                            size: 24.sp,
+                          ),
                   ),
                 ),
                 SizedBox(height: 12.h),

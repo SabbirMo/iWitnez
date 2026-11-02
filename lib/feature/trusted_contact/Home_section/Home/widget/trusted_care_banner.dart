@@ -4,10 +4,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 
 class TrustedCareBanner extends StatelessWidget {
-  const TrustedCareBanner({super.key});
+  const TrustedCareBanner({
+    super.key,
+    this.title = '',
+    this.description = '',
+  });
+
+  final String title;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
+    if (title.isEmpty) return const SizedBox.shrink();
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -41,7 +50,7 @@ class TrustedCareBanner extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Someone You Care About\nIs safe with Us',
+                    title,
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 17.sp,
@@ -49,15 +58,17 @@ class TrustedCareBanner extends StatelessWidget {
                       height: 1.25,
                     ),
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'Get Real Time updates and safety alerts',
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withValues(alpha: 0.88),
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w400,
+                  if (description.isNotEmpty) ...[
+                    SizedBox(height: 8.h),
+                    Text(
+                      description,
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withValues(alpha: 0.88),
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

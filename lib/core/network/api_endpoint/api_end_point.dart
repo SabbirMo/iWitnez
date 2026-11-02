@@ -29,6 +29,8 @@ class ApiEndPoints {
   static const String locationHistory = '/api/v1/location/history/';
   static const String contacts = '/api/v1/contacts/';
   static const String trustedCircles = '/api/v1/contacts/circles/';
+  static const String trustedDashboard =
+      '/api/v1/contacts/monitored/dashboard/';
 
   // Chat Endpoints
   static const String chatConversations = '/api/v1/chat/conversations/';

@@ -8,17 +8,21 @@ import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 class TrustedHomeHeader extends StatelessWidget {
   const TrustedHomeHeader({
     super.key,
+    this.greeting,
     required this.userName,
     required this.subtitle,
     required this.avatarUrl,
     required this.hasNotification,
+    this.unreadNotificationsCount = 0,
     this.onNotificationTap,
   });
 
+  final String? greeting;
   final String userName;
   final String subtitle;
   final String avatarUrl;
   final bool hasNotification;
+  final int unreadNotificationsCount;
   final VoidCallback? onNotificationTap;
 
   @override
@@ -41,20 +45,14 @@ class TrustedHomeHeader extends StatelessWidget {
             ],
           ),
           child: ClipOval(
-            child: Image.network(
-              avatarUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: const Color(0xFFF3E8FF),
-                child: Center(
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: AppColors.buttonGradientStart,
-                    size: 28.sp,
-                  ),
-                ),
-              ),
-            ),
+            child: avatarUrl.isNotEmpty
+                ? Image.network(
+                    avatarUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildFallbackAvatar(),
+                  )
+                : _buildFallbackAvatar(),
           ),
         ),
         SizedBox(width: 14.w),
@@ -66,7 +64,9 @@ class TrustedHomeHeader extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Hi $userName',
+                (greeting != null && greeting!.isNotEmpty)
+                    ? greeting!
+                    : (userName.isNotEmpty ? 'Hi $userName' : ''),
                 style: GoogleFonts.inter(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
@@ -109,7 +109,7 @@ class TrustedHomeHeader extends StatelessWidget {
                       BlendMode.srcIn,
                     ),
                   ),
-                  if (hasNotification)
+                  if (hasNotification || unreadNotificationsCount > 0)
                     Positioned(
                       top: 1.h,
                       right: 1.w,
@@ -129,6 +129,19 @@ class TrustedHomeHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFallbackAvatar() {
+    return Container(
+      color: const Color(0xFFF3E8FF),
+      child: Center(
+        child: Icon(
+          Icons.person_rounded,
+          color: AppColors.buttonGradientStart,
+          size: 28.sp,
+        ),
+      ),
     );
   }
 }
