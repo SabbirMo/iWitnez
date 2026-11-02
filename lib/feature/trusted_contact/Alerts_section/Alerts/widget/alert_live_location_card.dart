@@ -2,24 +2,105 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
+import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/model/active_alert_model.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-class AlertLiveLocationCard extends StatelessWidget {
-  const AlertLiveLocationCard({super.key});
+class AlertLiveLocationCard extends StatefulWidget {
+  final AlertLocationModel location;
+  final String userName;
+
+  const AlertLiveLocationCard({
+    super.key,
+    required this.location,
+    required this.userName,
+  });
+
+  @override
+  State<AlertLiveLocationCard> createState() => _AlertLiveLocationCardState();
+}
+
+class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
+  GoogleMapController? _mapController;
+  final Set<Marker> _markers = {};
+
+  bool get _hasValidCoords =>
+      widget.location.latitude != 0.0 && widget.location.longitude != 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initMarker();
+  }
+
+  @override
+  void didUpdateWidget(covariant AlertLiveLocationCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.location.latitude != widget.location.latitude ||
+        oldWidget.location.longitude != widget.location.longitude ||
+        oldWidget.userName != widget.userName) {
+      _initMarker();
+      if (_hasValidCoords && _mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(widget.location.latitude, widget.location.longitude),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initMarker() async {
+    if (!_hasValidCoords) return;
+
+    final pos = LatLng(widget.location.latitude, widget.location.longitude);
+    try {
+      final markerIcon = await MapMarkerHelper.createAvatarMarker(
+        name: widget.userName,
+        avatarUrl: '',
+        fallbackColor: const Color(0xFFF04438),
+        isLive: true,
+        size: 40.0,
+      );
+
+      if (mounted) {
+        setState(() {
+          _markers
+            ..clear()
+            ..add(
+              Marker(
+                markerId: const MarkerId('active_alert_location_marker'),
+                position: pos,
+                icon: markerIcon,
+                anchor: const Offset(0.5, 0.5),
+              ),
+            );
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
+    final name = widget.userName;
+    final addressText = widget.location.address;
+    final isSos = widget.location.isSosActivated;
+
     return Container(
       width: double.infinity,
       height: 146.h,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: const Color(0xFFEAECF0),
-          width: 1.w,
-        ),
+        border: Border.all(color: const Color(0xFFEAECF0), width: 1.w),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -50,7 +131,9 @@ class AlertLiveLocationCard extends StatelessWidget {
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
-                          "Emma's\nLive Location",
+                          name.isNotEmpty
+                              ? "$name's\nLive Location"
+                              : "Live Location",
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -82,21 +165,23 @@ class AlertLiveLocationCard extends StatelessWidget {
                           color: const Color(0xFF12B76A),
                         ),
                       ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        'Sos Activated',
-                        style: GoogleFonts.inter(
-                          fontSize: 9.5.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFFD92D20),
+                      if (isSos) ...[
+                        SizedBox(width: 6.w),
+                        Text(
+                          'Sos Activated',
+                          style: GoogleFonts.inter(
+                            fontSize: 9.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFD92D20),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
 
-                  // Address
+                  // Real Address from API
                   Text(
-                    '1200 Park Ave,\nNew York, NY 10028, USA',
+                    addressText,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
@@ -125,8 +210,9 @@ class AlertLiveLocationCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(100.r),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                const Color(0xFFF04438).withValues(alpha: 0.3),
+                            color: const Color(
+                              0xFFF04438,
+                            ).withValues(alpha: 0.3),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -138,7 +224,7 @@ class AlertLiveLocationCard extends StatelessWidget {
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 10.5.sp,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -149,145 +235,45 @@ class AlertLiveLocationCard extends StatelessWidget {
             ),
           ),
 
-          // Right Map Radar Preview
+          // Right Map: Real Google Map if coords available, else radar visual
           Expanded(
             flex: 6,
             child: ClipRRect(
               borderRadius: BorderRadius.horizontal(
-                right: Radius.circular(16.r),
+                right: Radius.circular(15.r),
               ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Base Map Graphic
-                  Image.asset(
-                    ImageAssets.liveTrackingMap,
-                    fit: BoxFit.cover,
-                  ),
-
-                  // Radar Pulse Rings in center
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
+              child: _hasValidCoords
+                  ? GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          widget.location.latitude,
+                          widget.location.longitude,
+                        ),
+                        zoom: 15,
+                      ),
+                      markers: _markers,
+                      onMapCreated: (ctrl) => _mapController = ctrl,
+                      zoomControlsEnabled: false,
+                      myLocationButtonEnabled: false,
+                      compassEnabled: false,
+                      mapToolbarEnabled: false,
+                    )
+                  : Stack(
+                      fit: StackFit.expand,
                       children: [
-                        // Outer Radar Ring
-                        Container(
-                          width: 82.r,
-                          height: 82.r,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFF04438)
-                                .withValues(alpha: 0.12),
-                          ),
+                        Image.asset(
+                          ImageAssets.liveTrackingMap,
+                          fit: BoxFit.cover,
                         ),
-                        // Mid Radar Ring
-                        Container(
-                          width: 56.r,
-                          height: 56.r,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFF04438)
-                                .withValues(alpha: 0.22),
-                          ),
-                        ),
-                        // Inner Halo
-                        Container(
-                          width: 32.r,
-                          height: 32.r,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFF04438)
-                                .withValues(alpha: 0.35),
-                          ),
-                        ),
-                        // Center Red Dot
-                        Container(
-                          width: 14.r,
-                          height: 14.r,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
+                        Center(
+                          child: Icon(
+                            Icons.location_on_rounded,
                             color: const Color(0xFFF04438),
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2.5.w,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFF04438)
-                                    .withValues(alpha: 0.5),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            size: 28.sp,
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                  // Emma Avatar Marker Pin (top right corner of map)
-                  Positioned(
-                    top: 10.h,
-                    right: 32.w,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 32.r,
-                          height: 32.r,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2.w,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: Image.asset(
-                              ImageAssets.emmaAvatar,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        // Alert Exclamation Badge
-                        Positioned(
-                          right: -3.w,
-                          bottom: -2.h,
-                          child: Container(
-                            width: 14.r,
-                            height: 14.r,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFFD92D20),
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 1.5.w,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '!',
-                                style: GoogleFonts.inter(
-                                  color: Colors.white,
-                                  fontSize: 8.5.sp,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],

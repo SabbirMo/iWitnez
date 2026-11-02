@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/model/active_alert_model.dart';
 
 class EmergencyAlertBanner extends StatelessWidget {
-  const EmergencyAlertBanner({super.key});
+  final ActiveAlertModel alert;
+
+  const EmergencyAlertBanner({super.key, required this.alert});
 
   @override
   Widget build(BuildContext context) {
@@ -71,27 +74,28 @@ class EmergencyAlertBanner extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Emergency Alert',
+                      alert.title,
                       style: GoogleFonts.inter(
                         color: const Color(0xFFD92D20),
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Text(
-                      'HIGH PRIORITY',
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFFD92D20),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
+                    if (alert.priority.isNotEmpty)
+                      Text(
+                        alert.priority,
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFFD92D20),
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 SizedBox(height: 3.h),
                 Text(
-                  'Emma triggered SOS',
+                  alert.subtitle,
                   style: GoogleFonts.inter(
                     color: const Color(0xFF1D2939),
                     fontSize: 13.5.sp,

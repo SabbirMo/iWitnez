@@ -71,6 +71,10 @@ class ApiEndPoints {
   static const String checkInStartTimer =
       '/api/v1/emergency/check-ins/start-timer/';
 
+  // Emergency Alerts Endpoints
+  static const String alertHistory = '/api/v1/emergency/alerts/history/';
+  static const String alertActive = '/api/v1/emergency/alerts/active/';
+
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';
   static String sosActivate(String id) => '/api/v1/emergency/sos/$id/activate/';

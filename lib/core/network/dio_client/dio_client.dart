@@ -29,6 +29,7 @@ class DioClient {
         sendTimeout: const Duration(seconds: 30),
         headers: const {
           'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
       ),
     );

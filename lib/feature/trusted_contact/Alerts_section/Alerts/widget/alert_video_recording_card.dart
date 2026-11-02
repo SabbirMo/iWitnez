@@ -4,10 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/utils/media_download_helper.dart';
+import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/model/active_alert_model.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/widget/alert_share_bottom_sheet.dart';
 
 class AlertVideoRecordingCard extends StatefulWidget {
-  const AlertVideoRecordingCard({super.key});
+  final AlertVideoRecordingModel video;
+
+  const AlertVideoRecordingCard({super.key, required this.video});
 
   @override
   State<AlertVideoRecordingCard> createState() =>
@@ -20,12 +24,10 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
   bool _isInitialized = false;
   bool _isPlaying = false;
   bool _isLoading = false;
-  bool _isNativeSupported = true;
 
   Duration _currentPosition = Duration.zero;
-  Duration _totalDuration = const Duration(minutes: 2, seconds: 45);
+  Duration _totalDuration = Duration.zero;
 
-  Timer? _simulatedTimer;
   late final AnimationController _pulseController;
 
   @override
@@ -36,36 +38,57 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
       duration: const Duration(milliseconds: 900),
     );
 
-    // Safely warm-up video controller in the background without blocking UI
+    if (widget.video.durationSeconds > 0) {
+      _totalDuration = Duration(seconds: widget.video.durationSeconds);
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _warmUpVideo();
+      _initVideo();
     });
   }
 
-  Future<void> _warmUpVideo() async {
+  @override
+  void didUpdateWidget(covariant AlertVideoRecordingCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.video.fileUrl != widget.video.fileUrl) {
+      _controller?.removeListener(_videoListener);
+      _controller?.dispose();
+      _controller = null;
+      _isInitialized = false;
+      _initVideo();
+    }
+  }
+
+  Future<void> _initVideo() async {
+    final url = widget.video.fileUrl;
+    if (url.isEmpty ||
+        (!url.startsWith('http://') && !url.startsWith('https://'))) {
+      return;
+    }
+
     try {
-      final ctrl = VideoPlayerController.asset(ImageAssets.demoAlertVideo);
+      final ctrl = VideoPlayerController.networkUrl(
+        Uri.parse(url),
+        httpHeaders: const {'ngrok-skip-browser-warning': 'true'},
+      );
       await ctrl.initialize();
       if (!mounted) {
         ctrl.dispose();
         return;
       }
+      _controller?.dispose();
       _controller = ctrl;
       _controller!.addListener(_videoListener);
       setState(() {
         _isInitialized = true;
-        _isNativeSupported = true;
         if (_controller!.value.duration > Duration.zero) {
           _totalDuration = _controller!.value.duration;
+        } else if (widget.video.durationSeconds > 0) {
+          _totalDuration = Duration(seconds: widget.video.durationSeconds);
         }
       });
     } catch (e) {
-      debugPrint('Video player warmup fallback: $e');
-      if (mounted) {
-        setState(() {
-          _isNativeSupported = false;
-        });
-      }
+      debugPrint('Error initializing active alert video: $e');
     }
   }
 
@@ -77,7 +100,6 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
     final pos = val.position;
     final dur = val.duration;
 
-    // Check completion
     if (dur > Duration.zero && pos >= dur) {
       _controller!.pause();
       _controller!.seekTo(Duration.zero);
@@ -112,120 +134,52 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
   }
 
   Future<void> _togglePlayPause() async {
-    // If native player initialized successfully
-    if (_isInitialized && _controller != null && _isNativeSupported) {
-      try {
-        if (_controller!.value.isPlaying) {
-          await _controller!.pause();
-          _pulseController.stop();
-          setState(() {
-            _isPlaying = false;
-          });
-        } else {
-          if (_currentPosition >= _totalDuration &&
-              _totalDuration > Duration.zero) {
-            await _controller!.seekTo(Duration.zero);
-          }
-          await _controller!.play();
-          _pulseController.repeat(reverse: true);
-          setState(() {
-            _isPlaying = true;
-          });
-        }
-        return;
-      } catch (e) {
-        debugPrint('Error toggling native video playback: $e');
-        _isNativeSupported = false;
-      }
+    if (_controller == null || !_isInitialized) {
+      setState(() => _isLoading = true);
+      await _initVideo();
+      setState(() => _isLoading = false);
     }
 
-    // If native not ready yet, try initializing on demand
-    if (!_isInitialized && _isNativeSupported && !_isLoading) {
-      setState(() => _isLoading = true);
-      try {
-        final ctrl = VideoPlayerController.asset(ImageAssets.demoAlertVideo);
-        await ctrl.initialize();
-        if (!mounted) {
-          ctrl.dispose();
-          return;
-        }
-        _controller = ctrl;
-        _controller!.addListener(_videoListener);
-        _isInitialized = true;
-        _isLoading = false;
-        if (_controller!.value.duration > Duration.zero) {
-          _totalDuration = _controller!.value.duration;
+    if (_controller != null && _isInitialized) {
+      if (_controller!.value.isPlaying) {
+        await _controller!.pause();
+        _pulseController.stop();
+        if (mounted) setState(() => _isPlaying = false);
+      } else {
+        if (_currentPosition >= _totalDuration &&
+            _totalDuration > Duration.zero) {
+          await _controller!.seekTo(Duration.zero);
         }
         await _controller!.play();
         _pulseController.repeat(reverse: true);
-        setState(() {
-          _isPlaying = true;
-        });
-        return;
-      } catch (e) {
-        debugPrint('On-demand video init failed: $e');
-        _isNativeSupported = false;
-        _isLoading = false;
+        if (mounted) setState(() => _isPlaying = true);
       }
-    }
-
-    // Fallback: Safe simulated playback (prevents ANR/crash on emulators/uncompiled builds)
-    _toggleSimulatedPlayback();
-  }
-
-  void _toggleSimulatedPlayback() {
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
-
-    if (_isPlaying) {
-      if (_currentPosition >= _totalDuration) {
-        _currentPosition = Duration.zero;
-      }
-      _pulseController.repeat(reverse: true);
-
-      _simulatedTimer?.cancel();
-      _simulatedTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted || !_isPlaying) {
-          timer.cancel();
-          return;
-        }
-        if (_currentPosition >= _totalDuration) {
-          setState(() {
-            _currentPosition = Duration.zero;
-            _isPlaying = false;
-          });
-          _pulseController.stop();
-          timer.cancel();
-        } else {
-          setState(() {
-            _currentPosition += const Duration(seconds: 1);
-          });
-        }
-      });
     } else {
-      _pulseController.stop();
-      _simulatedTimer?.cancel();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Video recording is currently unavailable.'),
+          duration: Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
   void _seekToRatio(double ratio) {
-    final targetMs = (_totalDuration.inMilliseconds * ratio).toInt();
-    final target = Duration(milliseconds: targetMs);
-
-    if (_isInitialized && _controller != null && _isNativeSupported) {
-      try {
-        _controller!.seekTo(target);
-      } catch (_) {}
+    if (_totalDuration > Duration.zero &&
+        _controller != null &&
+        _isInitialized) {
+      final targetMs = (_totalDuration.inMilliseconds * ratio).toInt();
+      final target = Duration(milliseconds: targetMs);
+      _controller!.seekTo(target);
+      setState(() {
+        _currentPosition = target;
+      });
     }
-
-    setState(() {
-      _currentPosition = target;
-    });
   }
 
   void _openFullscreen() {
-    if (_isInitialized && _controller != null && _isNativeSupported) {
+    if (_isInitialized && _controller != null) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (ctx) => _FullscreenVideoPlayer(
@@ -247,7 +201,6 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
 
   @override
   void dispose() {
-    _simulatedTimer?.cancel();
     _pulseController.dispose();
     if (_controller != null) {
       _controller!.removeListener(_videoListener);
@@ -266,6 +219,24 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
     if (_totalDuration.inMilliseconds == 0) return 0.0;
     return (_currentPosition.inMilliseconds / _totalDuration.inMilliseconds)
         .clamp(0.0, 1.0);
+  }
+
+  Widget _buildThumbnail() {
+    final thumb = widget.video.thumbnailUrl;
+    if (thumb != null && thumb.isNotEmpty) {
+      if (thumb.startsWith('http://') || thumb.startsWith('https://')) {
+        return Image.network(
+          thumb,
+          fit: BoxFit.cover,
+          headers: const {'ngrok-skip-browser-warning': 'true'},
+          errorBuilder: (_, __, ___) =>
+              Image.asset(ImageAssets.alertVideoThumbnail, fit: BoxFit.cover),
+        );
+      } else if (thumb.startsWith('assets/')) {
+        return Image.asset(thumb, fit: BoxFit.cover);
+      }
+    }
+    return Image.asset(ImageAssets.alertVideoThumbnail, fit: BoxFit.cover);
   }
 
   @override
@@ -301,7 +272,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Video Recording',
+                    widget.video.title.isNotEmpty
+                        ? widget.video.title
+                        : 'Video Recording',
                     style: GoogleFonts.inter(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
@@ -311,7 +284,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                 ],
               ),
               Text(
-                'Recorded by Emma',
+                widget.video.recordedBy.isNotEmpty
+                    ? widget.video.recordedBy
+                    : 'Recorded by Emma',
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -342,11 +317,8 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Video Stream or Initial Thumbnail
-                  if (_isInitialized &&
-                      _controller != null &&
-                      _isNativeSupported &&
-                      _isPlaying)
+                  // Video Stream when playing, or Thumbnail from API
+                  if (_isInitialized && _controller != null && _isPlaying)
                     GestureDetector(
                       onTap: _togglePlayPause,
                       child: SizedBox.expand(
@@ -366,16 +338,7 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                       ),
                     )
                   else
-                    // Always show the beautiful thumbnail when paused or warming up
-                    AnimatedScale(
-                      scale: _isPlaying ? 1.03 : 1.0,
-                      duration: const Duration(milliseconds: 1200),
-                      curve: Curves.easeInOut,
-                      child: Image.asset(
-                        ImageAssets.alertVideoThumbnail,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                    _buildThumbnail(),
 
                   // Top & Bottom Gradient Overlay for readability
                   IgnorePointer(
@@ -431,7 +394,11 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                             SizedBox(width: 5.w),
                           ],
                           Text(
-                            _formatDuration(_totalDuration),
+                            (_isInitialized && _totalDuration > Duration.zero)
+                                ? _formatDuration(_totalDuration)
+                                : (widget.video.durationDisplay.isNotEmpty
+                                      ? widget.video.durationDisplay
+                                      : _formatDuration(_totalDuration)),
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 11.sp,
@@ -443,7 +410,7 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                     ),
                   ),
 
-                  // Top-Right Fullscreen Icon
+                  // Top-Right Fullscreen Expand Icon
                   Positioned(
                     top: 10.h,
                     right: 10.w,
@@ -451,9 +418,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                       onTap: _openFullscreen,
                       borderRadius: BorderRadius.circular(6.r),
                       child: Container(
-                        padding: EdgeInsets.all(5.r),
+                        padding: EdgeInsets.all(6.r),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.45),
+                          color: Colors.black.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(6.r),
                         ),
                         child: Icon(
@@ -465,17 +432,16 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                     ),
                   ),
 
-                  // Center Circular Play / Pause Button
+                  // Center Play/Pause Floating Button
                   Center(
-                    child: InkWell(
-                      onTap: _togglePlayPause,
-                      borderRadius: BorderRadius.circular(30.r),
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: _isPlaying ? 0.85 : 0.95,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _togglePlayPause,
+                        borderRadius: BorderRadius.circular(32.r),
                         child: Container(
-                          width: 52.r,
-                          height: 52.r,
+                          width: 54.r,
+                          height: 54.r,
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
@@ -612,7 +578,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sent by emma',
+                        widget.video.sentByDisplay.isNotEmpty
+                            ? widget.video.sentByDisplay
+                            : 'Sent by emma',
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,
@@ -621,7 +589,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'Today, 10:32 AM',
+                        widget.video.sentAtDisplay.isNotEmpty
+                            ? widget.video.sentAtDisplay
+                            : 'Today, 10:32 AM',
                         style: GoogleFonts.inter(
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w700,
@@ -636,30 +606,38 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
               // Action Buttons: Download & Share
               Row(
                 children: [
-                  _buildCircleAction(
-                    icon: Icons.download_rounded,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Downloading video recording...'),
-                          duration: Duration(milliseconds: 1000),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(width: 8.w),
-                  _buildCircleAction(
-                    icon: Icons.share_rounded,
-                    onTap: () {
-                      AlertShareBottomSheet.show(
-                        context,
-                        mediaType: 'Video Recording',
-                        title: 'Emma',
-                        timestamp: 'Today, 10:32 AM',
-                      );
-                    },
-                  ),
+                  if (widget.video.canDownload) ...[
+                    _buildCircleAction(
+                      icon: Icons.download_rounded,
+                      onTap: () {
+                        MediaDownloadHelper.downloadMedia(
+                          context: context,
+                          url: widget.video.fileUrl,
+                          mediaType: 'Video Recording',
+                          preferredFileName:
+                              'emergency_video_${DateTime.now().millisecondsSinceEpoch}',
+                        );
+                      },
+                    ),
+                    SizedBox(width: 8.w),
+                  ],
+                  if (widget.video.canShare)
+                    _buildCircleAction(
+                      icon: Icons.share_rounded,
+                      onTap: () {
+                        AlertShareBottomSheet.show(
+                          context,
+                          mediaType: 'Video Recording',
+                          title: widget.video.recordedBy.isNotEmpty
+                              ? widget.video.recordedBy
+                              : 'Emma',
+                          timestamp: widget.video.sentAtDisplay.isNotEmpty
+                              ? widget.video.sentAtDisplay
+                              : 'Today, 10:32 AM',
+                          shareUrl: widget.video.fileUrl,
+                        );
+                      },
+                    ),
                 ],
               ),
             ],
@@ -810,7 +788,7 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer> {
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              'Video Recording - Emma',
+                              'Video Recording',
                               style: GoogleFonts.inter(
                                 color: Colors.white,
                                 fontSize: 16.sp,
