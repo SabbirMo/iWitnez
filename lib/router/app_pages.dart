@@ -39,6 +39,7 @@ import 'package:iwitnez/feature/main_user/Home_section/Home/screen/home_screen.d
 import 'package:iwitnez/feature/main_user/LiveLocation/screen/live_location_screen.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/screen/stop_sharing_location_screen.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/screen/manage_sharing_screen.dart';
+import 'package:iwitnez/feature/main_user/LiveLocation/screen/background_location_tracking_screen.dart';
 import 'package:iwitnez/feature/main_user/Notifications/screen/notification_screen.dart';
 import 'package:iwitnez/feature/main_user/PersonalInformation/screen/personal_info_screen.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/screen/profile_screen.dart'
@@ -389,6 +390,12 @@ final appPages = Provider<GoRouter>((ref) {
         path: AppRouteNames.manageSharingScreen,
         pageBuilder: (context, state) =>
             CupertinoPage(child: const ManageSharingScreen()),
+      ),
+      // Background Location Tracking Screen
+      GoRoute(
+        path: AppRouteNames.backgroundTrackingScreen,
+        pageBuilder: (context, state) =>
+            CupertinoPage(child: const BackgroundLocationTrackingScreen()),
       ),
       // Safety Tracking Screen
       GoRoute(

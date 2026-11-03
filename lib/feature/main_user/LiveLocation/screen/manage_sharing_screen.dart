@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/router/app_route_names.dart';
 import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/model/manage_sharing_model.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/provider/manage_sharing_provider.dart';
@@ -73,6 +74,20 @@ class ManageSharingScreen extends ConsumerWidget {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.radar_rounded,
+              color: AppColors.liveLocationPurple,
+              size: 24.sp,
+            ),
+            tooltip: 'Background Service',
+            onPressed: () {
+              context.push(AppRouteNames.backgroundTrackingScreen);
+            },
+          ),
+          SizedBox(width: 8.w),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(

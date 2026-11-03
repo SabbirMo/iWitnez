@@ -245,6 +245,22 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen> {
           },
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.radar_rounded,
+              color: liveState.isSharing
+                  ? const Color(0xFF10B981)
+                  : (isDark ? Colors.white : const Color(0xFF111827)),
+              size: 24.sp,
+            ),
+            tooltip: 'Background Tracking Dashboard',
+            onPressed: () {
+              context.push(AppRouteNames.backgroundTrackingScreen);
+            },
+          ),
+          SizedBox(width: 8.w),
+        ],
         title: Column(
           children: [
             Text(

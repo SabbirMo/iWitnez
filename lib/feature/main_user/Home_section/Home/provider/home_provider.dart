@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/core/services/location_service.dart';
+import 'package:iwitnez/core/providers/live_location_tracking_provider.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/home_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/live_location_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/trusted_circles_response_model.dart';
@@ -47,50 +48,30 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     _pingTimer?.cancel();
 
     try {
-      final permission = await const LocationService().checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return;
-      }
+      // Start foreground background service (persists across app minimize / kill)
+      await ref.read(liveLocationTrackingProvider.notifier).startTracking();
 
-      // Initial GPS ping on start
+      // Initial GPS ping
       pingCurrentGpsLocation();
 
-      // Periodic timer: ping every 30 seconds while sharing is active
-      _pingTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-        await pingCurrentGpsLocation();
-      });
-
-      // Stream updates: ping whenever phone moves >= 10 meters
+      // Keep in-memory home state synced when coordinates update
       _positionSubscription = const LocationService()
           .getPositionStream(
             accuracy: LocationAccuracy.high,
-            distanceFilter: 10,
+            distanceFilter: 5,
           )
-          .listen((position) async {
-            try {
-              final repository = ref.read(homeRepositoryProvider);
-              await repository.pingLocation(
-                latitude: position.latitude,
-                longitude: position.longitude,
-                accuracy: position.accuracy,
-                speed: position.speed,
-                heading: position.heading,
-                address: state.value?.liveLocation?.address,
-              );
-
-              final current = state.value;
-              if (current != null && current.liveLocation != null) {
-                state = AsyncValue.data(
-                  current.copyWith(
-                    liveLocation: current.liveLocation!.copyWith(
-                      latitude: position.latitude,
-                      longitude: position.longitude,
-                    ),
+          .listen((position) {
+            final current = state.value;
+            if (current != null && current.liveLocation != null) {
+              state = AsyncValue.data(
+                current.copyWith(
+                  liveLocation: current.liveLocation!.copyWith(
+                    latitude: position.latitude,
+                    longitude: position.longitude,
                   ),
-                );
-              }
-            } catch (_) {}
+                ),
+              );
+            }
           }, onError: (_) {});
     } catch (_) {}
   }
@@ -100,6 +81,7 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     _positionSubscription = null;
     _pingTimer?.cancel();
     _pingTimer = null;
+    ref.read(liveLocationTrackingProvider.notifier).stopTracking();
   }
 
   Future<void> fetchHomeData() async {
