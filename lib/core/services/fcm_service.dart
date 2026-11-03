@@ -369,6 +369,17 @@ class FcmService {
     }
   }
 
+  /// De-register device push token on logout
+  Future<void> unregisterDeviceToken() async {
+    try {
+      await _notificationRepo.unregisterDeviceToken(fcmDeviceToken: _currentFcmToken);
+      _currentFcmToken = null;
+      debugPrint('[FCM] Device token de-registered from backend.');
+    } catch (e) {
+      debugPrint('[FCM] Note: Could not de-register device token: $e');
+    }
+  }
+
   /// Step 1.2: Handle Foreground Push Notifications
   void _handleForegroundMessage(RemoteMessage message) {
     debugPrint(

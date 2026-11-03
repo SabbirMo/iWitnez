@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
@@ -120,7 +122,46 @@ class ChatDetailsRepository {
     }
   }
 
-  /// 4. Starting a New Direct Chat from Contact Profile: `POST /api/v1/chat/conversations/direct/<target_user_id>/`
+  /// 4. Upload Image/Media Attachment: `POST /api/v1/chat/conversations/<conversation_id>/attachments/`
+  Future<ChatMessage?> uploadMediaMessage(
+    String conversationId, {
+    required String filePath,
+    String text = '',
+    String messageType = 'image',
+  }) async {
+    try {
+      final fileName = filePath.split(Platform.pathSeparator).last;
+      final formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(
+          filePath,
+          filename: fileName,
+        ),
+        if (text.isNotEmpty) 'text': text,
+        'message_type': messageType,
+      });
+
+      debugPrint('[ChatDetailsRepo] Uploading media to ${ApiEndPoints.chatAttachments(conversationId)}');
+      final response = await _apiServices.post(
+        ApiEndPoints.chatAttachments(conversationId),
+        data: formData,
+        requireAuth: true,
+      );
+
+      final dynamic data = response.data is Map
+          ? (response.data['data'] ?? response.data)
+          : null;
+
+      if (data is Map<String, dynamic>) {
+        return ChatMessage.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[ChatDetailsRepo] Error uploading media message: $e');
+      return null;
+    }
+  }
+
+  /// 5. Starting a New Direct Chat from Contact Profile: `POST /api/v1/chat/conversations/direct/<target_user_id>/`
   Future<ConversationModel?> startDirectChat(String targetUserId) async {
     try {
       final response = await _apiServices.post(

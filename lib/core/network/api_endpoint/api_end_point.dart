@@ -1,6 +1,8 @@
 import 'package:iwitnez/core/network/base_url/api_base_url.dart';
 
 class ApiEndPoints {
+  static String get baseUrl => ApiBaseUrl.baseUrl;
+
   // authentication Endpoints
   static const String login = '/api/v1/auth/login/';
   static const String register = '/api/v1/auth/register/';
@@ -43,10 +45,16 @@ class ApiEndPoints {
   static const String chatConversations = '/api/v1/chat/conversations/';
   static String chatMessages(String conversationId) =>
       '/api/v1/chat/conversations/$conversationId/messages/';
+  static String chatAttachments(String conversationId) =>
+      '/api/v1/chat/conversations/$conversationId/attachments/';
   static String chatMarkRead(String conversationId) =>
       '/api/v1/chat/conversations/$conversationId/read/';
   static String chatDirect(String targetUserId) =>
       '/api/v1/chat/conversations/direct/$targetUserId/';
+  static String conversationMute(String conversationId) =>
+      '/api/v1/chat/conversations/$conversationId/mute/';
+  static String conversationBlock(String conversationId) =>
+      '/api/v1/chat/conversations/$conversationId/block/';
   static String chatWebSocketUrl(String conversationId, String token) =>
       '${ApiBaseUrl.wsBaseUrl}/ws/chat/$conversationId/?token=$token';
 
@@ -62,22 +70,45 @@ class ApiEndPoints {
       '/api/v1/contacts/$contactId/';
   static String contactMove(String contactId) =>
       '/api/v1/contacts/$contactId/move/';
+  static String contactMute(String contactId) =>
+      '/api/v1/contacts/$contactId/mute/';
+  static String contactBlock(String contactId) =>
+      '/api/v1/contacts/$contactId/block/';
   static const String locationManageSharing =
       '/api/v1/location/manage-sharing/';
 
-  // Support Endpoints
+  // Support & Content Endpoints
   static const String supportContact = '/api/v1/support/contact/';
   static const String supportFaqs = '/api/v1/support/faqs/';
+  static const String contentPrivacyPolicy = '/api/v1/content/privacy-policy/';
+  static const String contentTermsOfService = '/api/v1/content/terms-of-service/';
+  static const String contentAboutUs = '/api/v1/content/about-us/';
+  static const String contentWhoWeAre = '/api/v1/content/who-we-are/';
+  static const String contentOurMission = '/api/v1/content/our-mission/';
+
+  // Notification Push Token Unregister Endpoints
+  static const String notificationsDeviceTokenUnregister =
+      '/api/v1/notifications/device-token/unregister/';
+  static const String notificationsDeviceToken =
+      '/api/v1/notifications/device-token/';
 
   // Emergency Check-Ins Endpoints
   static const String checkInPage = '/api/v1/emergency/check-ins/page/';
   static const String checkInNow = '/api/v1/emergency/check-ins/check-in-now/';
   static const String checkInStartTimer =
       '/api/v1/emergency/check-ins/start-timer/';
+  static const String checkInActiveTimer =
+      '/api/v1/emergency/check-ins/active-timer/';
+  static const String checkInCancelTimer =
+      '/api/v1/emergency/check-ins/cancel-timer/';
 
   // Emergency Alerts Endpoints
   static const String alertHistory = '/api/v1/emergency/alerts/history/';
   static const String alertActive = '/api/v1/emergency/alerts/active/';
+  static String alertAcknowledge(String alertId) =>
+      '/api/v1/emergency/alerts/$alertId/acknowledge/';
+  static String alertResolve(String alertId) =>
+      '/api/v1/emergency/alerts/$alertId/resolve/';
 
   // Emergency SOS Endpoints
   static const String sosStart = '/api/v1/emergency/sos/start/';

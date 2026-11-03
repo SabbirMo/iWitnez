@@ -19,7 +19,8 @@ class ConversationModel {
       otherParticipant: OtherParticipant.fromJson(
         (json['other_participant'] as Map<String, dynamic>?) ?? {},
       ),
-      lastMessage: json['last_message'] != null &&
+      lastMessage:
+          json['last_message'] != null &&
               json['last_message'] is Map<String, dynamic>
           ? LastMessage.fromJson(json['last_message'] as Map<String, dynamic>)
           : null,
@@ -63,8 +64,30 @@ class ConversationModel {
   /// Contact Name: item['other_participant']['full_name']
   String get name => otherParticipant.fullName;
 
-  /// Last Message Preview: item['last_message'] != null ? item['last_message']['text'] : ""
-  String get lastMessagePreview => lastMessage?.text ?? '';
+  /// Last Message Preview: returns formatted preview including icon for photos/location
+  String get lastMessagePreview {
+    final msg = lastMessage;
+    if (msg == null) return '';
+
+    final type = msg.messageType.toLowerCase();
+    final text = msg.text.trim();
+
+    if (type == 'image') {
+      return text.isNotEmpty && text.toLowerCase() != 'photo'
+          ? '📷 $text'
+          : '📷 Photo';
+    } else if (type == 'location' || type == 'livelocation') {
+      return text.isNotEmpty && text.toLowerCase() != 'live location'
+          ? '📍 $text'
+          : '📍 Live Location';
+    } else if (type == 'file' || type == 'document') {
+      return text.isNotEmpty ? '📄 $text' : '📄 File';
+    } else if (type == 'audio' || type == 'voice') {
+      return text.isNotEmpty ? '🎤 $text' : '🎤 Voice message';
+    }
+
+    return text.isNotEmpty ? text : '';
+  }
 
   /// Timestamp: item['last_message']['formatted_time']
   String get formattedTime => lastMessage?.formattedTime ?? '';
@@ -133,10 +156,28 @@ class LastMessage {
   final String? createdAt;
 
   factory LastMessage.fromJson(Map<String, dynamic> json) {
+    final rawType =
+        json['message_type']?.toString().toLowerCase() ??
+        json['type']?.toString().toLowerCase() ??
+        (json['attachment'] != null ||
+                json['image_url'] != null ||
+                json['attachment_url'] != null
+            ? 'image'
+            : 'text');
+
+    String text = json['text']?.toString() ?? '';
+    if (text.isEmpty) {
+      if (rawType == 'image') {
+        text = 'Photo';
+      } else if (rawType == 'location' || rawType == 'livelocation') {
+        text = 'Live Location';
+      }
+    }
+
     return LastMessage(
       id: json['id']?.toString() ?? '',
-      text: json['text']?.toString() ?? '',
-      messageType: json['message_type']?.toString() ?? 'text',
+      text: text,
+      messageType: rawType,
       formattedTime: json['formatted_time']?.toString() ?? '',
       isOutgoing: json['is_outgoing'] == true,
       isRead: json['is_read'] == true,

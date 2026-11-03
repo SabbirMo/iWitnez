@@ -83,6 +83,25 @@ class NotificationRepository {
       return false;
     }
   }
+
+  /// De-register device push token (POST /api/v1/notifications/device-token/unregister/ or DELETE /api/v1/notifications/device-token/)
+  Future<bool> unregisterDeviceToken({String? fcmDeviceToken}) async {
+    try {
+      final data = <String, dynamic>{};
+      if (fcmDeviceToken != null && fcmDeviceToken.isNotEmpty) {
+        data['fcm_device_token'] = fcmDeviceToken;
+      }
+      final res = await _apiServices.post(
+        ApiEndPoints.notificationsDeviceTokenUnregister,
+        data: data,
+        requireAuth: true,
+      );
+      return res.data?['success'] == true || res.statusCode == 200;
+    } catch (e) {
+      debugPrint('[NotificationRepo] Error unregistering device token: $e');
+      return false;
+    }
+  }
 }
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {

@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/feature/AboutUs/repository/content_repository.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-class WhoWeAreScreen extends StatelessWidget {
+class WhoWeAreScreen extends ConsumerWidget {
   const WhoWeAreScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final whoWeAreAsync = ref.watch(whoWeAreFutureProvider);
+    final cmsData = whoWeAreAsync.value;
+
+    final heading = cmsData?.title.isNotEmpty == true
+        ? cmsData!.title
+        : "We’re here to help you\nstay safe and connected.";
+
+    final description = cmsData?.subtitle.isNotEmpty == true
+        ? cmsData!.subtitle
+        : (cmsData?.content.isNotEmpty == true
+            ? cmsData!.content
+            : 'iWitnez is a team of passionate people working to build smart and reliable safety solutions for everyone.');
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
@@ -62,7 +76,7 @@ class WhoWeAreScreen extends StatelessWidget {
                 SizedBox(height: 40.h),
                 // Heading
                 Text(
-                  "We’re here to help you\nstay safe and connected.",
+                  heading,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 21.sp,
@@ -77,7 +91,7 @@ class WhoWeAreScreen extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Text(
-                    'iWitnez is a team of passionate people working to build smart and reliable safety solutions for everyone.',
+                    description,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 13.5.sp,
@@ -87,6 +101,35 @@ class WhoWeAreScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (cmsData != null && cmsData.sections.isNotEmpty) ...[
+                  SizedBox(height: 24.h),
+                  ...cmsData.sections.map((s) => Padding(
+                        padding: EdgeInsets.only(bottom: 16.h),
+                        child: Column(
+                          children: [
+                            Text(
+                              s.heading,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : const Color(0xFF1E293B),
+                              ),
+                            ),
+                            SizedBox(height: 6.h),
+                            Text(
+                              s.body,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                fontSize: 13.sp,
+                                color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                ],
                 SizedBox(height: 40.h),
               ],
             ),

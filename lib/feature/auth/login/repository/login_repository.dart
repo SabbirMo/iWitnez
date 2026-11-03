@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
 import 'package:iwitnez/core/network/service/api_services.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/core/utils/token_storage.dart';
 import 'package:iwitnez/feature/auth/login/model/login_request_model.dart';
 
@@ -35,6 +36,11 @@ class LoginRepository {
   Future<void> logout() async {
     final refreshToken = await TokenStorage.getRefreshToken();
     try {
+      // De-register push notification token from backend
+      try {
+        await FcmService.instance.unregisterDeviceToken();
+      } catch (_) {}
+
       if (refreshToken != null && refreshToken.isNotEmpty) {
         await _apiServices.post(
           ApiEndPoints.logout,

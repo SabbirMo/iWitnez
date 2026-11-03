@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/feature/AboutUs/repository/content_repository.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-class TermsOfServiceScreen extends StatelessWidget {
+class TermsOfServiceScreen extends ConsumerWidget {
   const TermsOfServiceScreen({super.key});
 
-  static const _sections = [
+  static const _defaultSections = [
     _TermsSection(
       title: 'Welcome to iWitnez',
       body:
@@ -52,8 +54,27 @@ class TermsOfServiceScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final termsAsync = ref.watch(termsOfServiceFutureProvider);
+
+    final cmsData = termsAsync.value;
+    final hasCmsSections = cmsData != null && cmsData.sections.isNotEmpty;
+
+    final displaySections = hasCmsSections
+        ? cmsData.sections.asMap().entries.map((entry) {
+            final s = entry.value;
+            return _TermsSection(
+              number: (entry.key > 0) ? '${entry.key}' : null,
+              title: s.heading,
+              body: s.body,
+            );
+          }).toList()
+        : _defaultSections;
+
+    final lastUpdated = (cmsData?.lastUpdated.isNotEmpty ?? false)
+        ? 'Last updated: ${cmsData!.lastUpdated}'
+        : 'Last updated: May 27, 2026';
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9FB),
@@ -76,7 +97,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           },
         ),
         title: Text(
-          'Terms Of Service',
+          cmsData?.title.isNotEmpty == true ? cmsData!.title : 'Terms Of Service',
           style: GoogleFonts.inter(
             color: isDark ? Colors.white : const Color(0xFF0F172A),
             fontWeight: FontWeight.w700,
@@ -109,7 +130,18 @@ class TermsOfServiceScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ..._sections.map(
+                if (cmsData?.content.isNotEmpty == true && !hasCmsSections) ...[
+                  Text(
+                    cmsData!.content,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
+                      height: 1.55,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                ],
+                ...displaySections.map(
                   (s) {
                     final displayTitle = s.number != null
                         ? '${s.number}. ${s.title}'
@@ -160,7 +192,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 14.h),
                 Text(
-                  'Last updated: May 27, 2026',
+                  lastUpdated,
                   style: GoogleFonts.inter(
                     fontSize: 12.5.sp,
                     color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),

@@ -16,33 +16,19 @@ class DirectionsRepository {
   DirectionsRepository({
     ApiServices? apiServices,
     GoogleDirectionsService? googleDirectionsService,
-  })  : _apiServices = apiServices ?? ApiServices(),
-        _googleDirectionsService =
-            googleDirectionsService ?? GoogleDirectionsService();
-
-  bool _isDummyResponse(DirectionsData data, DirectionsRequest req) {
-    if (req.originLatitude != 0.0 && req.originLongitude != 0.0) {
-      final dist = PolylineDecoder.calculateDistanceKm(
-        req.originLatitude,
-        req.originLongitude,
-        data.originLatitude,
-        data.originLongitude,
-      );
-      if (dist > 100.0) return true;
-    }
-    if (data.destinationAddress.toLowerCase().contains('wall street') &&
-        !req.destinationAddress.toLowerCase().contains('wall street')) {
-      return true;
-    }
-    return false;
-  }
+  }) : _apiServices = apiServices ?? ApiServices(),
+       _googleDirectionsService =
+           googleDirectionsService ?? GoogleDirectionsService();
 
   /// POST /api/v1/location/directions/
-  /// Falls back to Google Maps Directions API if backend returns mock data or fails
+  /// Uses backend real OSRM road routing, falling back to Google Directions API on error
   Future<DirectionsResponseModel> getDirections(
     DirectionsRequest request,
   ) async {
     try {
+      debugPrint(
+        '[DirectionsRepo] POST ${ApiEndPoints.locationDirections} body: ${request.toJson()}',
+      );
       final response = await _apiServices.post(
         ApiEndPoints.locationDirections,
         data: request.toJson(),
@@ -57,16 +43,20 @@ class DirectionsRepository {
 
         if (parsed.success &&
             parsed.data != null &&
-            parsed.data!.routes.isNotEmpty &&
-            !_isDummyResponse(parsed.data!, request)) {
+            parsed.data!.routes.isNotEmpty) {
+          debugPrint(
+            '[DirectionsRepo] Real route received from backend with ${parsed.data!.routes.length} routes.',
+          );
           return parsed;
         }
       }
     } catch (e) {
-      debugPrint('Backend directions failed: $e, using Google Directions API');
+      debugPrint(
+        'Backend directions failed: $e, using Google Directions API fallback',
+      );
     }
 
-    // Call Google Maps Directions API directly with real coordinates and mode
+    // Call Google Maps Directions API fallback directly
     try {
       return await _googleDirectionsService.getDirections(request);
     } catch (e) {

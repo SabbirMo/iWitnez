@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/feature/AboutUs/repository/content_repository.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-class PrivacyPolicyScreen extends StatelessWidget {
+class PrivacyPolicyScreen extends ConsumerWidget {
   const PrivacyPolicyScreen({super.key});
 
-  static const _sections = [
+  static const _defaultSections = [
     _PolicySection(
       title: 'Your Privacy Matters',
       body:
@@ -46,8 +48,22 @@ class PrivacyPolicyScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final policyAsync = ref.watch(privacyPolicyFutureProvider);
+
+    final cmsData = policyAsync.value;
+    final hasCmsSections = cmsData != null && cmsData.sections.isNotEmpty;
+
+    final displaySections = hasCmsSections
+        ? cmsData.sections
+            .map((s) => _PolicySection(title: s.heading, body: s.body))
+            .toList()
+        : _defaultSections;
+
+    final lastUpdated = (cmsData?.lastUpdated.isNotEmpty ?? false)
+        ? 'Last updated: ${cmsData!.lastUpdated}'
+        : 'Last updated: May 27, 2026';
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9FB),
@@ -70,7 +86,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           },
         ),
         title: Text(
-          'Privacy Policy',
+          cmsData?.title.isNotEmpty == true ? cmsData!.title : 'Privacy Policy',
           style: GoogleFonts.inter(
             color: isDark ? Colors.white : const Color(0xFF0F172A),
             fontWeight: FontWeight.w700,
@@ -103,7 +119,18 @@ class PrivacyPolicyScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ..._sections.map(
+                if (cmsData?.content.isNotEmpty == true && !hasCmsSections) ...[
+                  Text(
+                    cmsData!.content,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
+                      height: 1.55,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                ],
+                ...displaySections.map(
                   (s) => Padding(
                     padding: EdgeInsets.only(bottom: 18.h),
                     child: Column(
@@ -133,7 +160,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Last updated: May 27, 2026',
+                  lastUpdated,
                   style: GoogleFonts.inter(
                     fontSize: 12.5.sp,
                     color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),

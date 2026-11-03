@@ -124,4 +124,23 @@ class AlertsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Acknowledges an active alert: POST /api/v1/emergency/alerts/{alert_id}/acknowledge/
+  Future<bool> acknowledgeAlert(String alertId) async {
+    final success = await _repository.acknowledgeAlert(alertId);
+    if (success) {
+      await fetchActiveAlert();
+    }
+    return success;
+  }
+
+  /// Resolves an active alert: POST /api/v1/emergency/alerts/{alert_id}/resolve/
+  Future<bool> resolveAlert(String alertId) async {
+    final success = await _repository.resolveAlert(alertId);
+    if (success) {
+      await fetchActiveAlert();
+      await fetchAlertHistory();
+    }
+    return success;
+  }
 }

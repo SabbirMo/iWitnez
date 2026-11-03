@@ -8,7 +8,7 @@ class CallRepository {
   final ApiServices _apiServices;
 
   CallRepository([ApiServices? apiServices])
-      : _apiServices = apiServices ?? ApiServices();
+    : _apiServices = apiServices ?? ApiServices();
 
   /// 1. Initiate Audio or Video Call:
   /// POST /api/v1/calls/initiate/
@@ -239,5 +239,57 @@ class CallRepository {
       debugPrint('[CallRepo] Error finding contactId: $e');
     }
     return null;
+  }
+
+  /// 9. Mute / Unmute Contact: POST /api/v1/contacts/<contact_id>/mute/ or /api/v1/chat/conversations/<conversation_id>/mute/
+  Future<bool> muteContact(
+    String contactId, {
+    bool? isMuted,
+    String? conversationId,
+  }) async {
+    try {
+      final endpoint = contactId.isNotEmpty
+          ? ApiEndPoints.contactMute(contactId)
+          : ApiEndPoints.conversationMute(conversationId ?? '');
+      final response = await _apiServices.post(
+        endpoint,
+        data: isMuted != null ? {'is_muted': isMuted} : {},
+        requireAuth: true,
+      );
+      final dynamic resData = response.data;
+      if (resData is Map && resData['success'] == true) {
+        return true;
+      }
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      debugPrint('[CallRepo] Error muting contact $contactId: $e');
+      return false;
+    }
+  }
+
+  /// 10. Block / Unblock Contact: POST /api/v1/contacts/<contact_id>/block/ or /api/v1/chat/conversations/<conversation_id>/block/
+  Future<bool> blockContact(
+    String contactId, {
+    bool? isBlocked,
+    String? conversationId,
+  }) async {
+    try {
+      final endpoint = contactId.isNotEmpty
+          ? ApiEndPoints.contactBlock(contactId)
+          : ApiEndPoints.conversationBlock(conversationId ?? '');
+      final response = await _apiServices.post(
+        endpoint,
+        data: isBlocked != null ? {'is_blocked': isBlocked} : {},
+        requireAuth: true,
+      );
+      final dynamic resData = response.data;
+      if (resData is Map && resData['success'] == true) {
+        return true;
+      }
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      debugPrint('[CallRepo] Error blocking contact $contactId: $e');
+      return false;
+    }
   }
 }

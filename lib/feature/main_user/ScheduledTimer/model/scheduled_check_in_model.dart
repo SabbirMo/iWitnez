@@ -12,6 +12,9 @@ class ScheduledCheckInModel {
   final bool notifyIfNotCheckedIn;
   final String notes;
   final String? createdAt;
+  final int remainingSeconds;
+  final String formattedRemaining;
+  final bool isRunning;
 
   ScheduledCheckInModel({
     required this.id,
@@ -27,6 +30,9 @@ class ScheduledCheckInModel {
     this.notifyIfNotCheckedIn = true,
     this.notes = '',
     this.createdAt,
+    this.remainingSeconds = 0,
+    this.formattedRemaining = '',
+    this.isRunning = false,
   });
 
   factory ScheduledCheckInModel.fromJson(Map<String, dynamic> json) {
@@ -34,7 +40,7 @@ class ScheduledCheckInModel {
       id: json['id']?.toString() ?? '',
       title: json['title'] as String? ?? 'Scheduled Safety Check-In',
       scheduledTime: json['scheduled_time'] as String?,
-      scheduledTimeDisplay: json['scheduled_time_display'] as String?,
+      scheduledTimeDisplay: json['scheduled_time_display'] as String? ?? json['scheduled_time'] as String?,
       status: json['status'] as String? ?? 'pending',
       checkedInAt: json['checked_in_at'] as String?,
       snoozeUntil: json['snooze_until'] as String?,
@@ -45,6 +51,9 @@ class ScheduledCheckInModel {
       notifyIfNotCheckedIn: json['notify_if_not_checked_in'] as bool? ?? true,
       notes: json['notes'] as String? ?? '',
       createdAt: json['created_at'] as String?,
+      remainingSeconds: (json['remaining_seconds'] as num?)?.toInt() ?? 0,
+      formattedRemaining: json['formatted_remaining'] as String? ?? '',
+      isRunning: json['is_running'] as bool? ?? false,
     );
   }
 
@@ -63,6 +72,9 @@ class ScheduledCheckInModel {
       'notify_if_not_checked_in': notifyIfNotCheckedIn,
       'notes': notes,
       'created_at': createdAt,
+      'remaining_seconds': remainingSeconds,
+      'formatted_remaining': formattedRemaining,
+      'is_running': isRunning,
     };
   }
 }

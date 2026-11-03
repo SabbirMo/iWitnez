@@ -10,6 +10,8 @@ class ActiveAlertModel {
   final AlertLocationModel? location;
   final AlertVideoRecordingModel? videoRecording;
   final AlertAudioRecordingModel? audioRecording;
+  final bool isAcknowledged;
+  final bool isResolved;
 
   const ActiveAlertModel({
     required this.hasActiveAlert,
@@ -21,6 +23,8 @@ class ActiveAlertModel {
     this.location,
     this.videoRecording,
     this.audioRecording,
+    this.isAcknowledged = false,
+    this.isResolved = false,
   });
 
   static String? normalizeUrl(dynamic raw) {
@@ -64,6 +68,10 @@ class ActiveAlertModel {
               Map<String, dynamic>.from(json['audio_recording'] as Map),
             )
           : null,
+      isAcknowledged: json['is_acknowledged'] == true ||
+          json['status']?.toString().toLowerCase() == 'acknowledged',
+      isResolved: json['is_resolved'] == true ||
+          json['status']?.toString().toLowerCase() == 'resolved',
     );
   }
 }

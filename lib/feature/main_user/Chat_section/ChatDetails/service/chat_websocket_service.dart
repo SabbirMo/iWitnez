@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:iwitnez/core/network/base_url/api_base_url.dart';
+import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -60,8 +60,9 @@ class ChatWebSocketService {
     }
 
     try {
-      final wsBase = baseUrl ?? ApiBaseUrl.wsBaseUrl;
-      final wsUrl = '$wsBase/ws/chat/$conversationId/?token=$jwtToken';
+      final wsUrl = baseUrl != null
+          ? '$baseUrl/ws/chat/$conversationId/?token=$jwtToken'
+          : ApiEndPoints.chatWebSocketUrl(conversationId, jwtToken);
       debugPrint('[ChatWS] Connecting to: $wsUrl');
 
       _disconnectChannel();

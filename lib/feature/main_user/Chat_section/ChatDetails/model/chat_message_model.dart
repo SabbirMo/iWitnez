@@ -1,3 +1,5 @@
+import 'package:iwitnez/core/network/base_url/api_base_url.dart';
+
 enum MessageType { text, liveLocation, image }
 
 enum MessageStatus { sent, delivered, read }
@@ -27,7 +29,8 @@ class ChatMessage {
   final bool isMe;
   final MessageType type;
   final MessageStatus status;
-  final String? locationLabel; // e.g. "1200 Park Ave, New York, NY" or "View on map"
+  final String?
+  locationLabel; // e.g. "1200 Park Ave, New York, NY" or "View on map"
   final double? latitude;
   final double? longitude;
   final String? locationAddress;
@@ -74,7 +77,8 @@ class ChatMessage {
   }
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
-    final rawType = json['message_type']?.toString().toLowerCase() ??
+    final rawType =
+        json['message_type']?.toString().toLowerCase() ??
         json['type']?.toString().toLowerCase() ??
         'text';
     MessageType type = MessageType.text;
@@ -84,29 +88,30 @@ class ChatMessage {
       type = MessageType.image;
     }
 
-    final isRead = json['is_read'] == true ||
+    final isRead =
+        json['is_read'] == true ||
         json['status']?.toString().toLowerCase() == 'read';
     final isMe = json['is_outgoing'] == true || json['is_me'] == true;
 
-    final locationAddress = json['location_address']?.toString() ??
+    final locationAddress =
+        json['location_address']?.toString() ??
         json['locationLabel']?.toString() ??
         (type == MessageType.liveLocation ? 'View on map' : null);
 
     final double? lat = json['latitude'] != null
         ? (json['latitude'] is num
-            ? (json['latitude'] as num).toDouble()
-            : double.tryParse(json['latitude'].toString()))
+              ? (json['latitude'] as num).toDouble()
+              : double.tryParse(json['latitude'].toString()))
         : null;
 
     final double? lng = json['longitude'] != null
         ? (json['longitude'] is num
-            ? (json['longitude'] as num).toDouble()
-            : double.tryParse(json['longitude'].toString()))
+              ? (json['longitude'] as num).toDouble()
+              : double.tryParse(json['longitude'].toString()))
         : null;
 
-    String formattedTime = json['formatted_time']?.toString() ??
-        json['time']?.toString() ??
-        '';
+    String formattedTime =
+        json['formatted_time']?.toString() ?? json['time']?.toString() ?? '';
 
     if (formattedTime.isEmpty && json['created_at'] != null) {
       try {
@@ -116,6 +121,23 @@ class ChatMessage {
         final period = dt.hour >= 12 ? 'PM' : 'AM';
         formattedTime = '$hour:$minute $period';
       } catch (_) {}
+    }
+
+    String? media =
+        json['attachment_url']?.toString() ??
+        json['image_url']?.toString() ??
+        json['media_url']?.toString() ??
+        json['attachment']?.toString() ??
+        json['media_path']?.toString() ??
+        json['mediaPath']?.toString();
+
+    if (media != null &&
+        media.isNotEmpty &&
+        !media.startsWith('http') &&
+        !media.startsWith('file://')) {
+      if (media.startsWith('/')) {
+        media = '${ApiBaseUrl.baseUrl}$media';
+      }
     }
 
     return ChatMessage(
@@ -129,9 +151,7 @@ class ChatMessage {
       latitude: lat,
       longitude: lng,
       locationAddress: locationAddress,
-      mediaPath: json['media_url']?.toString() ??
-          json['media_path']?.toString() ??
-          json['mediaPath']?.toString(),
+      mediaPath: media,
       senderId: json['sender_id']?.toString(),
       senderName: json['sender_name']?.toString(),
       senderAvatarUrl: json['sender_avatar_url']?.toString(),

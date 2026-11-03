@@ -72,7 +72,8 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
     // 2. Fetch initial message history from REST API first
     List<ChatMessage> initialMessages = const [];
     try {
-      initialMessages = await _repository.getMessages(chatId);
+      final fetched = await _repository.getMessages(chatId);
+      initialMessages = _deduplicate(fetched);
     } catch (e) {
       debugPrint('[ChatDetailsNotifier] Error fetching messages: $e');
     }
@@ -129,8 +130,10 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
 
     List<ChatMessage> updatedMessages = [...current.messages];
 
-    // Check if message with same ID already exists
-    if (incoming.id != null && incoming.id!.isNotEmpty) {
+    // 1. Check if message with same real ID already exists
+    if (incoming.id != null &&
+        incoming.id!.isNotEmpty &&
+        !incoming.id!.startsWith('temp_')) {
       final existingIndex = updatedMessages.indexWhere(
         (m) => m.id == incoming.id,
       );
@@ -138,33 +141,49 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
         updatedMessages[existingIndex] = incoming;
         _notifyChatListUpdated(incoming);
         state = AsyncData(
-          current.copyWith(messages: updatedMessages, isOtherUserTyping: false),
+          current.copyWith(
+            messages: _deduplicate(updatedMessages),
+            isOtherUserTyping: false,
+          ),
         );
         return;
       }
     }
 
-    // Check if this incoming message matches our pending optimistic outgoing message
+    // 2. Check if this incoming message matches our pending optimistic outgoing message
     if (incoming.isMe) {
-      final pendingIndex = updatedMessages.lastIndexWhere(
-        (m) =>
-            m.isMe &&
-            (m.id == null || m.id!.isEmpty) &&
-            m.text == incoming.text &&
-            m.type == incoming.type,
-      );
+      final pendingIndex = updatedMessages.lastIndexWhere((m) {
+        if (!m.isMe) return false;
+        final isPending =
+            m.id == null || m.id!.isEmpty || m.id!.startsWith('temp_');
+        if (!isPending) return false;
+
+        if (incoming.type == MessageType.image) {
+          return m.type == MessageType.image;
+        } else if (incoming.type == MessageType.liveLocation) {
+          return m.type == MessageType.liveLocation;
+        } else {
+          return m.type == MessageType.text &&
+              (m.text == incoming.text ||
+                  m.text.isEmpty ||
+                  incoming.text.isEmpty);
+        }
+      });
 
       if (pendingIndex != -1) {
-        updatedMessages[pendingIndex] = incoming;
+        updatedMessages[pendingIndex] = incoming.copyWith(isMe: true);
         _notifyChatListUpdated(incoming);
         state = AsyncData(
-          current.copyWith(messages: updatedMessages, isOtherUserTyping: false),
+          current.copyWith(
+            messages: _deduplicate(updatedMessages),
+            isOtherUserTyping: false,
+          ),
         );
         return;
       }
     }
 
-    // Otherwise append new message
+    // 3. Otherwise append new message
     updatedMessages.add(incoming);
     _notifyChatListUpdated(incoming);
 
@@ -173,14 +192,23 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
     }
 
     state = AsyncData(
-      current.copyWith(messages: updatedMessages, isOtherUserTyping: false),
+      current.copyWith(
+        messages: _deduplicate(updatedMessages),
+        isOtherUserTyping: false,
+      ),
     );
   }
 
   void _notifyChatListUpdated(ChatMessage message) {
+    final defaultText = message.type == MessageType.image
+        ? 'Photo'
+        : (message.type == MessageType.liveLocation
+            ? 'Live Location'
+            : message.text);
+
     ChatProvider.notifyNewMessage(
       chatId: chatId,
-      text: message.text,
+      text: message.text.isNotEmpty ? message.text : defaultText,
       formattedTime: message.time.isNotEmpty ? message.time : _nowFormatted(),
       messageType: message.type == MessageType.liveLocation
           ? 'location'
@@ -246,7 +274,9 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
 
     final current = state.value ?? const ChatDetailsState();
     final time = _nowFormatted();
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final optimistic = ChatMessage(
+      id: tempId,
       text: trimmed,
       time: time,
       isMe: true,
@@ -267,12 +297,14 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
         final cur = state.value;
         if (cur != null) {
           final msgs = [...cur.messages];
-          final idx = msgs.lastIndexOf(optimistic);
+          final idx = msgs.indexWhere((m) => m.id == tempId);
           if (idx != -1) {
-            msgs[idx] = sent;
-            _notifyChatListUpdated(sent);
-            state = AsyncData(cur.copyWith(messages: msgs));
+            msgs[idx] = sent.copyWith(isMe: true);
+          } else {
+            msgs.add(sent.copyWith(isMe: true));
           }
+          state = AsyncData(cur.copyWith(messages: _deduplicate(msgs)));
+          _notifyChatListUpdated(sent);
         }
       }
     }
@@ -301,7 +333,9 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
     }
 
     final time = _nowFormatted();
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final optimistic = ChatMessage(
+      id: tempId,
       text: 'Live Location',
       time: time,
       isMe: true,
@@ -338,12 +372,14 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
         final cur = state.value;
         if (cur != null) {
           final msgs = [...cur.messages];
-          final idx = msgs.lastIndexOf(optimistic);
+          final idx = msgs.indexWhere((m) => m.id == tempId);
           if (idx != -1) {
-            msgs[idx] = sent;
-            _notifyChatListUpdated(sent);
-            state = AsyncData(cur.copyWith(messages: msgs));
+            msgs[idx] = sent.copyWith(isMe: true);
+          } else {
+            msgs.add(sent.copyWith(isMe: true));
           }
+          state = AsyncData(cur.copyWith(messages: _deduplicate(msgs)));
+          _notifyChatListUpdated(sent);
         }
       }
     }
@@ -376,10 +412,13 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
     _repository.markAsRead(chatId);
   }
 
-  void sendImage(String filePath) {
+  /// Action 5: Send Image Message
+  Future<void> sendImage(String filePath) async {
     final current = state.value ?? const ChatDetailsState();
     final time = _nowFormatted();
-    final newMsg = ChatMessage(
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    final optimisticMsg = ChatMessage(
+      id: tempId,
       text: 'Photo',
       time: time,
       isMe: true,
@@ -388,10 +427,68 @@ class ChatDetailsNotifier extends AsyncNotifier<ChatDetailsState> {
       status: MessageStatus.sent,
     );
 
+    // 1. Optimistic UI update
     state = AsyncData(
-      current.copyWith(messages: [...current.messages, newMsg]),
+      current.copyWith(messages: [...current.messages, optimisticMsg]),
     );
-    _notifyChatListUpdated(newMsg);
+    _notifyChatListUpdated(optimisticMsg);
+
+    // 2. Upload to server via POST /api/v1/chat/conversations/{id}/attachments/
+    final uploadedMsg = await _repository.uploadMediaMessage(
+      chatId,
+      filePath: filePath,
+    );
+
+    if (uploadedMsg != null) {
+      final curMsgs = state.value?.messages ?? [];
+      final alreadyAddedByWs = uploadedMsg.id != null &&
+          curMsgs.any((m) => m.id == uploadedMsg.id);
+
+      List<ChatMessage> updatedMessages;
+      if (alreadyAddedByWs) {
+        // WebSocket arrived first and already registered the message!
+        // Drop the temporary optimistic bubble to avoid duplication:
+        updatedMessages = curMsgs.where((m) => m.id != tempId).toList();
+      } else {
+        // REST API completed before WebSocket; replace tempId with the server response
+        updatedMessages = curMsgs.map((m) {
+          if (m.id == tempId) {
+            return uploadedMsg.copyWith(isMe: true);
+          }
+          return m;
+        }).toList();
+      }
+
+      state = AsyncData(
+        (state.value ?? const ChatDetailsState()).copyWith(
+          messages: _deduplicate(updatedMessages),
+        ),
+      );
+      _notifyChatListUpdated(uploadedMsg);
+    } else {
+      // Upload failed: remove optimistic bubble
+      final curMsgs = state.value?.messages ?? [];
+      state = AsyncData(
+        (state.value ?? const ChatDetailsState()).copyWith(
+          messages: curMsgs.where((m) => m.id != tempId).toList(),
+        ),
+      );
+    }
+  }
+
+  /// Deduplicate messages ensuring no identical real IDs appear twice
+  List<ChatMessage> _deduplicate(List<ChatMessage> list) {
+    final seenIds = <String>{};
+    final result = <ChatMessage>[];
+    for (final m in list) {
+      final id = m.id;
+      if (id != null && id.isNotEmpty && !id.startsWith('temp_')) {
+        if (seenIds.contains(id)) continue;
+        seenIds.add(id);
+      }
+      result.add(m);
+    }
+    return result;
   }
 
   String _nowFormatted() {

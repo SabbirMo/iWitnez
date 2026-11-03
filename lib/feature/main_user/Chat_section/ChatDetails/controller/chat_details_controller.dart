@@ -13,6 +13,8 @@ import 'package:iwitnez/router/app_route_names.dart';
 class ChatDetailsController {
   ChatDetailsController();
 
+  bool _isPickingMedia = false;
+
   void openProfileDetails(
     BuildContext context, {
     required String name,
@@ -230,30 +232,28 @@ class ChatDetailsController {
   }
 
   Future<void> _pickFromGallery(ChatDetailsNotifier notifier) async {
+    if (_isPickingMedia) return;
+    _isPickingMedia = true;
     try {
       final ImagePicker picker = ImagePicker();
-      List<XFile> files = [];
-      try {
-        files = await picker.pickMultiImage(imageQuality: 85);
-      } catch (_) {
-        final single = await picker.pickImage(
-          source: ImageSource.gallery,
-          imageQuality: 85,
-        );
-        if (single != null) files = [single];
-      }
+      final XFile? file = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
 
-      if (files.isNotEmpty) {
-        for (final file in files) {
-          notifier.sendImage(file.path);
-        }
+      if (file != null) {
+        await notifier.sendImage(file.path);
       }
     } catch (e) {
       debugPrint('Error picking from gallery: $e');
+    } finally {
+      _isPickingMedia = false;
     }
   }
 
   Future<void> _pickFromCamera(ChatDetailsNotifier notifier) async {
+    if (_isPickingMedia) return;
+    _isPickingMedia = true;
     try {
       final ImagePicker picker = ImagePicker();
       final photo = await picker.pickImage(
@@ -261,10 +261,12 @@ class ChatDetailsController {
         imageQuality: 85,
       );
       if (photo != null) {
-        notifier.sendImage(photo.path);
+        await notifier.sendImage(photo.path);
       }
     } catch (e) {
       debugPrint('Error taking photo: $e');
+    } finally {
+      _isPickingMedia = false;
     }
   }
 }

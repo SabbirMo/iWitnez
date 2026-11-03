@@ -475,12 +475,7 @@ class _ChatProfileDetailsScreenState extends State<ChatProfileDetailsScreen> {
                   ),
                   onTap: () {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Notifications muted for $_name'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    _handleMuteContact();
                   },
                 ),
                 ListTile(
@@ -494,12 +489,7 @@ class _ChatProfileDetailsScreenState extends State<ChatProfileDetailsScreen> {
                   ),
                   onTap: () {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Blocked $_name'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    _handleBlockContact();
                   },
                 ),
               ],
@@ -507,6 +497,52 @@ class _ChatProfileDetailsScreenState extends State<ChatProfileDetailsScreen> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _handleMuteContact() async {
+    final targetId = _contactId ?? _receiverId;
+    if (targetId == null || targetId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Contact ID not found for mute.')),
+      );
+      return;
+    }
+
+    final success = await _callRepo.muteContact(targetId);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Notifications updated for $_name'
+              : 'Failed to update notification settings.',
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _handleBlockContact() async {
+    final targetId = _contactId ?? _receiverId;
+    if (targetId == null || targetId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Contact ID not found for block.')),
+      );
+      return;
+    }
+
+    final success = await _callRepo.blockContact(targetId);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Contact action completed for $_name'
+              : 'Failed to update block settings.',
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 

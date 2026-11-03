@@ -73,4 +73,42 @@ class AlertHistoryRepository {
       data: [],
     );
   }
+
+  /// POST /api/v1/emergency/alerts/{alert_id}/acknowledge/
+  Future<bool> acknowledgeAlert(String alertId) async {
+    try {
+      final response = await _apiServices.post(
+        ApiEndPoints.alertAcknowledge(alertId),
+        data: {},
+        requireAuth: true,
+      );
+      final dynamic resData = response.data;
+      if (resData is Map) {
+        return resData['success'] == true;
+      }
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('[AlertHistoryRepo] Error acknowledging alert $alertId: $e');
+      return false;
+    }
+  }
+
+  /// POST /api/v1/emergency/alerts/{alert_id}/resolve/
+  Future<bool> resolveAlert(String alertId) async {
+    try {
+      final response = await _apiServices.post(
+        ApiEndPoints.alertResolve(alertId),
+        data: {},
+        requireAuth: true,
+      );
+      final dynamic resData = response.data;
+      if (resData is Map) {
+        return resData['success'] == true;
+      }
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('[AlertHistoryRepo] Error resolving alert $alertId: $e');
+      return false;
+    }
+  }
 }

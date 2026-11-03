@@ -56,6 +56,50 @@ class ScheduledTimerRepository {
       notifyIfNotCheckedIn: notifyIfNotCheckedIn,
     );
   }
+
+  /// GET /api/v1/emergency/check-ins/active-timer/
+  Future<ScheduledCheckInModel?> getActiveTimer() async {
+    try {
+      final response = await _apiServices.get(
+        ApiEndPoints.checkInActiveTimer,
+        requireAuth: true,
+      );
+
+      final resData = response.data;
+      if (resData is Map<String, dynamic>) {
+        final data = resData['data'];
+        if (data is Map<String, dynamic> && data['id'] != null) {
+          return ScheduledCheckInModel.fromJson(data);
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// POST /api/v1/emergency/check-ins/cancel-timer/
+  Future<bool> cancelTimer({String? checkInId}) async {
+    try {
+      final endpoint = checkInId != null && checkInId.isNotEmpty
+          ? '/api/v1/emergency/check-ins/$checkInId/cancel/'
+          : ApiEndPoints.checkInCancelTimer;
+
+      final response = await _apiServices.post(
+        endpoint,
+        data: {},
+        requireAuth: true,
+      );
+
+      final resData = response.data;
+      if (resData is Map) {
+        return resData['success'] == true || response.statusCode == 200;
+      }
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
 }
 
 final scheduledTimerRepositoryProvider =

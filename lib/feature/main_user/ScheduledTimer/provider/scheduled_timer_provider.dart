@@ -68,7 +68,30 @@ class ScheduledTimerState {
 class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
   @override
   ScheduledTimerState build() {
+    Future.microtask(() => fetchActiveTimer());
     return const ScheduledTimerState();
+  }
+
+  /// Checks if there's an ongoing active timer on backend (on app start / screen open)
+  Future<void> fetchActiveTimer() async {
+    try {
+      final repository = ref.read(scheduledTimerRepositoryProvider);
+      final active = await repository.getActiveTimer();
+      if (active != null && active.isRunning) {
+        final sec = active.remainingSeconds > 0
+            ? active.remainingSeconds
+            : active.timerDurationSeconds;
+        state = state.copyWith(
+          isTimerActive: true,
+          activeCheckIn: active,
+          remainingSeconds: sec,
+          hours: sec ~/ 3600,
+          minutes: (sec % 3600) ~/ 60,
+          seconds: sec % 60,
+          note: active.notes.isNotEmpty ? active.notes : state.note,
+        );
+      }
+    } catch (_) {}
   }
 
   void setHours(int hours) {
@@ -166,12 +189,32 @@ class ScheduledTimerNotifier extends Notifier<ScheduledTimerState> {
     }
   }
 
-  void stopTimer() {
+  Future<bool> stopTimer({BuildContext? context}) async {
+    final activeId = state.activeCheckIn?.id;
     state = state.copyWith(
       isTimerActive: false,
       remainingSeconds: null,
       clearActiveCheckIn: true,
     );
+
+    try {
+      final repository = ref.read(scheduledTimerRepositoryProvider);
+      final cancelled = await repository.cancelTimer(checkInId: activeId);
+
+      try {
+        ref.read(checkInProvider.notifier).loadCheckInPage();
+      } catch (_) {}
+
+      if (context != null && context.mounted) {
+        CustomSnackBar.showSuccess(
+          context,
+          message: 'Check-in timer cancelled successfully.',
+        );
+      }
+      return cancelled;
+    } catch (_) {
+      return false;
+    }
   }
 
   void reset() {
