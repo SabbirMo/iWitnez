@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/provider/safety_tracking_provider.dart';
 
 class SafetyHistoryMapView extends ConsumerStatefulWidget {
@@ -61,6 +62,7 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
     final state = ref.watch(safetyTrackingProvider);
     final history = state.historyData;
     final route = history?.route ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     ref.listen(safetyTrackingProvider, (prev, next) {
       if (prev?.historyData != next.historyData &&
@@ -98,9 +100,8 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
             title: 'Start',
             snippet: history?.timeline.isNotEmpty == true
                 ? history!.timeline.first.address
-                : null,
+                : 'Journey start',
           ),
-          zIndexInt: 10,
         ),
       );
 
@@ -115,10 +116,9 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
             infoWindow: InfoWindow(
               title: 'End',
               snippet: history?.timeline.isNotEmpty == true
-                ? history!.timeline.last.address
-                : null,
+                  ? history!.timeline.last.address
+                  : 'Journey destination',
             ),
-            zIndexInt: 10,
           ),
         );
       }
@@ -126,23 +126,29 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
 
     final initialCenter = route.isNotEmpty
         ? route.first
-        : const LatLng(23.750854, 90.393524); // Dhaka default
+        : const LatLng(40.7580, -73.9855); // NYC Times Square fallback
 
     return Stack(
       children: [
-        // 1. Interactive Google Map
+        // 1. Google Map View
         GoogleMap(
+          key: ValueKey('history_map_${route.length}_$isDark'),
+          style: isDark ? darkMapStyleJson : null,
           initialCameraPosition: CameraPosition(
             target: initialCenter,
-            zoom: 13.5,
+            zoom: 13.0,
           ),
           mapType: _mapType,
+          polylines: polylines,
+          markers: markers,
           myLocationButtonEnabled: false,
           zoomControlsEnabled: false,
           compassEnabled: false,
           mapToolbarEnabled: false,
-          polylines: polylines,
-          markers: markers,
+          rotateGesturesEnabled: true,
+          scrollGesturesEnabled: true,
+          tiltGesturesEnabled: false,
+          zoomGesturesEnabled: true,
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<OneSequenceGestureRecognizer>(
               () => EagerGestureRecognizer(),
@@ -166,11 +172,16 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: isDark
+                    ? const Color(0xFF181A26).withValues(alpha: 0.95)
+                    : Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF262938) : Colors.transparent,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
                     blurRadius: 8,
                   ),
                 ],
@@ -181,9 +192,9 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
                   SizedBox(
                     width: 14.r,
                     height: 14.r,
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Color(0xFF6C48F5),
+                      color: isDark ? const Color(0xFFA855F7) : const Color(0xFF6C48F5),
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -191,7 +202,7 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
                     'Loading route...',
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: const Color(0xFF4B5563),
+                      color: isDark ? Colors.white : const Color(0xFF4B5563),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -210,6 +221,7 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
               // Fit Route / Recenter
               _buildMapButton(
                 icon: Icons.center_focus_strong_rounded,
+                isDark: isDark,
                 onTap: () {
                   if (route.isNotEmpty) {
                     _fitRouteBounds(route);
@@ -221,11 +233,14 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
               // Zoom In & Out Box
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF262938) : Colors.transparent,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -235,6 +250,7 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
                   children: [
                     _buildZoomSubButton(
                       icon: Icons.add,
+                      isDark: isDark,
                       onTap: () {
                         _mapController?.animateCamera(CameraUpdate.zoomIn());
                       },
@@ -242,10 +258,11 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
                     Container(
                       width: 22.w,
                       height: 1,
-                      color: const Color(0xFFE5E7EB),
+                      color: isDark ? const Color(0xFF262938) : const Color(0xFFE5E7EB),
                     ),
                     _buildZoomSubButton(
                       icon: Icons.remove,
+                      isDark: isDark,
                       onTap: () {
                         _mapController?.animateCamera(CameraUpdate.zoomOut());
                       },
@@ -263,19 +280,28 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
   Widget _buildMapButton({
     required IconData icon,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return Material(
-      color: Colors.white,
-      shape: const CircleBorder(),
+      color: isDark ? const Color(0xFF181A26) : Colors.white,
+      shape: CircleBorder(
+        side: isDark
+            ? const BorderSide(color: Color(0xFF262938))
+            : BorderSide.none,
+      ),
       elevation: 3,
-      shadowColor: Colors.black.withValues(alpha: 0.18),
+      shadowColor: Colors.black.withValues(alpha: isDark ? 0.3 : 0.18),
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: SizedBox(
           width: 38.r,
           height: 38.r,
-          child: Icon(icon, size: 20.sp, color: AppColors.callsPurple),
+          child: Icon(
+            icon,
+            size: 20.sp,
+            color: isDark ? const Color(0xFFA855F7) : AppColors.callsPurple,
+          ),
         ),
       ),
     );
@@ -284,6 +310,7 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
   Widget _buildZoomSubButton({
     required IconData icon,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return InkWell(
       onTap: onTap,
@@ -291,7 +318,11 @@ class _SafetyHistoryMapViewState extends ConsumerState<SafetyHistoryMapView> {
       child: SizedBox(
         width: 38.r,
         height: 32.r,
-        child: Icon(icon, size: 18.sp, color: const Color(0xFF374151)),
+        child: Icon(
+          icon,
+          size: 18.sp,
+          color: isDark ? Colors.white : const Color(0xFF374151),
+        ),
       ),
     );
   }

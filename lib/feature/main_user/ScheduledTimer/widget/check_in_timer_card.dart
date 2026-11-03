@@ -29,14 +29,18 @@ class CheckInTimerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -51,7 +55,7 @@ class CheckInTimerCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14.5.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
+              color: isDark ? Colors.white : const Color(0xFF111827),
             ),
           ),
           SizedBox(height: 16.h),
@@ -60,7 +64,7 @@ class CheckInTimerCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildTimeBox(hours.toString().padLeft(2, '0')),
+              _buildTimeBox(hours.toString().padLeft(2, '0'), isDark),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.w),
                 child: Text(
@@ -68,11 +72,11 @@ class CheckInTimerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 26.sp,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
               ),
-              _buildTimeBox(minutes.toString().padLeft(2, '0')),
+              _buildTimeBox(minutes.toString().padLeft(2, '0'), isDark),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.w),
                 child: Text(
@@ -80,11 +84,11 @@ class CheckInTimerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 26.sp,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
               ),
-              _buildTimeBox(seconds.toString().padLeft(2, '0')),
+              _buildTimeBox(seconds.toString().padLeft(2, '0'), isDark),
             ],
           ),
           SizedBox(height: 6.h),
@@ -101,7 +105,7 @@ class CheckInTimerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   ),
                 ),
               ),
@@ -114,7 +118,7 @@ class CheckInTimerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   ),
                 ),
               ),
@@ -127,7 +131,7 @@ class CheckInTimerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   ),
                 ),
               ),
@@ -139,8 +143,11 @@ class CheckInTimerCard extends StatelessWidget {
           Container(
             height: 110.h,
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: isDark ? const Color(0xFF1F2232) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(
+                color: isDark ? const Color(0xFF262938) : Colors.transparent,
+              ),
             ),
             child: Row(
               children: [
@@ -163,8 +170,8 @@ class CheckInTimerCard extends StatelessWidget {
                                 ? FontWeight.w700
                                 : FontWeight.w500,
                             color: isSelected
-                                ? const Color(0xFF6D28D9)
-                                : const Color(0xFF9CA3AF),
+                                ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF6D28D9))
+                                : (isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF)),
                           ),
                         ),
                       );
@@ -192,8 +199,8 @@ class CheckInTimerCard extends StatelessWidget {
                                 ? FontWeight.w700
                                 : FontWeight.w500,
                             color: isSelected
-                                ? const Color(0xFF6D28D9)
-                                : const Color(0xFF9CA3AF),
+                                ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF6D28D9))
+                                : (isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF)),
                           ),
                         ),
                       );
@@ -221,8 +228,8 @@ class CheckInTimerCard extends StatelessWidget {
                                 ? FontWeight.w700
                                 : FontWeight.w500,
                             color: isSelected
-                                ? const Color(0xFF6D28D9)
-                                : const Color(0xFF9CA3AF),
+                                ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF6D28D9))
+                                : (isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF)),
                           ),
                         ),
                       );
@@ -237,13 +244,16 @@ class CheckInTimerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeBox(String text) {
+  Widget _buildTimeBox(String text, bool isDark) {
     return Container(
       width: 72.w,
       height: 68.h,
       decoration: BoxDecoration(
-        color: const Color(0xFFF3E8FF),
+        color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF),
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF4C1D74) : Colors.transparent,
+        ),
       ),
       child: Center(
         child: Text(
@@ -251,7 +261,7 @@ class CheckInTimerCard extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 28.sp,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF6D28D9),
+            color: isDark ? const Color(0xFFA855F7) : const Color(0xFF6D28D9),
           ),
         ),
       ),

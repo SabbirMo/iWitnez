@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/model/active_alert_model.dart';
 import 'package:iwitnez/router/app_route_names.dart';
@@ -90,6 +91,7 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final name = widget.userName;
     final addressText = widget.location.address;
     final isSos = widget.location.isSosActivated;
@@ -98,12 +100,17 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
       width: double.infinity,
       height: 146.h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFEAECF0), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFEAECF0),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -137,7 +144,9 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111827),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF111827),
                             height: 1.15,
                           ),
                         ),
@@ -151,8 +160,10 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
                       Container(
                         width: 5.r,
                         height: 5.r,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF12B76A),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF12B76A),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -162,7 +173,9 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
                         style: GoogleFonts.inter(
                           fontSize: 9.5.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF12B76A),
+                          color: isDark
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF12B76A),
                         ),
                       ),
                       if (isSos) ...[
@@ -172,7 +185,9 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
                           style: GoogleFonts.inter(
                             fontSize: 9.5.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFFD92D20),
+                            color: isDark
+                                ? const Color(0xFFFF6B6B)
+                                : const Color(0xFFD92D20),
                           ),
                         ),
                       ],
@@ -187,7 +202,9 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
                     style: GoogleFonts.inter(
                       fontSize: 9.5.sp,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF667085),
+                      color: isDark
+                          ? const Color(0xFFE5E7EB)
+                          : const Color(0xFF667085),
                       height: 1.25,
                     ),
                   ),
@@ -244,6 +261,9 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
               ),
               child: _hasValidCoords
                   ? GoogleMap(
+                      key: ValueKey(
+                        'alert_loc_map_${widget.location.latitude}_${widget.location.longitude}_$isDark',
+                      ),
                       initialCameraPosition: CameraPosition(
                         target: LatLng(
                           widget.location.latitude,
@@ -252,7 +272,13 @@ class _AlertLiveLocationCardState extends State<AlertLiveLocationCard> {
                         zoom: 15,
                       ),
                       markers: _markers,
-                      onMapCreated: (ctrl) => _mapController = ctrl,
+                      style: isDark ? darkMapStyleJson : null,
+                      onMapCreated: (ctrl) {
+                        _mapController = ctrl;
+                        if (isDark) {
+                          ctrl.setMapStyle(darkMapStyleJson);
+                        }
+                      },
                       zoomControlsEnabled: false,
                       myLocationButtonEnabled: false,
                       compassEnabled: false,

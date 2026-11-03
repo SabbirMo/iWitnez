@@ -16,10 +16,11 @@ class AlertHistoryMediaModal extends StatefulWidget {
   const AlertHistoryMediaModal({super.key, required this.item});
 
   static Future<void> show(BuildContext context, AlertHistoryModel item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       barrierColor: Colors.black.withValues(alpha: 0.6),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -157,6 +158,7 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SafeArea(
       child: Padding(
@@ -171,7 +173,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAECF0),
+                  color: isDark
+                      ? const Color(0xFF344054)
+                      : const Color(0xFFEAECF0),
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -190,16 +194,24 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                         vertical: 3.h,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEF3F2),
+                        color: isDark
+                            ? const Color(0xFF35161E)
+                            : const Color(0xFFFEF3F2),
                         borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(color: const Color(0xFFFECDCA)),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF5E1B24)
+                              : const Color(0xFFFECDCA),
+                        ),
                       ),
                       child: Text(
                         item.title,
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFD92D20),
+                          color: isDark
+                              ? const Color(0xFFFF6B6B)
+                              : const Color(0xFFD92D20),
                         ),
                       ),
                     ),
@@ -209,7 +221,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF667085),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF667085),
                       ),
                     ),
                   ],
@@ -218,7 +232,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                   onPressed: () => Navigator.pop(context),
                   icon: Icon(
                     Icons.close_rounded,
-                    color: const Color(0xFF667085),
+                    color: isDark
+                        ? const Color(0xFF98A2B3)
+                        : const Color(0xFF667085),
                     size: 20.sp,
                   ),
                   splashRadius: 20.r,
@@ -330,9 +346,15 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                 width: double.infinity,
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
+                  color: isDark
+                      ? const Color(0xFF1F2232)
+                      : const Color(0xFFF9FAFB),
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: const Color(0xFFEAECF0)),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF2C3044)
+                        : const Color(0xFFEAECF0),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -365,7 +387,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                             style: GoogleFonts.inter(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF111827),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF111827),
                             ),
                           ),
                           SizedBox(height: 4.h),
@@ -373,7 +397,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                             '${_formatDuration(_audioPosition)} / ${item.durationDisplay}',
                             style: GoogleFonts.inter(
                               fontSize: 11.sp,
-                              color: const Color(0xFF667085),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF667085),
                             ),
                           ),
                         ],
@@ -390,9 +416,15 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
               width: double.infinity,
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
+                color: isDark
+                    ? const Color(0xFF1F2232)
+                    : const Color(0xFFF9FAFB),
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(color: const Color(0xFFEAECF0)),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF2C3044)
+                      : const Color(0xFFEAECF0),
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,7 +444,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                           style: GoogleFonts.inter(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF667085),
+                            color: isDark
+                                ? const Color(0xFF98A2B3)
+                                : const Color(0xFF667085),
                           ),
                         ),
                         SizedBox(height: 2.h),
@@ -421,7 +455,9 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF111827),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF111827),
                           ),
                         ),
                       ],
@@ -451,19 +487,27 @@ class _AlertHistoryMediaModalState extends State<AlertHistoryMediaModal> {
                     icon: Icon(
                       Icons.share_outlined,
                       size: 16.sp,
-                      color: const Color(0xFF344054),
+                      color: isDark
+                          ? Colors.white
+                          : const Color(0xFF344054),
                     ),
                     label: Text(
                       'Share Alert',
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF344054),
+                        color: isDark
+                            ? Colors.white
+                            : const Color(0xFF344054),
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 12.h),
-                      side: const BorderSide(color: Color(0xFFD0D5DD)),
+                      side: BorderSide(
+                        color: isDark
+                            ? const Color(0xFF4C2ECC)
+                            : const Color(0xFFD0D5DD),
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r),
                       ),

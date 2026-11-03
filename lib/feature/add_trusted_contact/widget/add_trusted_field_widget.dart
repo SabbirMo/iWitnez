@@ -495,7 +495,7 @@ class _AddTrustedFieldWidgetState extends ConsumerState<AddTrustedFieldWidget> {
                 style: GoogleFonts.inter(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.black,
+                  color: isDark ? AppColors.white : AppColors.black,
                   letterSpacing: -0.2,
                 ),
               )
@@ -668,6 +668,7 @@ class _TrustedInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -675,15 +676,21 @@ class _TrustedInputField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          style: TextStyle(
+            color: isDark ? AppColors.white : AppColors.black,
+          ),
           decoration: InputDecoration(
             hintText: hintText,
+            hintStyle: TextStyle(
+              color: isDark ? const Color(0xFF667085) : AppColors.gray,
+            ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
               vertical: 14.h,
             ),
-            border: _pillBorder(),
-            enabledBorder: _pillBorder(),
-            focusedBorder: _pillBorder(AppColors.buttonGradientStart),
+            border: _pillBorder(null, isDark),
+            enabledBorder: _pillBorder(null, isDark),
+            focusedBorder: _pillBorder(AppColors.buttonGradientStart, isDark),
             prefixIcon: Padding(
               padding: EdgeInsets.all(12.0.w),
               child: SvgPicture.asset(
@@ -703,11 +710,14 @@ class _TrustedInputField extends StatelessWidget {
     );
   }
 
-  static OutlineInputBorder _pillBorder([Color? color]) {
+  static OutlineInputBorder _pillBorder([Color? color, bool isDark = false]) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(50.r),
       borderSide: BorderSide(
-        color: color ?? AppColors.fieldColor.withValues(alpha: 0.6),
+        color: color ??
+            (isDark
+                ? const Color(0xFF262938)
+                : AppColors.fieldColor.withValues(alpha: 0.6)),
       ),
     );
   }

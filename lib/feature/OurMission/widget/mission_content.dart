@@ -14,6 +14,8 @@ class MissionContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -42,10 +44,10 @@ class MissionContent extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: isDark ? Colors.white : Colors.black87,
               height: 1.3,
             ),
           ),
@@ -61,7 +63,7 @@ class MissionContent extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: isDark ? const Color(0xFF98A2B3) : Colors.grey[600],
               height: 1.5,
             ),
           ),

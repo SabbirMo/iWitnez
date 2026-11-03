@@ -14,16 +14,20 @@ class AccountSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(accountSettingsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9F9),
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: isDark ? Colors.white : Colors.black,
+          ),
           onPressed: () {
             if (context.canPop()) context.pop();
           },
@@ -31,7 +35,7 @@ class AccountSettingsScreen extends ConsumerWidget {
         title: Text(
           'Account Settings',
           style: GoogleFonts.inter(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.w700,
             fontSize: 18.sp,
           ),
@@ -56,7 +60,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF6B7280),
+                  color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   letterSpacing: 0.3,
                 ),
               ),
@@ -65,11 +69,14 @@ class AccountSettingsScreen extends ConsumerWidget {
               // ── Settings card ──
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
+                  border: isDark
+                      ? Border.all(color: const Color(0xFF262938))
+                      : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -147,6 +154,7 @@ class AccountSettingsScreen extends ConsumerWidget {
 
   // ── Delete confirmation dialog with password prompt ──
   void _confirmDeleteAccount(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final passwordController = TextEditingController();
     bool obscurePassword = true;
     bool isDeleting = false;
@@ -158,6 +166,7 @@ class AccountSettingsScreen extends ConsumerWidget {
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setDialogState) {
           return AlertDialog(
+            backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.r),
             ),
@@ -188,7 +197,7 @@ class AccountSettingsScreen extends ConsumerWidget {
                     'Are you sure you want to permanently delete your account? This action cannot be undone. Please enter your password to confirm.',
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
-                      color: const Color(0xFF6B7280),
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       height: 1.4,
                     ),
                   ),
@@ -197,11 +206,15 @@ class AccountSettingsScreen extends ConsumerWidget {
                     controller: passwordController,
                     obscureText: obscurePassword,
                     enabled: !isDeleting,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
-                      prefixIcon: const Icon(
+                      hintStyle: TextStyle(
+                        color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+                      ),
+                      prefixIcon: Icon(
                         Icons.lock_outline_rounded,
-                        color: Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(

@@ -30,6 +30,8 @@ class HomeAppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SizedBox(
       width: double.infinity,
       height: 86.h,
@@ -60,7 +62,7 @@ class HomeAppHeader extends StatelessWidget {
             child: Text(
               _formatGreeting(),
               style: GoogleFonts.inter(
-                color: AppColors.black,
+                color: isDark ? Colors.white : AppColors.black,
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w600,
                 height: 0.75,
@@ -73,7 +75,7 @@ class HomeAppHeader extends StatelessWidget {
             child: Text(
               subtitle,
               style: GoogleFonts.inter(
-                color: AppColors.black,
+                color: isDark ? const Color(0xFF98A2B3) : AppColors.black,
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
                 height: 1.50,
@@ -95,7 +97,12 @@ class HomeAppHeader extends StatelessWidget {
                     Positioned(
                       left: 0,
                       top: 0,
-                      child: SvgPicture.asset(ImageAssets.notificatioBell),
+                      child: SvgPicture.asset(
+                        ImageAssets.notificatioBell,
+                        colorFilter: isDark
+                            ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                            : null,
+                      ),
                     ),
                     if (hasUnreadNotification && unreadCount > 0)
                       Positioned(

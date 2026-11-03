@@ -114,6 +114,7 @@ class TrustedCircleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const avatarSize = 23.46;
     final safeAvatars = avatars ?? const [];
     final effectiveDisplayCount = safeAvatars.isNotEmpty
@@ -124,17 +125,17 @@ class TrustedCircleCard extends StatelessWidget {
       width: 80.w,
       height: 72.h,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isDark ? const Color(0xFF181A26) : AppColors.white,
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(
           width: 0.5.w,
-          color: AppColors.homeTrustedCardBorder,
+          color: isDark ? const Color(0xFF262938) : AppColors.homeTrustedCardBorder,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: AppColors.homeTrustedCardShadow,
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
             blurRadius: 3,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -186,7 +187,7 @@ class TrustedCircleCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: GoogleFonts.inter(
-                    color: AppColors.homeTrustedTitleColor,
+                    color: isDark ? Colors.white : AppColors.homeTrustedTitleColor,
                     fontSize: 9.sp,
                     fontWeight: FontWeight.w700,
                     height: 1.3,

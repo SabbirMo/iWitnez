@@ -54,17 +54,21 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
       }
     });
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor: isDark
+          ? const Color(0xFF0D0E15)
+          : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -80,7 +84,7 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
             letterSpacing: -0.2,
           ),
         ),
@@ -184,7 +188,9 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111827),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF111827),
                               ),
                             ),
                             SizedBox(height: 12.h),
@@ -213,13 +219,26 @@ class TrustedJourneyEtaScreen extends ConsumerWidget {
                                 lastDate: DateTime(2030),
                                 builder: (context, child) {
                                   return Theme(
-                                    data: Theme.of(context).copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: Color(0xFF6C48F5),
-                                        onPrimary: Colors.white,
-                                        onSurface: Color(0xFF111827),
-                                      ),
-                                    ),
+                                    data: isDark
+                                        ? ThemeData.dark().copyWith(
+                                            colorScheme:
+                                                const ColorScheme.dark(
+                                              primary: Color(0xFF6C48F5),
+                                              onPrimary: Colors.white,
+                                              surface: Color(0xFF181A26),
+                                              onSurface: Colors.white,
+                                            ),
+                                            dialogBackgroundColor:
+                                                const Color(0xFF181A26),
+                                          )
+                                        : Theme.of(context).copyWith(
+                                            colorScheme:
+                                                const ColorScheme.light(
+                                              primary: Color(0xFF6C48F5),
+                                              onPrimary: Colors.white,
+                                              onSurface: Color(0xFF111827),
+                                            ),
+                                          ),
                                     child: child!,
                                   );
                                 },

@@ -16,6 +16,8 @@ class FaqCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -23,15 +25,15 @@ class FaqCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF181A26) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey.withValues(alpha: 0.2),
+            color: isDark ? const Color(0xFF262938) : Colors.grey.withValues(alpha: 0.2),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.03),
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
               spreadRadius: 2,
               blurRadius: 8,
               offset: const Offset(0, 4),
@@ -47,10 +49,10 @@ class FaqCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     question,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                       height: 1.4,
                     ),
                   ),
@@ -63,7 +65,7 @@ class FaqCard extends StatelessWidget {
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
                     size: 20,
-                    color: Colors.grey[700],
+                    color: isDark ? const Color(0xFF98A2B3) : Colors.grey[700],
                   ),
                 ),
               ],
@@ -72,7 +74,7 @@ class FaqCard extends StatelessWidget {
               const SizedBox(height: 12),
               Divider(
                 height: 1,
-                color: Colors.grey.withValues(alpha: 0.15),
+                color: isDark ? const Color(0xFF262938) : Colors.grey.withValues(alpha: 0.15),
               ),
               const SizedBox(height: 12),
               Text(
@@ -80,7 +82,7 @@ class FaqCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: Colors.grey[700],
+                  color: isDark ? const Color(0xFF98A2B3) : Colors.grey[700],
                   height: 1.5,
                 ),
               ),

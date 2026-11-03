@@ -77,20 +77,21 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(changePasswordProvider);
     final notifier = ref.read(changePasswordProvider.notifier);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: AppColors.textDark,
+            color: isDark ? Colors.white : AppColors.textDark,
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -103,7 +104,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         title: Text(
           'Change Password',
           style: GoogleFonts.inter(
-            color: AppColors.textDark,
+            color: isDark ? Colors.white : AppColors.textDark,
             fontWeight: FontWeight.w700,
             fontSize: 18.sp,
             letterSpacing: -0.2,
@@ -121,7 +122,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               Text(
                 'Your new password must be different from previously used passwords and at least 8 characters long.',
                 style: CustomTextStyle.regular16(
-                  AppColors.onboardingDesc,
+                  isDark ? const Color(0xFF98A2B3) : AppColors.onboardingDesc,
                 ).copyWith(fontSize: 13.sp, height: 1.4),
               ),
               SizedBox(height: 20.h),
@@ -135,6 +136,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     const TextFieldHintText(text: 'Current Password'),
                     TextFormField(
                       controller: _currentPasswordController,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter current password';
@@ -172,6 +174,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     const TextFieldHintText(text: 'New Password'),
                     TextFormField(
                       controller: _newPasswordController,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black),
                       validator: (value) {
                         final basicValidation = AppValidator.validatePassword(
                           value,
@@ -212,6 +215,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     const TextFieldHintText(text: 'Confirm New Password'),
                     TextFormField(
                       controller: _confirmPasswordController,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black),
                       validator: (value) =>
                           AppValidator.validateConfirmPassword(
                             value,

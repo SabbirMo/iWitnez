@@ -7,11 +7,16 @@ class CircleSafetyBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F3FF),
+        color: isDark ? const Color(0xFF181A26) : const Color(0xFFF5F3FF),
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : Colors.transparent,
+        ),
       ),
       child: Row(
         children: [
@@ -39,7 +44,7 @@ class CircleSafetyBanner extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1E293B),
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -47,7 +52,7 @@ class CircleSafetyBanner extends StatelessWidget {
                   'Your trusted circle will be notified in case of SOS or safety alerts.',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: const Color(0xFF64748B),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                     height: 1.35,
                   ),
                 ),

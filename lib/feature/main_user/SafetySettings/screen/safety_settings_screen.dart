@@ -13,17 +13,20 @@ class SafetySettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(safetySettingsControllerProvider);
     final controller = ref.read(safetySettingsControllerProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9F9),
+        backgroundColor:
+            isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -33,10 +36,10 @@ class SafetySettingsScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Safety Settings',
           style: TextStyle(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -57,8 +60,9 @@ class SafetySettingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // --- Emergency Section ---
-                _buildSectionTitle('Emergency'),
+                _buildSectionTitle('Emergency', isDark),
                 _buildSectionContainer(
+                  isDark: isDark,
                   children: [
                     SettingsTile(
                       icon: Icons.sos,
@@ -70,15 +74,24 @@ class SafetySettingsScreen extends ConsumerWidget {
                         activeColor: const Color(0xFF8B5CF6),
                       ),
                     ),
-                    const Divider(height: 1, indent: 80, endIndent: 16),
+                    Divider(
+                      height: 1,
+                      indent: 80,
+                      endIndent: 16,
+                      color: isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFF1F5F9),
+                    ),
                     SettingsTile(
                       icon: Icons.location_on_outlined,
                       title: 'Live Location Sharing',
                       subtitle: 'Share your live location during emergency',
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 14,
-                        color: Colors.grey,
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : Colors.grey,
                       ),
                       onTap: () {
                         context.push(AppRouteNames.liveLocationScreen);
@@ -89,8 +102,9 @@ class SafetySettingsScreen extends ConsumerWidget {
                 SizedBox(height: 24.h),
 
                 // --- Safe Places Section ---
-                _buildSectionTitle('Safe Places'),
+                _buildSectionTitle('Safe Places', isDark),
                 _buildSectionContainer(
+                  isDark: isDark,
                   children: [
                     SettingsTile(
                       icon: Icons.home_outlined,
@@ -104,7 +118,14 @@ class SafetySettingsScreen extends ConsumerWidget {
                         activeColor: const Color(0xFF8B5CF6),
                       ),
                     ),
-                    const Divider(height: 1, indent: 80, endIndent: 16),
+                    Divider(
+                      height: 1,
+                      indent: 80,
+                      endIndent: 16,
+                      color: isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFF1F5F9),
+                    ),
                     SettingsTile(
                       icon: Icons.notifications_none,
                       title: 'Safe Place Suggestions',
@@ -121,8 +142,9 @@ class SafetySettingsScreen extends ConsumerWidget {
                 SizedBox(height: 24.h),
 
                 // --- Other Section ---
-                _buildSectionTitle('Other'),
+                _buildSectionTitle('Other', isDark),
                 _buildSectionContainer(
+                  isDark: isDark,
                   children: [
                     SettingsTile(
                       icon: Icons.nightlight_round,
@@ -145,7 +167,7 @@ class SafetySettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, bool isDark) {
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h, left: 4.w),
       child: Text(
@@ -153,20 +175,26 @@ class SafetySettingsScreen extends ConsumerWidget {
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 16.sp,
-          color: Colors.black87,
+          color: isDark ? Colors.white : Colors.black87,
         ),
       ),
     );
   }
 
-  Widget _buildSectionContainer({required List<Widget> children}) {
+  Widget _buildSectionContainer({
+    required List<Widget> children,
+    required bool isDark,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : Colors.transparent,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

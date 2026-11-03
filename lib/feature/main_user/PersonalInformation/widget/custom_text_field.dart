@@ -30,6 +30,8 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -37,7 +39,9 @@ class CustomTextField extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 13,
-            color: enabled ? Colors.grey[700] : Colors.grey[500],
+            color: enabled
+                ? (isDark ? const Color(0xFFD0D5DD) : Colors.grey[700])
+                : (isDark ? const Color(0xFF667085) : Colors.grey[500]),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -68,13 +72,20 @@ class CustomTextField extends StatelessWidget {
                 prefixIcon: Icon(
                   icon,
                   color: enabled
-                      ? const Color(0xFF8B5CF6)
-                      : const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                      ? (isDark
+                          ? const Color(0xFFA855F7)
+                          : const Color(0xFF8B5CF6))
+                      : (isDark
+                          ? const Color(0xFFA855F7).withValues(alpha: 0.4)
+                          : const Color(0xFF8B5CF6).withValues(alpha: 0.4)),
                   size: 20,
                 ),
-
                 filled: true,
-                fillColor: enabled ? Colors.white : const Color(0xFFF3F4F6),
+                fillColor: enabled
+                    ? (isDark ? const Color(0xFF1F2232) : Colors.white)
+                    : (isDark
+                        ? const Color(0xFF161822)
+                        : const Color(0xFFF3F4F6)),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 14,
                   horizontal: 12,
@@ -82,32 +93,42 @@ class CustomTextField extends StatelessWidget {
                 disabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Colors.grey.withValues(alpha: 0.15),
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : Colors.grey.withValues(alpha: 0.15),
                   ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: isDark
+                        ? const Color(0xFF2C3044)
+                        : Colors.grey.withValues(alpha: 0.2),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: isDark
+                        ? const Color(0xFF2C3044)
+                        : Colors.grey.withValues(alpha: 0.2),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color(0xFF8B5CF6),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFFA855F7)
+                        : const Color(0xFF8B5CF6),
                     width: 1.5,
                   ),
                 ),
               ),
               style: TextStyle(
                 fontSize: 14,
-                color: enabled ? Colors.black87 : Colors.grey[600],
+                color: enabled
+                    ? (isDark ? Colors.white : Colors.black87)
+                    : (isDark ? const Color(0xFF98A2B3) : Colors.grey[600]),
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -14,6 +14,8 @@ class AboutMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -25,34 +27,36 @@ class AboutMenuTile extends StatelessWidget {
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF8B5CF6).withOpacity(0.12), // Light purple
+                color: isDark
+                    ? const Color(0xFF2B1D45)
+                    : const Color(0xFF8B5CF6).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF8B5CF6), // Purple icon
+                color: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B5CF6),
                 size: 20,
               ),
             ),
             const SizedBox(width: 16),
-            
+
             // Title
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ),
-            
+
             // Trailing Arrow
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
               size: 14,
-              color: Colors.grey,
+              color: isDark ? const Color(0xFF98A2B3) : Colors.grey,
             ),
           ],
         ),

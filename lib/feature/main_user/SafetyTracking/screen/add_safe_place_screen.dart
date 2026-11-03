@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/provider/home_provider.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/provider/safety_tracking_provider.dart';
@@ -532,21 +533,24 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final homeLoc = ref.watch(homeProvider).value?.liveLocation;
     final cameraLat = homeLoc?.latitude ?? 23.8103;
     final cameraLng = homeLoc?.longitude ?? 90.4125;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFC),
+        backgroundColor:
+            isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -562,7 +566,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
         ),
       ),
@@ -584,7 +588,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                       ),
                     ),
                     SizedBox(height: 2.h),
@@ -593,7 +599,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                       ),
                     ),
                   ],
@@ -604,12 +612,18 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
               // 1. Place Name Card
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF1F5F9),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.25 : 0.03,
+                      ),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -644,7 +658,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111827),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF111827),
                             ),
                           ),
                           SizedBox(height: 6.h),
@@ -652,22 +668,31 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                             height: 40.h,
                             padding: EdgeInsets.symmetric(horizontal: 12.w),
                             decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF1F2232)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(10.r),
                               border: Border.all(
-                                color: const Color(0xFFE5E7EB),
+                                color: isDark
+                                    ? const Color(0xFF262938)
+                                    : const Color(0xFFE5E7EB),
                               ),
                             ),
                             child: TextField(
                               controller: _nameController,
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
-                                color: const Color(0xFF111827),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF111827),
                               ),
                               decoration: InputDecoration(
                                 hintText: 'e.g. Home, Office, Gym',
                                 hintStyle: GoogleFonts.inter(
                                   fontSize: 12.5.sp,
-                                  color: const Color(0xFF9CA3AF),
+                                  color: isDark
+                                      ? const Color(0xFF667085)
+                                      : const Color(0xFF9CA3AF),
                                 ),
                                 focusedBorder: InputBorder.none,
                                 border: InputBorder.none,
@@ -692,7 +717,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 13.5.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF111827),
+                  color: isDark ? Colors.white : const Color(0xFF111827),
                 ),
               ),
               SizedBox(height: 8.h),
@@ -700,12 +725,14 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
               // Search or enter address box
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
                     color: _showSuggestions
                         ? const Color(0xFF8B5CF6)
-                        : const Color(0xFFE5E7EB),
+                        : (isDark
+                              ? const Color(0xFF262938)
+                              : const Color(0xFFE5E7EB)),
                     width: _showSuggestions ? 1.4.w : 1.w,
                   ),
                 ),
@@ -716,7 +743,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                       width: 32.r,
                       height: 32.r,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3E8FF),
+                        color: isDark
+                            ? const Color(0xFF2A1B4D)
+                            : const Color(0xFFF3E8FF),
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Icon(
@@ -738,13 +767,17 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                         },
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
-                          color: const Color(0xFF111827),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF111827),
                         ),
                         decoration: InputDecoration(
                           hintText: 'Search or enter an address',
                           hintStyle: GoogleFonts.inter(
                             fontSize: 12.5.sp,
-                            color: const Color(0xFF6B7280),
+                            color: isDark
+                                ? const Color(0xFF667085)
+                                : const Color(0xFF6B7280),
                           ),
                           focusedBorder: InputBorder.none,
                           border: InputBorder.none,
@@ -769,7 +802,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                         constraints: const BoxConstraints(),
                         icon: Icon(
                           Icons.close_rounded,
-                          color: const Color(0xFF94A3B8),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF94A3B8),
                           size: 20.sp,
                         ),
                         onPressed: () {
@@ -800,12 +835,18 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     horizontal: 14.w,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF181A26) : Colors.white,
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFE5E7EB),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.3 : 0.05,
+                        ),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),
@@ -829,7 +870,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                         'Searching matching locations...',
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
-                          color: const Color(0xFF6B7280),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF6B7280),
                         ),
                       ),
                     ],
@@ -840,12 +883,18 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                   margin: EdgeInsets.only(top: 6.h),
                   constraints: BoxConstraints(maxHeight: 220.h),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF181A26) : Colors.white,
                     borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFE5E7EB),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.35 : 0.08,
+                        ),
                         blurRadius: 14,
                         offset: const Offset(0, 4),
                       ),
@@ -855,8 +904,12 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     shrinkWrap: true,
                     padding: EdgeInsets.symmetric(vertical: 4.h),
                     itemCount: _suggestions.length,
-                    separatorBuilder: (context, index) =>
-                        Divider(color: const Color(0xFFF1F5F9), height: 1.h),
+                    separatorBuilder: (context, index) => Divider(
+                      color: isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFF1F5F9),
+                      height: 1.h,
+                    ),
                     itemBuilder: (context, index) {
                       final item = _suggestions[index];
                       return Material(
@@ -877,7 +930,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                   height: 28.r,
                                   margin: EdgeInsets.only(top: 2.h),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF3E8FF),
+                                    color: isDark
+                                        ? const Color(0xFF2A1B4D)
+                                        : const Color(0xFFF3E8FF),
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Icon(
@@ -900,7 +955,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                         style: GoogleFonts.inter(
                                           fontSize: 13.5.sp,
                                           fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF111827),
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF111827),
                                         ),
                                       ),
                                       if (item.subtitle.isNotEmpty) ...[
@@ -911,7 +968,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.inter(
                                             fontSize: 11.5.sp,
-                                            color: const Color(0xFF6B7280),
+                                            color: isDark
+                                                ? const Color(0xFF98A2B3)
+                                                : const Color(0xFF6B7280),
                                           ),
                                         ),
                                       ],
@@ -921,7 +980,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                 Icon(
                                   Icons.arrow_forward_ios_rounded,
                                   size: 13.sp,
-                                  color: const Color(0xFFCBD5E1),
+                                  color: isDark
+                                      ? const Color(0xFF475467)
+                                      : const Color(0xFFCBD5E1),
                                 ),
                               ],
                             ),
@@ -941,7 +1002,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                   borderRadius: BorderRadius.circular(18.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.25 : 0.05,
+                      ),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -954,6 +1017,8 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     // Base Map: Interactive GoogleMap or graphic fallback
                     Positioned.fill(
                       child: GoogleMap(
+                        key: ValueKey('add_safe_place_map_$isDark'),
+                        style: isDark ? darkMapStyleJson : null,
                         initialCameraPosition: CameraPosition(
                           target:
                               _selectedLatLng ?? LatLng(cameraLat, cameraLng),
@@ -1018,6 +1083,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                         children: [
                           _buildMapMiniButton(
                             icon: Icons.my_location_rounded,
+                            isDark: isDark,
                             onTap: () {
                               if (homeLoc?.latitude != null &&
                                   homeLoc?.longitude != null) {
@@ -1034,11 +1100,15 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                           Container(
                             width: 34.r,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: isDark
+                                  ? const Color(0xFF181A26)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(18.r),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.08),
+                                  color: Colors.black.withValues(
+                                    alpha: isDark ? 0.3 : 0.08,
+                                  ),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -1070,7 +1140,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                 Container(
                                   width: 18.w,
                                   height: 1.h,
-                                  color: const Color(0xFFE2E8F0),
+                                  color: isDark
+                                      ? const Color(0xFF262938)
+                                      : const Color(0xFFE2E8F0),
                                 ),
                                 InkWell(
                                   borderRadius: BorderRadius.vertical(
@@ -1106,12 +1178,18 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
               // Set Radius Card
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF1F5F9),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.25 : 0.03,
+                      ),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -1124,7 +1202,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                       width: 42.r,
                       height: 42.r,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3E8FF),
+                        color: isDark
+                            ? const Color(0xFF2A1B4D)
+                            : const Color(0xFFF3E8FF),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Icon(
@@ -1143,7 +1223,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111827),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF111827),
                             ),
                           ),
                           SizedBox(height: 2.h),
@@ -1151,7 +1233,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                             "You'll get alerts when you enter or leave this area.",
                             style: GoogleFonts.inter(
                               fontSize: 10.2.sp,
-                              color: const Color(0xFF6B7280),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF6B7280),
                             ),
                           ),
                         ],
@@ -1162,11 +1246,17 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     // Radius Dropdown Pill
                     PopupMenuButton<int>(
                       initialValue: _selectedRadius,
+                      color: isDark ? const Color(0xFF181A26) : Colors.white,
                       onSelected: (val) {
                         setState(() => _selectedRadius = val);
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
+                        side: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF262938)
+                              : const Color(0xFFE5E7EB),
+                        ),
                       ),
                       itemBuilder: (context) {
                         return _radiusOptions.map((radius) {
@@ -1181,7 +1271,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                     : FontWeight.w500,
                                 color: _selectedRadius == radius
                                     ? const Color(0xFF8B5CF6)
-                                    : const Color(0xFF111827),
+                                    : (isDark
+                                          ? Colors.white
+                                          : const Color(0xFF111827)),
                               ),
                             ),
                           );
@@ -1193,8 +1285,15 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                           vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1F2232)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF262938)
+                                : const Color(0xFFE5E7EB),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -1204,14 +1303,18 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF111827),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF111827),
                               ),
                             ),
                             SizedBox(width: 4.w),
                             Icon(
                               Icons.keyboard_arrow_down_rounded,
                               size: 18.sp,
-                              color: const Color(0xFF6B7280),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF6B7280),
                             ),
                           ],
                         ),
@@ -1230,7 +1333,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   SizedBox(width: 6.w),
@@ -1238,7 +1341,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     '(optional)',
                     style: GoogleFonts.inter(
                       fontSize: 11.5.sp,
-                      color: const Color(0xFF9CA3AF),
+                      color: isDark
+                          ? const Color(0xFF667085)
+                          : const Color(0xFF9CA3AF),
                     ),
                   ),
                 ],
@@ -1253,6 +1358,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     _buildIconOption(
                       icon: _icons[i],
                       isSelected: _selectedIconIndex == i,
+                      isDark: isDark,
                       onTap: () {
                         setState(() => _selectedIconIndex = i);
                       },
@@ -1336,17 +1442,18 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
 
   Widget _buildMapMiniButton({
     required IconData icon,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return Container(
       width: 34.r,
       height: 34.r,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -1369,6 +1476,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
   Widget _buildIconOption({
     required IconData icon,
     required bool isSelected,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -1380,12 +1488,14 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
             width: 52.r,
             height: 52.r,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF181A26) : Colors.white,
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected
                     ? const Color(0xFF7E22CE)
-                    : const Color(0xFFE5E7EB),
+                    : (isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFE5E7EB)),
                 width: isSelected ? 2.2.w : 1.w,
               ),
             ),
@@ -1394,7 +1504,9 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                 icon,
                 color: isSelected
                     ? const Color(0xFF7E22CE)
-                    : const Color(0xFF94A3B8),
+                    : (isDark
+                          ? const Color(0xFF667085)
+                          : const Color(0xFF94A3B8)),
                 size: 24.sp,
               ),
             ),

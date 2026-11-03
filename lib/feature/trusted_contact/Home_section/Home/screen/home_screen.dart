@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/controller/home_controller.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/provider/home_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/widget/home_widget.dart';
@@ -14,11 +15,16 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(trustedHomeProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
     final bottomClearance =
         68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -42,7 +48,9 @@ class HomeScreen extends ConsumerWidget {
                             Icon(
                               Icons.error_outline_rounded,
                               size: 48.sp,
-                              color: const Color(0xFF98A2B3),
+                              color: isDark
+                                  ? const Color(0xFF6B7280)
+                                  : const Color(0xFF98A2B3),
                             ),
                             SizedBox(height: 12.h),
                             Text(
@@ -50,7 +58,9 @@ class HomeScreen extends ConsumerWidget {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
-                                color: const Color(0xFF667085),
+                                color: isDark
+                                    ? const Color(0xFF9CA3AF)
+                                    : const Color(0xFF667085),
                               ),
                             ),
                             SizedBox(height: 16.h),
@@ -91,6 +101,7 @@ class HomeScreen extends ConsumerWidget {
                             hasNotification: state.hasNotification,
                             unreadNotificationsCount:
                                 state.unreadNotificationsCount,
+                            isDark: isDark,
                             onNotificationTap: () =>
                                 _controller.onNotificationTap(context, ref),
                           ),
@@ -101,6 +112,7 @@ class HomeScreen extends ConsumerWidget {
                             TrustedCareBanner(
                               title: state.safetyBanner!.title,
                               description: state.safetyBanner!.description,
+                              isDark: isDark,
                             ),
                             SizedBox(height: 16.h),
                           ],
@@ -114,6 +126,7 @@ class HomeScreen extends ConsumerWidget {
                             isOnline: state.monitoredUser?.isOnline ?? true,
                             latitude: state.liveLocation?.latitude,
                             longitude: state.liveLocation?.longitude,
+                            isDark: isDark,
                             onViewFullMapTap: () =>
                                 _controller.onViewFullMapTap(context),
                           ),
@@ -123,6 +136,7 @@ class HomeScreen extends ConsumerWidget {
                           if (state.quickActions.isNotEmpty) ...[
                             TrustedQuickActions(
                               actions: state.quickActions,
+                              isDark: isDark,
                               onCheckInStatusTap: () =>
                                   _controller.onCheckInStatusTap(context),
                               onJourneyEtaTap: () =>
@@ -134,6 +148,7 @@ class HomeScreen extends ConsumerWidget {
                           // 5. Recent Activity: Emma checked in, Emma left Home, etc.
                           TrustedRecentActivitySection(
                             activities: state.activities,
+                            isDark: isDark,
                             onViewAllTap: () =>
                                 _controller.onViewAllActivityTap(context),
                             onItemTap: (item) =>

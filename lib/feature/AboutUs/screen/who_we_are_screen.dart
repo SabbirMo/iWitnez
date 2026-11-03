@@ -10,16 +10,18 @@ class WhoWeAreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
             size: 20,
           ),
           onPressed: () {
@@ -33,7 +35,7 @@ class WhoWeAreScreen extends StatelessWidget {
         title: Text(
           'Who We Are',
           style: GoogleFonts.inter(
-            color: const Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
             fontWeight: FontWeight.w700,
             fontSize: 18.sp,
           ),
@@ -65,7 +67,7 @@ class WhoWeAreScreen extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 21.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                     height: 1.35,
                     letterSpacing: -0.2,
                   ),
@@ -80,7 +82,7 @@ class WhoWeAreScreen extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                       height: 1.55,
                     ),
                   ),
@@ -94,4 +96,3 @@ class WhoWeAreScreen extends StatelessWidget {
     );
   }
 }
-

@@ -12,14 +12,23 @@ class SafetyAlertsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFAF5FF),
+        color: isDark ? const Color(0xFF181A26) : const Color(0xFFFAF5FF),
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: const Color(0xFFF3E8FF),
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF3E8FF),
           width: 1.2.w,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.035),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -36,13 +45,13 @@ class SafetyAlertsCard extends StatelessWidget {
                   width: 44.r,
                   height: 44.r,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3E8FF),
+                    color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF),
                     borderRadius: BorderRadius.circular(14.r),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.notifications_none_rounded,
-                      color: const Color(0xFF7C3AED),
+                      color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
                       size: 22.sp,
                     ),
                   ),
@@ -59,7 +68,7 @@ class SafetyAlertsCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                       SizedBox(height: 3.h),
@@ -68,7 +77,7 @@ class SafetyAlertsCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                          color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                           height: 1.3,
                         ),
                       ),
@@ -80,7 +89,7 @@ class SafetyAlertsCard extends StatelessWidget {
                 // Trailing Chevron
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: const Color(0xFF9CA3AF),
+                  color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                   size: 22.sp,
                 ),
               ],

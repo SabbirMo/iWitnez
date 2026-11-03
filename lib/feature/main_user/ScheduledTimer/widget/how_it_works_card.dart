@@ -7,14 +7,18 @@ class HowItWorksCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -26,14 +30,14 @@ class HowItWorksCard extends StatelessWidget {
           Container(
             width: 42.r,
             height: 42.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF3E8FF),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Icon(
                 Icons.access_time_rounded,
-                color: const Color(0xFF8B5CF6),
+                color: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B5CF6),
                 size: 22.sp,
               ),
             ),
@@ -48,7 +52,7 @@ class HowItWorksCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 3.h),
@@ -57,7 +61,7 @@ class HowItWorksCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                     height: 1.35,
                   ),
                 ),
@@ -76,8 +80,8 @@ class HowItWorksCard extends StatelessWidget {
                 Container(
                   width: 44.r,
                   height: 44.r,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEDE9FE),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFEDE9FE),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -90,14 +94,14 @@ class HowItWorksCard extends StatelessWidget {
                   right: 2.w,
                   bottom: 2.h,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF181A26) : Colors.white,
                       shape: BoxShape.circle,
                     ),
                     padding: EdgeInsets.all(1.5.r),
                     child: Icon(
                       Icons.verified_rounded,
-                      color: const Color(0xFF7C3AED),
+                      color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
                       size: 15.sp,
                     ),
                   ),

@@ -11,6 +11,7 @@ class CheckInProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color badgeColor;
     Color badgeTextColor;
     IconData badgeIcon;
@@ -18,18 +19,18 @@ class CheckInProfileCard extends StatelessWidget {
     final subtitle = data.badgeSubtext;
 
     if (data.isNotSetUp) {
-      badgeColor = const Color(0xFFF1F5F9);
-      badgeTextColor = const Color(0xFF64748B);
+      badgeColor = isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9);
+      badgeTextColor = isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B);
       badgeIcon = Icons.info_outline_rounded;
       badgeText = data.statusBadge.isNotEmpty ? data.statusBadge : 'Not Set Up';
     } else if (data.isMissed) {
-      badgeColor = const Color(0xFFFFF1E6);
-      badgeTextColor = const Color(0xFFF97316);
+      badgeColor = isDark ? const Color(0xFF351A10) : const Color(0xFFFFF1E6);
+      badgeTextColor = isDark ? const Color(0xFFFB923C) : const Color(0xFFF97316);
       badgeIcon = Icons.warning_amber_rounded;
       badgeText = data.statusBadge.isNotEmpty ? data.statusBadge : 'Missed';
     } else {
-      badgeColor = const Color(0xFFE8F8EE);
-      badgeTextColor = const Color(0xFF16A34A);
+      badgeColor = isDark ? const Color(0xFF132B1D) : const Color(0xFFE8F8EE);
+      badgeTextColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
       badgeIcon = Icons.check_circle_rounded;
       badgeText = data.statusBadge.isNotEmpty ? data.statusBadge : 'Checked In';
     }
@@ -40,12 +41,15 @@ class CheckInProfileCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -77,7 +81,7 @@ class CheckInProfileCard extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -123,7 +127,9 @@ class CheckInProfileCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF9CA3AF),
+                    color: isDark
+                        ? const Color(0xFF98A2B3)
+                        : const Color(0xFF9CA3AF),
                   ),
                 ),
               ],

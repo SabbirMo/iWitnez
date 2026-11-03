@@ -5,7 +5,7 @@ import 'package:iwitnez/core/utils/theme_storage.dart';
 class ThemeModeProvider extends Notifier<ThemeMode> {
   final ThemeMode initialTheme;
 
-  ThemeModeProvider({this.initialTheme = ThemeMode.light});
+  ThemeModeProvider({this.initialTheme = ThemeMode.dark});
 
   @override
   ThemeMode build() => initialTheme;
@@ -20,6 +20,8 @@ class ThemeModeProvider extends Notifier<ThemeMode> {
     state = newMode;
     await ThemeStorage.saveThemeMode(newMode);
   }
+
+  Future<void> toggle() => toggleTheme();
 }
 
 final themeModeProvider = NotifierProvider<ThemeModeProvider, ThemeMode>(

@@ -19,10 +19,11 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
     required SafePlaceModel place,
     VoidCallback? onRefresh,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       barrierColor: Colors.black.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
@@ -41,6 +42,7 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       top: false,
       child: Padding(
@@ -66,7 +68,7 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
                 letterSpacing: -0.3,
               ),
             ),
@@ -79,7 +81,9 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 13.5.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF64748B),
+                color: isDark
+                    ? const Color(0xFF98A2B3)
+                    : const Color(0xFF64748B),
                 height: 1.4,
               ),
             ),
@@ -89,9 +93,16 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: isDark
+                    ? const Color(0xFF1F2232)
+                    : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.w),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF262938)
+                      : const Color(0xFFF1F5F9),
+                  width: 1.w,
+                ),
               ),
               child: Row(
                 children: [
@@ -124,7 +135,9 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 15.5.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1E293B),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1E293B),
                           ),
                         ),
                         SizedBox(height: 3.h),
@@ -133,7 +146,9 @@ class SafePlaceSavedBottomSheet extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF98A2B3)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ],

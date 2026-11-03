@@ -20,14 +20,19 @@ class SafePlacesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.035),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -46,7 +51,7 @@ class SafePlacesCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 17.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF111827),
+                  color: isDark ? Colors.white : const Color(0xFF111827),
                   letterSpacing: -0.2,
                 ),
               ),
@@ -62,7 +67,7 @@ class SafePlacesCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF6D28D9),
+                        color: isDark ? const Color(0xFFA855F7) : const Color(0xFF6D28D9),
                       ),
                     ),
                   ),
@@ -82,7 +87,7 @@ class SafePlacesCard extends StatelessWidget {
                     Icon(
                       Icons.place_outlined,
                       size: 32.sp,
-                      color: const Color(0xFFCBD5E1),
+                      color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
                     ),
                     SizedBox(height: 8.h),
                     Text(
@@ -90,7 +95,7 @@ class SafePlacesCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF94A3B8),
                       ),
                     ),
                   ],
@@ -102,25 +107,25 @@ class SafePlacesCard extends StatelessWidget {
               if (i > 0)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 12.h),
-                  child: const Divider(
-                    color: Color(0xFFF1F5F9),
+                  child: Divider(
+                    color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
                     height: 1,
                     thickness: 1,
                   ),
                 ),
-              _buildPlaceTile(context, places[i]),
+              _buildPlaceTile(context, places[i], isDark),
             ],
 
           SizedBox(height: 18.h),
 
           // "Add Safe Place" Button with dashed outline border
-          _buildAddSafePlaceButton(context),
+          _buildAddSafePlaceButton(context, isDark),
         ],
       ),
     );
   }
 
-  Widget _buildPlaceTile(BuildContext context, SafePlaceModel place) {
+  Widget _buildPlaceTile(BuildContext context, SafePlaceModel place, bool isDark) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -158,7 +163,7 @@ class SafePlacesCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14.5.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                     SizedBox(height: 2.h),
@@ -169,7 +174,7 @@ class SafePlacesCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       ),
                     ),
                   ],
@@ -182,13 +187,13 @@ class SafePlacesCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   color: place.isInside
-                      ? const Color(0xFFDCFCE7)
-                      : const Color(0xFFF1F5F9),
+                      ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7))
+                      : (isDark ? const Color(0xFF1F2232) : const Color(0xFFF1F5F9)),
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
                     color: place.isInside
-                        ? const Color(0xFF86EFAC).withValues(alpha: 0.6)
-                        : const Color(0xFFE2E8F0),
+                        ? const Color(0xFF22C55E).withValues(alpha: 0.6)
+                        : (isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0)),
                     width: 0.8.w,
                   ),
                 ),
@@ -201,8 +206,8 @@ class SafePlacesCard extends StatelessWidget {
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color: place.isInside
-                            ? const Color(0xFF15803D)
-                            : const Color(0xFF64748B),
+                            ? const Color(0xFF22C55E)
+                            : (isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B)),
                       ),
                     ),
                     SizedBox(width: 3.w),
@@ -210,8 +215,8 @@ class SafePlacesCard extends StatelessWidget {
                       Icons.chevron_right_rounded,
                       size: 16.sp,
                       color: place.isInside
-                          ? const Color(0xFF15803D)
-                          : const Color(0xFF94A3B8),
+                          ? const Color(0xFF22C55E)
+                          : (isDark ? const Color(0xFF98A2B3) : const Color(0xFF94A3B8)),
                     ),
                   ],
                 ),
@@ -223,10 +228,10 @@ class SafePlacesCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAddSafePlaceButton(BuildContext context) {
+  Widget _buildAddSafePlaceButton(BuildContext context, bool isDark) {
     return CustomPaint(
       painter: _DashedRRectPainter(
-        color: const Color(0xFF5B17B0).withValues(alpha: 0.45),
+        color: const Color(0xFF5B17B0).withValues(alpha: isDark ? 0.7 : 0.45),
         strokeWidth: 1.5,
         dashWidth: 4,
         dashSpace: 3,
@@ -248,25 +253,22 @@ class SafePlacesCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
               child: Row(
                 children: [
-                  // White circular plus icon
                   Container(
                     width: 38.r,
                     height: 38.r,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: Icon(
                         Icons.add_rounded,
-                        color: const Color(0xFF1E1B4B),
+                        color: Colors.white,
                         size: 22.sp,
                       ),
                     ),
                   ),
                   SizedBox(width: 14.w),
-
-                  // Texts
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,9 +283,9 @@ class SafePlacesCard extends StatelessWidget {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Set a new safe place',
+                          'Home, Work, School, or other places',
                           style: GoogleFonts.inter(
-                            fontSize: 12.5.sp,
+                            fontSize: 11.5.sp,
                             fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.85),
                           ),
@@ -291,12 +293,10 @@ class SafePlacesCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Right Chevron
                   Icon(
                     Icons.chevron_right_rounded,
                     color: Colors.white,
-                    size: 22.sp,
+                    size: 20.sp,
                   ),
                 ],
               ),
@@ -308,7 +308,6 @@ class SafePlacesCard extends StatelessWidget {
   }
 }
 
-/// Custom Painter for the subtle dashed border around the Add Safe Place button
 class _DashedRRectPainter extends CustomPainter {
   final Color color;
   final double strokeWidth;
@@ -318,10 +317,10 @@ class _DashedRRectPainter extends CustomPainter {
 
   _DashedRRectPainter({
     required this.color,
-    required this.strokeWidth,
-    required this.dashWidth,
-    required this.dashSpace,
-    required this.radius,
+    this.strokeWidth = 1.0,
+    this.dashWidth = 4.0,
+    this.dashSpace = 3.0,
+    this.radius = 16.0,
   });
 
   @override
@@ -331,39 +330,32 @@ class _DashedRRectPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(-1.5, -1.5, size.width + 3.0, size.height + 3.0),
-      Radius.circular(radius),
-    );
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(radius),
+        ),
+      );
 
-    final path = Path()..addRRect(rrect);
-    final dashedPath = _createDashedPath(path, dashWidth, dashSpace);
-    canvas.drawPath(dashedPath, paint);
-  }
-
-  Path _createDashedPath(Path source, double dashWidth, double dashSpace) {
-    final dest = Path();
-    for (final metric in source.computeMetrics()) {
+    for (final metric in path.computeMetrics()) {
       double distance = 0.0;
-      bool draw = true;
       while (distance < metric.length) {
-        final length = draw ? dashWidth : dashSpace;
-        if (draw) {
-          dest.addPath(
-            metric.extractPath(distance, distance + length),
-            Offset.zero,
-          );
-        }
-        distance += length;
-        draw = !draw;
+        final double len = (distance + dashWidth < metric.length)
+            ? dashWidth
+            : metric.length - distance;
+        final extract = metric.extractPath(distance, distance + len);
+        canvas.drawPath(extract, paint);
+        distance += dashWidth + dashSpace;
       }
     }
-    return dest;
   }
 
   @override
   bool shouldRepaint(covariant _DashedRRectPainter oldDelegate) =>
       oldDelegate.color != color ||
       oldDelegate.strokeWidth != strokeWidth ||
+      oldDelegate.dashWidth != dashWidth ||
+      oldDelegate.dashSpace != dashSpace ||
       oldDelegate.radius != radius;
 }

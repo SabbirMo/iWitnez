@@ -22,18 +22,21 @@ class CheckInScreen extends ConsumerWidget {
     final state = ref.watch(checkInProvider);
     final notifier = ref.read(checkInProvider.notifier);
     final isCompleted = state.pageData.isCompleted;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFC),
+        backgroundColor:
+            isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -47,7 +50,7 @@ class CheckInScreen extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
             letterSpacing: -0.2,
           ),
         ),
@@ -80,7 +83,9 @@ class CheckInScreen extends ConsumerWidget {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
-                                  color: const Color(0xFF6B7280),
+                                  color: isDark
+                                      ? const Color(0xFF98A2B3)
+                                      : const Color(0xFF6B7280),
                                 ),
                               )
                             : Column(
@@ -90,7 +95,9 @@ class CheckInScreen extends ConsumerWidget {
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.inter(
                                       fontSize: 12.sp,
-                                      color: const Color(0xFF6B7280),
+                                      color: isDark
+                                          ? const Color(0xFF98A2B3)
+                                          : const Color(0xFF6B7280),
                                     ),
                                   ),
                                   SizedBox(height: 2.h),
@@ -99,7 +106,9 @@ class CheckInScreen extends ConsumerWidget {
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.inter(
                                       fontSize: 12.sp,
-                                      color: const Color(0xFF6B7280),
+                                      color: isDark
+                                          ? const Color(0xFF98A2B3)
+                                          : const Color(0xFF6B7280),
                                     ),
                                   ),
                                 ],
@@ -146,10 +155,14 @@ class CheckInScreen extends ConsumerWidget {
                         Container(
                           height: 50.h,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark
+                                ? const Color(0xFF181A26)
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(25.r),
                             border: Border.all(
-                              color: const Color(0xFF7C3AED),
+                              color: isDark
+                                  ? const Color(0xFFA855F7)
+                                  : const Color(0xFF7C3AED),
                               width: 1.5,
                             ),
                           ),
@@ -179,7 +192,9 @@ class CheckInScreen extends ConsumerWidget {
                                         children: [
                                           Icon(
                                             Icons.location_on_outlined,
-                                            color: const Color(0xFF7C3AED),
+                                            color: isDark
+                                                ? const Color(0xFFA855F7)
+                                                : const Color(0xFF7C3AED),
                                             size: 19.sp,
                                           ),
                                           SizedBox(width: 8.w),
@@ -188,7 +203,9 @@ class CheckInScreen extends ConsumerWidget {
                                             style: GoogleFonts.inter(
                                               fontSize: 14.5.sp,
                                               fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF7C3AED),
+                                              color: isDark
+                                                  ? const Color(0xFFA855F7)
+                                                  : const Color(0xFF7C3AED),
                                             ),
                                           ),
                                         ],
@@ -274,14 +291,18 @@ class CheckInScreen extends ConsumerWidget {
                             Icon(
                               Icons.lock_rounded,
                               size: 13.sp,
-                              color: const Color(0xFF6B7280),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF6B7280),
                             ),
                             SizedBox(width: 4.w),
                             Text(
                               'Your location is only shared with trusted circles.',
                               style: GoogleFonts.inter(
                                 fontSize: 11.5.sp,
-                                color: const Color(0xFF6B7280),
+                                color: isDark
+                                    ? const Color(0xFF98A2B3)
+                                    : const Color(0xFF6B7280),
                               ),
                             ),
                           ],

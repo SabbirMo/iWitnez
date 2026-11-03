@@ -28,11 +28,12 @@ class AlertShareBottomSheet extends StatelessWidget {
   }) {
     final defaultUrl =
         'https://iwitnez.app/alerts/emma-sos-${mediaType.toLowerCase().replaceAll(' ', '-')}';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       barrierColor: Colors.black.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -117,6 +118,8 @@ class AlertShareBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 24.h),
@@ -130,7 +133,9 @@ class AlertShareBottomSheet extends StatelessWidget {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAECF0),
+                  color: isDark
+                      ? const Color(0xFF344054)
+                      : const Color(0xFFEAECF0),
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -144,12 +149,16 @@ class AlertShareBottomSheet extends StatelessWidget {
                   width: 40.r,
                   height: 40.r,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF4F3FF),
+                    color: isDark
+                        ? const Color(0xFF261D42)
+                        : const Color(0xFFF4F3FF),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Icon(
                     Icons.share_rounded,
-                    color: const Color(0xFF7F56D9),
+                    color: isDark
+                        ? const Color(0xFFD6BBFB)
+                        : const Color(0xFF7F56D9),
                     size: 20.sp,
                   ),
                 ),
@@ -163,7 +172,9 @@ class AlertShareBottomSheet extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF111827),
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -172,7 +183,9 @@ class AlertShareBottomSheet extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF667085),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF667085),
                         ),
                       ),
                     ],
@@ -183,14 +196,18 @@ class AlertShareBottomSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16.r),
                   child: Container(
                     padding: EdgeInsets.all(5.r),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF2F4F7),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF262938)
+                          : const Color(0xFFF2F4F7),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.close_rounded,
                       size: 18.sp,
-                      color: const Color(0xFF667085),
+                      color: isDark
+                          ? const Color(0xFF98A2B3)
+                          : const Color(0xFF667085),
                     ),
                   ),
                 ),
@@ -202,15 +219,24 @@ class AlertShareBottomSheet extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FC),
+                color: isDark
+                    ? const Color(0xFF1F2232)
+                    : const Color(0xFFF8F9FC),
                 borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: const Color(0xFFEAECF0), width: 1.w),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF2C3044)
+                      : const Color(0xFFEAECF0),
+                  width: 1.w,
+                ),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.link_rounded,
-                    color: const Color(0xFF7F56D9),
+                    color: isDark
+                        ? const Color(0xFFD6BBFB)
+                        : const Color(0xFF7F56D9),
                     size: 18.sp,
                   ),
                   SizedBox(width: 8.w),
@@ -221,7 +247,9 @@ class AlertShareBottomSheet extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF475467),
+                        color: isDark
+                            ? const Color(0xFFD0D5DD)
+                            : const Color(0xFF475467),
                         fontWeight: FontWeight.w500,
                       ),
                     ),

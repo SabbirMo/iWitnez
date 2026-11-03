@@ -73,6 +73,7 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(sosCountdownProvider);
     final notifier = ref.read(sosCountdownProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // When 10-second countdown reaches 0 automatically, navigate directly to Screen 4 (Active Camera/Recording)
     ref.listen(sosCountdownProvider, (previous, next) {
@@ -95,7 +96,7 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -157,7 +158,9 @@ class _SosCountdownScreenState extends ConsumerState<SosCountdownScreen> {
                       style: TextStyle(
                         fontSize: 14.5.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                         letterSpacing: 0.2,
                       ),
                     ),

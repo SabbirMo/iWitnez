@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/core/utils/token_storage.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
@@ -45,7 +46,10 @@ class _OnboardingStartScreenState extends ConsumerState<OnboardingStartScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark =
+        themeMode == ThemeMode.dark ||
+        Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Stack(

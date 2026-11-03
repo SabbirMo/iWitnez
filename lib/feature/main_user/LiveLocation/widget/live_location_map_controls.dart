@@ -19,6 +19,8 @@ class LiveLocationMapControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Positioned(
       right: 16.w,
       top: 80.h,
@@ -28,8 +30,9 @@ class LiveLocationMapControls extends StatelessWidget {
           if (onCompassTap != null) ...[
             _buildCircleMapButton(
               icon: Icons.explore_outlined,
-              iconColor: const Color(0xFF8B2CF5),
+              iconColor: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B2CF5),
               onTap: onCompassTap!,
+              isDark: isDark,
             ),
             SizedBox(height: 10.h),
           ],
@@ -38,6 +41,7 @@ class LiveLocationMapControls extends StatelessWidget {
           _buildCircleMapButton(
             icon: Icons.layers_outlined,
             onTap: onLayersTap ?? () {},
+            isDark: isDark,
           ),
           SizedBox(height: 10.h),
 
@@ -45,6 +49,7 @@ class LiveLocationMapControls extends StatelessWidget {
           _buildCircleMapButton(
             icon: Icons.my_location_rounded,
             onTap: onMyLocationTap ?? () {},
+            isDark: isDark,
           ),
           SizedBox(height: 10.h),
 
@@ -52,11 +57,14 @@ class LiveLocationMapControls extends StatelessWidget {
           Container(
             width: 38.r,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF181A26) : Colors.white,
               borderRadius: BorderRadius.circular(19.r),
+              border: Border.all(
+                color: isDark ? const Color(0xFF262938) : Colors.transparent,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -75,15 +83,15 @@ class LiveLocationMapControls extends StatelessWidget {
                       child: Icon(
                         Icons.add,
                         size: 19.sp,
-                        color: const Color(0xFF4B5563),
+                        color: isDark ? Colors.white : const Color(0xFF4B5563),
                       ),
                     ),
                   ),
                 ),
-                const Divider(
+                Divider(
                   height: 1,
                   thickness: 0.8,
-                  color: Color(0xFFE5E7EB),
+                  color: isDark ? const Color(0xFF262938) : const Color(0xFFE5E7EB),
                 ),
                 InkWell(
                   onTap: onZoomOutTap,
@@ -96,7 +104,7 @@ class LiveLocationMapControls extends StatelessWidget {
                       child: Icon(
                         Icons.remove,
                         size: 19.sp,
-                        color: const Color(0xFF4B5563),
+                        color: isDark ? Colors.white : const Color(0xFF4B5563),
                       ),
                     ),
                   ),
@@ -111,9 +119,12 @@ class LiveLocationMapControls extends StatelessWidget {
 
   Widget _buildCircleMapButton({
     required IconData icon,
-    Color iconColor = const Color(0xFF4B5563),
+    Color? iconColor,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
+    final effectiveIconColor = iconColor ?? (isDark ? Colors.white : const Color(0xFF4B5563));
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(100.r),
@@ -121,17 +132,20 @@ class LiveLocationMapControls extends StatelessWidget {
         width: 38.r,
         height: 38.r,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF181A26) : Colors.white,
           shape: BoxShape.circle,
+          border: Border.all(
+            color: isDark ? const Color(0xFF262938) : Colors.transparent,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Icon(icon, color: iconColor, size: 19.sp),
+        child: Icon(icon, color: effectiveIconColor, size: 19.sp),
       ),
     );
   }

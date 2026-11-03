@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/model/alert_history_model.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/widget/alert_history_media_modal.dart';
 import 'package:iwitnez/router/app_route_names.dart';
@@ -111,18 +112,24 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final item = widget.item;
     final dur = _displayDuration;
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF2F4F7), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -245,7 +252,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFF04438),
+                          color: isDark
+                              ? const Color(0xFFFF6B6B)
+                              : const Color(0xFFF04438),
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -256,7 +265,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF667085),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF667085),
                         ),
                       ),
                       SizedBox(height: 4.h),
@@ -269,7 +280,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                             padding: EdgeInsets.only(top: 1.h),
                             child: Icon(
                               Icons.location_on_rounded,
-                              color: const Color(0xFF7F56D9),
+                              color: isDark
+                                  ? const Color(0xFF9E77ED)
+                                  : const Color(0xFF7F56D9),
                               size: 13.sp,
                             ),
                           ),
@@ -282,7 +295,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                               style: GoogleFonts.inter(
                                 fontSize: 9.5.sp,
                                 fontWeight: FontWeight.w400,
-                                color: const Color(0xFF667085),
+                                color: isDark
+                                    ? const Color(0xFFE5E7EB)
+                                    : const Color(0xFF667085),
                                 height: 1.25,
                               ),
                             ),
@@ -301,7 +316,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                                 vertical: 2.5.h,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF4F3FF),
+                                color: isDark
+                                    ? const Color(0xFF261D42)
+                                    : const Color(0xFFF4F3FF),
                                 borderRadius: BorderRadius.circular(6.r),
                               ),
                               child: Row(
@@ -309,7 +326,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                                 children: [
                                   Icon(
                                     Icons.videocam_rounded,
-                                    color: const Color(0xFF7F56D9),
+                                    color: isDark
+                                        ? const Color(0xFFD6BBFB)
+                                        : const Color(0xFF7F56D9),
                                     size: 12.sp,
                                   ),
                                   SizedBox(width: 3.w),
@@ -318,7 +337,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                                     style: GoogleFonts.inter(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF7F56D9),
+                                      color: isDark
+                                          ? const Color(0xFFD6BBFB)
+                                          : const Color(0xFF7F56D9),
                                     ),
                                   ),
                                 ],
@@ -333,7 +354,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                                 vertical: 2.5.h,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF4F3FF),
+                                color: isDark
+                                    ? const Color(0xFF261D42)
+                                    : const Color(0xFFF4F3FF),
                                 borderRadius: BorderRadius.circular(6.r),
                               ),
                               child: Text(
@@ -341,7 +364,9 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                                 style: GoogleFonts.inter(
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF7F56D9),
+                                  color: isDark
+                                      ? const Color(0xFFD6BBFB)
+                                      : const Color(0xFF7F56D9),
                                 ),
                               ),
                             ),
@@ -366,13 +391,14 @@ class _AlertHistoryCardState extends State<AlertHistoryCard> {
                           IgnorePointer(
                             child: GoogleMap(
                               key: ValueKey(
-                                'hist_map_${item.id}_${item.latitude}_${item.longitude}',
+                                'hist_map_${item.id}_${item.latitude}_${item.longitude}_$isDark',
                               ),
                               initialCameraPosition: CameraPosition(
                                 target: LatLng(item.latitude!, item.longitude!),
                                 zoom: 14.5,
                               ),
                               markers: const {},
+                              style: isDark ? darkMapStyleJson : null,
                               zoomControlsEnabled: false,
                               myLocationButtonEnabled: false,
                               compassEnabled: false,

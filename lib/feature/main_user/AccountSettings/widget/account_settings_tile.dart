@@ -33,6 +33,13 @@ class AccountSettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveIconBg = (iconBgColor == const Color(0xFFF3EEFF) && isDark)
+        ? const Color(0xFF2B1D45)
+        : ((iconBgColor == const Color(0xFFFEE2E2) && isDark)
+            ? const Color(0xFF351A10)
+            : iconBgColor);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -49,7 +56,7 @@ class AccountSettingsTile extends StatelessWidget {
                   width: 40.w,
                   height: 40.h,
                   decoration: BoxDecoration(
-                    color: iconBgColor,
+                    color: effectiveIconBg,
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Icon(icon, color: iconColor, size: 20.sp),
@@ -65,7 +72,8 @@ class AccountSettingsTile extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: titleColor ?? const Color(0xFF111827),
+                          color: titleColor ??
+                              (isDark ? Colors.white : const Color(0xFF111827)),
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -74,7 +82,8 @@ class AccountSettingsTile extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w400,
-                          color: subtitleColor ?? const Color(0xFF6B7280),
+                          color: subtitleColor ??
+                              (isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280)),
                         ),
                       ),
                     ],
@@ -95,7 +104,9 @@ class AccountSettingsTile extends StatelessWidget {
                       Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 14.sp,
-                        color: const Color(0xFF9CA3AF),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF9CA3AF),
                       ),
               ],
             ),
@@ -106,7 +117,7 @@ class AccountSettingsTile extends StatelessWidget {
             height: 1,
             indent: 70.w,
             endIndent: 16.w,
-            color: const Color(0xFFF3F4F6),
+            color: isDark ? const Color(0xFF262938) : const Color(0xFFF3F4F6),
           ),
       ],
     );

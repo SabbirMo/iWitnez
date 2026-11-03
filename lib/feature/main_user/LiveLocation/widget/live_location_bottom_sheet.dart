@@ -25,6 +25,7 @@ class _LiveLocationBottomSheetState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(liveLocationScreenProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.46,
@@ -33,11 +34,11 @@ class _LiveLocationBottomSheetState
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF181A26) : Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
                 blurRadius: 18,
                 offset: const Offset(0, -4),
               ),
@@ -57,7 +58,7 @@ class _LiveLocationBottomSheetState
                       width: 38.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE2E8F0),
+                        color: isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0),
                         borderRadius: BorderRadius.circular(10.r),
                       ),
                     ),
@@ -70,7 +71,7 @@ class _LiveLocationBottomSheetState
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -84,7 +85,7 @@ class _LiveLocationBottomSheetState
                           'No contacts currently sharing location',
                           style: GoogleFonts.inter(
                             fontSize: 12.5.sp,
-                            color: const Color(0xFF94A3B8),
+                            color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF94A3B8),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -96,7 +97,7 @@ class _LiveLocationBottomSheetState
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: state.contacts.length,
                       separatorBuilder: (context, index) =>
-                          Divider(color: const Color(0xFFF1F5F9), height: 12.h),
+                          Divider(color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9), height: 12.h),
                       itemBuilder: (context, index) {
                         final person = state.contacts[index];
                         final isSelf = person.id == 'self' || index == 0;
@@ -105,6 +106,7 @@ class _LiveLocationBottomSheetState
                           person,
                           isSelf: isSelf,
                           isSharingActive: state.isSharing,
+                          isDark: isDark,
                         );
                       },
                     ),
@@ -117,14 +119,14 @@ class _LiveLocationBottomSheetState
                     style: GoogleFonts.inter(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   SizedBox(height: 12.h),
 
                   // "Share for" tile
                   InkWell(
-                    onTap: () => _showShareDurationPicker(context, ref),
+                    onTap: () => _showShareDurationPicker(context, ref, isDark),
                     borderRadius: BorderRadius.circular(12.r),
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -134,12 +136,12 @@ class _LiveLocationBottomSheetState
                             width: 40.r,
                             height: 40.r,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF5EEFF),
+                              color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF5EEFF),
                               borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: Icon(
                               Icons.access_time_rounded,
-                              color: const Color(0xFF8B2CF5),
+                              color: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B2CF5),
                               size: 20.sp,
                             ),
                           ),
@@ -153,7 +155,7 @@ class _LiveLocationBottomSheetState
                                   style: GoogleFonts.inter(
                                     fontSize: 13.5.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF111827),
+                                    color: isDark ? Colors.white : const Color(0xFF111827),
                                   ),
                                 ),
                                 SizedBox(height: 2.h),
@@ -162,7 +164,7 @@ class _LiveLocationBottomSheetState
                                   style: GoogleFonts.inter(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w400,
-                                    color: const Color(0xFF6B7280),
+                                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                                   ),
                                 ),
                               ],
@@ -170,7 +172,7 @@ class _LiveLocationBottomSheetState
                           ),
                           Icon(
                             Icons.chevron_right_rounded,
-                            color: const Color(0xFF9CA3AF),
+                            color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                             size: 20.sp,
                           ),
                         ],
@@ -230,6 +232,7 @@ class _LiveLocationBottomSheetState
     SharingPersonModel person, {
     required bool isSelf,
     required bool isSharingActive,
+    required bool isDark,
   }) {
     final showLiveBadge = isSelf ? isSharingActive : person.isLive;
 
@@ -249,7 +252,10 @@ class _LiveLocationBottomSheetState
                   height: 44.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1.5.w),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF181A26) : Colors.white,
+                      width: 1.5.w,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.08),
@@ -283,7 +289,10 @@ class _LiveLocationBottomSheetState
                           ? const Color(0xFF22C55E)
                           : const Color(0xFF9CA3AF),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2.w),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF181A26) : Colors.white,
+                        width: 2.w,
+                      ),
                     ),
                   ),
                 ),
@@ -304,7 +313,7 @@ class _LiveLocationBottomSheetState
                           style: GoogleFonts.inter(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111827),
+                            color: isDark ? Colors.white : const Color(0xFF111827),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -319,7 +328,7 @@ class _LiveLocationBottomSheetState
                             vertical: 2.h,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF3E8FF),
+                            color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF),
                             borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
@@ -327,7 +336,7 @@ class _LiveLocationBottomSheetState
                             style: GoogleFonts.inter(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF8B2CF5),
+                              color: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B2CF5),
                             ),
                           ),
                         ),
@@ -339,7 +348,7 @@ class _LiveLocationBottomSheetState
                             vertical: 2.h,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF3F4F6),
+                            color: isDark ? const Color(0xFF1F2232) : const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
@@ -347,7 +356,7 @@ class _LiveLocationBottomSheetState
                             style: GoogleFonts.inter(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF6B7280),
+                              color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                             ),
                           ),
                         ),
@@ -355,7 +364,6 @@ class _LiveLocationBottomSheetState
                     ],
                   ),
                   SizedBox(height: 2.h),
-                  // distance_display ("Now" for you, "Now • 200 ft away" for others)
                   Text(
                     isSelf
                         ? (isSharingActive ? 'Now' : 'Sharing is off')
@@ -364,8 +372,8 @@ class _LiveLocationBottomSheetState
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                       color: isSelf && isSharingActive
-                          ? const Color(0xFF8B2CF5)
-                          : const Color(0xFF6B7280),
+                          ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF8B2CF5))
+                          : (isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280)),
                     ),
                   ),
                 ],
@@ -374,7 +382,7 @@ class _LiveLocationBottomSheetState
 
             Icon(
               Icons.chevron_right_rounded,
-              color: const Color(0xFF9CA3AF),
+              color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
               size: 20.sp,
             ),
           ],
@@ -399,7 +407,7 @@ class _LiveLocationBottomSheetState
     );
   }
 
-  void _showShareDurationPicker(BuildContext context, WidgetRef ref) {
+  void _showShareDurationPicker(BuildContext context, WidgetRef ref, bool isDark) {
     final currentType = ref.read(liveLocationScreenProvider).durationType;
 
     final options = [
@@ -410,6 +418,7 @@ class _LiveLocationBottomSheetState
 
     showModalBottomSheet<void>(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -426,7 +435,7 @@ class _LiveLocationBottomSheetState
                     width: 38.w,
                     height: 4.h,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                   ),
@@ -437,7 +446,7 @@ class _LiveLocationBottomSheetState
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -453,14 +462,14 @@ class _LiveLocationBottomSheetState
                             ? FontWeight.w700
                             : FontWeight.w500,
                         color: isSelected
-                            ? const Color(0xFF8B2CF5)
-                            : const Color(0xFF1F2937),
+                            ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF8B2CF5))
+                            : (isDark ? Colors.white : const Color(0xFF1F2937)),
                       ),
                     ),
                     trailing: isSelected
-                        ? const Icon(
+                        ? Icon(
                             Icons.check_rounded,
-                            color: Color(0xFF8B2CF5),
+                            color: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B2CF5),
                           )
                         : null,
                     onTap: () async {

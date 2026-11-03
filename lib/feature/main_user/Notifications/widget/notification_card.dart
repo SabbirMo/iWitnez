@@ -11,6 +11,8 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final isSosAlert =
         notification.iconType.toLowerCase() == 'sos' ||
         notification.notificationType.toLowerCase().contains('sos') ||
@@ -22,17 +24,21 @@ class NotificationCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color(0xFFFFF5F5) : Colors.white,
+        color: isHighlighted
+            ? (isDark ? const Color(0xFF351A10) : const Color(0xFFFFF5F5))
+            : (isDark ? const Color(0xFF181A26) : Colors.white),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: isHighlighted
-              ? const Color(0xFFFEE4E2).withValues(alpha: 0.8)
-              : const Color(0xFFF2F4F7),
+              ? (isDark
+                  ? const Color(0xFFEF4444).withValues(alpha: 0.5)
+                  : const Color(0xFFFEE4E2).withValues(alpha: 0.8))
+              : (isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7)),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             spreadRadius: 1,
             blurRadius: 6,
             offset: const Offset(0, 2),
@@ -76,7 +82,7 @@ class NotificationCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.w700,
                           fontSize: 14.5.sp,
-                          color: const Color(0xFF101828),
+                          color: isDark ? Colors.white : const Color(0xFF101828),
                         ),
                       ),
                       SizedBox(height: 3.h),
@@ -85,7 +91,9 @@ class NotificationCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF667085),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF667085),
                           height: 1.35,
                         ),
                       ),
@@ -103,7 +111,9 @@ class NotificationCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 11.5.sp,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF667085),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF667085),
                       ),
                     ),
                     if (notification.isUnread) ...[
@@ -111,8 +121,10 @@ class NotificationCard extends StatelessWidget {
                       Container(
                         width: 7.r,
                         height: 7.r,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF6941C6),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFFA855F7)
+                              : const Color(0xFF6941C6),
                           shape: BoxShape.circle,
                         ),
                       ),

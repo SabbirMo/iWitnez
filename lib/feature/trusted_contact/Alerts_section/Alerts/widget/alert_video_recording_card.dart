@@ -241,16 +241,23 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFEAECF0), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFEAECF0),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -278,7 +285,7 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                     style: GoogleFonts.inter(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                 ],
@@ -290,7 +297,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF7F56D9),
+                  color: isDark
+                      ? const Color(0xFF9E77ED)
+                      : const Color(0xFF7F56D9),
                 ),
               ),
             ],
@@ -564,12 +573,16 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                     width: 36.r,
                     height: 36.r,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F3FF),
+                      color: isDark
+                          ? const Color(0xFF261D42)
+                          : const Color(0xFFF4F3FF),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Icon(
                       Icons.calendar_today_rounded,
-                      color: const Color(0xFF7F56D9),
+                      color: isDark
+                          ? const Color(0xFF9E77ED)
+                          : const Color(0xFF7F56D9),
                       size: 18.sp,
                     ),
                   ),
@@ -584,7 +597,9 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF667085),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF667085),
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -595,7 +610,7 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                         style: GoogleFonts.inter(
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                     ],
@@ -609,6 +624,7 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                   if (widget.video.canDownload) ...[
                     _buildCircleAction(
                       icon: Icons.download_rounded,
+                      isDark: isDark,
                       onTap: () {
                         MediaDownloadHelper.downloadMedia(
                           context: context,
@@ -624,6 +640,7 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
                   if (widget.video.canShare)
                     _buildCircleAction(
                       icon: Icons.share_rounded,
+                      isDark: isDark,
                       onTap: () {
                         AlertShareBottomSheet.show(
                           context,
@@ -649,13 +666,14 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
 
   Widget _buildCircleAction({
     required IconData icon,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return Container(
       width: 34.r,
       height: 34.r,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF4F3FF),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF),
         shape: BoxShape.circle,
       ),
       child: Material(
@@ -664,7 +682,11 @@ class _AlertVideoRecordingCardState extends State<AlertVideoRecordingCard>
           onTap: onTap,
           borderRadius: BorderRadius.circular(17.r),
           child: Center(
-            child: Icon(icon, color: const Color(0xFF7F56D9), size: 16.sp),
+            child: Icon(
+              icon,
+              color: isDark ? const Color(0xFFD6BBFB) : const Color(0xFF7F56D9),
+              size: 16.sp,
+            ),
           ),
         ),
       ),

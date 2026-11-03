@@ -8,14 +8,18 @@ class TrustedCareBanner extends StatelessWidget {
     super.key,
     this.title = '',
     this.description = '',
+    this.isDark,
   });
 
   final String title;
   final String description;
+  final bool? isDark;
 
   @override
   Widget build(BuildContext context) {
     if (title.isEmpty) return const SizedBox.shrink();
+
+    final dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
 
     return Container(
       width: double.infinity,
@@ -32,7 +36,7 @@ class TrustedCareBanner extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6B4CFE).withValues(alpha: 0.25),
+            color: const Color(0xFF6B4CFE).withValues(alpha: dark ? 0.35 : 0.25),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),

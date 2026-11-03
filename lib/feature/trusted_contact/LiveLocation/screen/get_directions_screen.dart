@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/monitored_live_location_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/provider/get_directions_provider.dart';
@@ -246,6 +247,8 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
       }
     });
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final initialCenter =
         originLatLng ?? destLatLng ?? const LatLng(23.8103, 90.4125);
 
@@ -255,16 +258,16 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
         data.destinationLongitude != 0.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (_isNavigating) {
@@ -284,7 +287,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
         ),
         actions: [
@@ -309,6 +312,8 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
           // 1. Real Google Map with Route Polylines and Markers
           Positioned.fill(
             child: GoogleMap(
+              key: ValueKey('directions_map_$isDark'),
+              style: isDark ? darkMapStyleJson : null,
               initialCameraPosition: CameraPosition(
                 target: initialCenter,
                 zoom: 14.0,
@@ -321,6 +326,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
               mapToolbarEnabled: false,
               onMapCreated: (controller) {
                 _mapController = controller;
+                if (isDark) {
+                  controller.setMapStyle(darkMapStyleJson);
+                }
                 final pts = selectedRoute?.points ?? [];
                 _fitRouteBounds(pts, originLatLng, destLatLng);
               },
@@ -347,11 +355,14 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                 Container(
                   width: 38.r,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF181A26) : Colors.white,
                     borderRadius: BorderRadius.circular(19.r),
+                    border: isDark
+                        ? Border.all(color: const Color(0xFF262938))
+                        : null,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),
@@ -372,15 +383,19 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                             child: Icon(
                               Icons.add,
                               size: 20.sp,
-                              color: const Color(0xFF4B5563),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF4B5563),
                             ),
                           ),
                         ),
                       ),
-                      const Divider(
+                      Divider(
                         height: 1,
                         thickness: 0.8,
-                        color: Color(0xFFE5E7EB),
+                        color: isDark
+                            ? const Color(0xFF262938)
+                            : const Color(0xFFE5E7EB),
                       ),
                       InkWell(
                         onTap: () => _mapController?.animateCamera(
@@ -395,7 +410,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                             child: Icon(
                               Icons.remove,
                               size: 20.sp,
-                              color: const Color(0xFF4B5563),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF4B5563),
                             ),
                           ),
                         ),
@@ -416,13 +433,21 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
             top: _isNavigating ? -360.h : 0,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF181A26) : Colors.white,
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(20.r),
                 ),
+                border: isDark
+                    ? Border(
+                        bottom: BorderSide(
+                          color: const Color(0xFF262938),
+                          width: 1,
+                        ),
+                      )
+                    : null,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
                     blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
@@ -622,13 +647,21 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
 
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF181A26) : Colors.white,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(22.r),
                     ),
+                    border: isDark
+                        ? Border(
+                            top: BorderSide(
+                              color: const Color(0xFF262938),
+                              width: 1,
+                            ),
+                          )
+                        : null,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
+                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
                         blurRadius: 18,
                         offset: const Offset(0, -4),
                       ),
@@ -652,7 +685,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                   width: 44.w,
                                   height: 5.h,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD0D5DD),
+                                    color: isDark
+                                        ? const Color(0xFF33374B)
+                                        : const Color(0xFFD0D5DD),
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
                                 ),
@@ -670,8 +705,10 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                     Container(
                                       width: 38.r,
                                       height: 38.r,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF4F3FF),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? const Color(0xFF2B1D45)
+                                            : const Color(0xFFF4F3FF),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
@@ -695,9 +732,11 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                                 style: GoogleFonts.inter(
                                                   fontSize: 16.sp,
                                                   fontWeight: FontWeight.w700,
-                                                  color: const Color(
-                                                    0xFF111827,
-                                                  ),
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : const Color(
+                                                          0xFF111827,
+                                                        ),
                                                 ),
                                               ),
                                               if (selectedRoute
@@ -709,9 +748,13 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                                   style: GoogleFonts.inter(
                                                     fontSize: 13.sp,
                                                     fontWeight: FontWeight.w500,
-                                                    color: const Color(
-                                                      0xFF667085,
-                                                    ),
+                                                    color: isDark
+                                                        ? const Color(
+                                                            0xFF98A2B3,
+                                                          )
+                                                        : const Color(
+                                                            0xFF667085,
+                                                          ),
                                                   ),
                                                 ),
                                               ],
@@ -765,15 +808,19 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(6.r),
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF9FAFB),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? const Color(0xFF1F2232)
+                                            : const Color(0xFFF9FAFB),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
                                         isExpanded
                                             ? Icons.keyboard_arrow_down_rounded
                                             : Icons.keyboard_arrow_up_rounded,
-                                        color: const Color(0xFF667085),
+                                        color: isDark
+                                            ? const Color(0xFF98A2B3)
+                                            : const Color(0xFF667085),
                                         size: 22.sp,
                                       ),
                                     ),
@@ -796,7 +843,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                     'Calculating Google Maps travel times...',
                                     style: GoogleFonts.inter(
                                       fontSize: 13.sp,
-                                      color: const Color(0xFF667085),
+                                      color: isDark
+                                          ? const Color(0xFF98A2B3)
+                                          : const Color(0xFF667085),
                                     ),
                                   ),
                                 ],
@@ -813,8 +862,10 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                       Container(
                                         width: 36.r,
                                         height: 36.r,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFF4F3FF),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? const Color(0xFF2B1D45)
+                                              : const Color(0xFFF4F3FF),
                                           shape: BoxShape.circle,
                                         ),
                                         child: const Icon(
@@ -834,14 +885,18 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                               style: GoogleFonts.inter(
                                                 fontSize: 14.5.sp,
                                                 fontWeight: FontWeight.w700,
-                                                color: const Color(0xFF111827),
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : const Color(0xFF111827),
                                               ),
                                             ),
                                             Text(
                                               'Search a place or address to see Google Maps travel times',
                                               style: GoogleFonts.inter(
                                                 fontSize: 11.5.sp,
-                                                color: const Color(0xFF667085),
+                                                color: isDark
+                                                    ? const Color(0xFF98A2B3)
+                                                    : const Color(0xFF667085),
                                               ),
                                             ),
                                           ],
@@ -864,7 +919,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF344054),
+                                      color: isDark
+                                          ? Colors.white
+                                          : const Color(0xFF344054),
                                     ),
                                   ),
                                   Text(
@@ -872,7 +929,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: 11.5.sp,
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF667085),
+                                      color: isDark
+                                          ? const Color(0xFF98A2B3)
+                                          : const Color(0xFF667085),
                                     ),
                                   ),
                                 ],
@@ -919,15 +978,18 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
     required String tooltip,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: 38.r,
       height: 38.r,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         shape: BoxShape.circle,
+        border: isDark ? Border.all(color: const Color(0xFF262938)) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -939,7 +1001,11 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(19.r),
           child: Center(
-            child: Icon(icon, size: 20.sp, color: const Color(0xFF4B5563)),
+            child: Icon(
+              icon,
+              size: 20.sp,
+              color: isDark ? Colors.white : const Color(0xFF4B5563),
+            ),
           ),
         ),
       ),
@@ -947,6 +1013,8 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
   }
 
   Widget _buildLocationsBox(DirectionsData? data, DirectionsNotifier notifier) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final originTitle = data?.originName.isNotEmpty == true
         ? data!.originName
         : (widget.args?.originName ?? 'Your Location');
@@ -968,12 +1036,15 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1F2232) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(width: 1.w, color: const Color(0xFFF2F4F7)),
+        border: Border.all(
+          width: 1.w,
+          color: isDark ? const Color(0xFF2C3044) : const Color(0xFFF2F4F7),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -990,7 +1061,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                 height: 12.r,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1F2232) : Colors.white,
                   border: Border.all(
                     color: const Color(0xFF8B2CF5),
                     width: 2.5.w,
@@ -1000,7 +1071,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
               Container(
                 width: 1.5.w,
                 height: 28.h,
-                color: const Color(0xFFD0D5DD),
+                color: isDark ? const Color(0xFF33374B) : const Color(0xFFD0D5DD),
               ),
               Icon(
                 Icons.location_on,
@@ -1022,7 +1093,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -1033,7 +1104,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF667085),
+                    color: isDark
+                        ? const Color(0xFF98A2B3)
+                        : const Color(0xFF667085),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -1051,7 +1124,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111827),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF111827),
                               ),
                             ),
                             SizedBox(height: 2.h),
@@ -1062,7 +1137,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w400,
-                                color: const Color(0xFF667085),
+                                color: isDark
+                                    ? const Color(0xFF98A2B3)
+                                    : const Color(0xFF667085),
                               ),
                             ),
                           ],
@@ -1070,8 +1147,10 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                       ),
                       Container(
                         padding: EdgeInsets.all(6.r),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF4F3FF),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF2B1D45)
+                              : const Color(0xFFF4F3FF),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -1096,7 +1175,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
               padding: EdgeInsets.all(6.r),
               child: Icon(
                 Icons.swap_vert_rounded,
-                color: const Color(0xFF667085),
+                color: isDark
+                    ? const Color(0xFF98A2B3)
+                    : const Color(0xFF667085),
                 size: 22.sp,
               ),
             ),
@@ -1110,10 +1191,12 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
     BuildContext context,
     DirectionsNotifier notifier,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
       ),
@@ -1138,6 +1221,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
     DirectionsState state,
     DirectionsNotifier notifier,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final modes = data?.travelModes ?? TravelModeItem.defaultModes;
 
     return Row(
@@ -1146,8 +1230,10 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
         final mode = modes[index];
         final isSelected = state.selectedTransportIndex == index;
 
-        const activeColor = Color(0xFF7F56D9);
-        const inactiveColor = Color(0xFF667085);
+        final activeColor =
+            isDark ? const Color(0xFFA855F7) : const Color(0xFF7F56D9);
+        final inactiveColor =
+            isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085);
 
         return Expanded(
           child: Padding(
@@ -1158,12 +1244,18 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFF4F3FF) : Colors.white,
+                  color: isSelected
+                      ? (isDark
+                          ? const Color(0xFF2B1D45)
+                          : const Color(0xFFF4F3FF))
+                      : (isDark ? const Color(0xFF1F2232) : Colors.white),
                   borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
                     color: isSelected
                         ? activeColor.withValues(alpha: 0.35)
-                        : const Color(0xFFF2F4F7),
+                        : (isDark
+                            ? const Color(0xFF2C3044)
+                            : const Color(0xFFF2F4F7)),
                     width: 1.w,
                   ),
                 ),
@@ -1274,15 +1366,17 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
     required String mode,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final borderColor = isSelected
         ? const Color(0xFF7F56D9)
-        : const Color(0xFFF2F4F7);
+        : (isDark ? const Color(0xFF2C3044) : const Color(0xFFF2F4F7));
     final iconBg = isSelected
-        ? const Color(0xFFF4F3FF)
-        : const Color(0xFFF9FAFB);
+        ? (isDark ? const Color(0xFF2B1D45) : const Color(0xFFF4F3FF))
+        : (isDark ? const Color(0xFF252839) : const Color(0xFFF9FAFB));
     final iconColor = isSelected
-        ? const Color(0xFF7F56D9)
-        : const Color(0xFF667085);
+        ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF7F56D9))
+        : (isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085));
 
     return InkWell(
       onTap: onTap,
@@ -1290,7 +1384,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1F2232) : Colors.white,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
             width: isSelected ? 1.5.w : 1.w,
@@ -1299,7 +1393,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF7F56D9).withValues(alpha: 0.08),
+                    color: const Color(0xFF7F56D9).withValues(alpha: isDark ? 0.2 : 0.08),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1330,7 +1424,7 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   if (route.distance.isNotEmpty ||
@@ -1343,7 +1437,9 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 11.5.sp,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF667085),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF667085),
                       ),
                     ),
                   ],
@@ -1370,14 +1466,18 @@ class _GetDirectionsScreenState extends ConsumerState<GetDirectionsScreen> {
                   painter: _MiniRouteCurvePainter(
                     color: isSelected
                         ? const Color(0xFF7F56D9)
-                        : const Color(0xFF98A2B3),
+                        : (isDark
+                            ? const Color(0xFF667085)
+                            : const Color(0xFF98A2B3)),
                     isCurved: route.hasCurve,
                   ),
                 ),
                 SizedBox(width: 6.w),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: const Color(0xFF98A2B3),
+                  color: isDark
+                      ? const Color(0xFF667085)
+                      : const Color(0xFF98A2B3),
                   size: 20.sp,
                 ),
               ],
@@ -1583,6 +1683,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -1599,7 +1700,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: const Color(0xFFD0D5DD),
+                color: isDark ? const Color(0xFF33374B) : const Color(0xFFD0D5DD),
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
@@ -1610,7 +1711,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
+              color: isDark ? Colors.white : const Color(0xFF111827),
             ),
           ),
           SizedBox(height: 12.h),
@@ -1618,9 +1719,11 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
           // Search Field
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
+              color: isDark ? const Color(0xFF1F2232) : const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(
+                color: isDark ? const Color(0xFF2C3044) : const Color(0xFFE5E7EB),
+              ),
             ),
             child: TextField(
               controller: _controller,
@@ -1629,13 +1732,13 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
               onSubmitted: _executeSearch,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
               ),
               decoration: InputDecoration(
                 hintText: 'Type place name, street or area...',
                 hintStyle: GoogleFonts.inter(
                   fontSize: 13.sp,
-                  color: const Color(0xFF98A2B3),
+                  color: isDark ? const Color(0xFF667085) : const Color(0xFF98A2B3),
                 ),
                 prefixIcon: const Icon(
                   Icons.search_rounded,
@@ -1644,10 +1747,12 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                 ),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.clear_rounded,
                           size: 18,
-                          color: Color(0xFF98A2B3),
+                          color: isDark
+                              ? const Color(0xFF667085)
+                              : const Color(0xFF98A2B3),
                         ),
                         onPressed: () {
                           _controller.clear();
@@ -1687,7 +1792,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                 shrinkWrap: true,
                 itemCount: _suggestions.length,
                 separatorBuilder: (_, __) =>
-                    const Divider(height: 1, color: Color(0xFFF2F4F7)),
+                    Divider(height: 1, color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7)),
                 itemBuilder: (ctx, index) {
                   final place = _suggestions[index];
                   return ListTile(
@@ -1695,8 +1800,8 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                     leading: Container(
                       width: 36.r,
                       height: 36.r,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF4F3FF),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF4F3FF),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -1710,7 +1815,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF111827),
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                     subtitle: Text(
@@ -1719,7 +1824,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: 11.5.sp,
-                        color: const Color(0xFF667085),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
                       ),
                     ),
                     onTap: () {
@@ -1743,7 +1848,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF667085),
+                color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
               ),
             ),
             SizedBox(height: 8.h),
@@ -1752,7 +1857,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                 shrinkWrap: true,
                 itemCount: widget.safePlaces.length,
                 separatorBuilder: (_, __) =>
-                    const Divider(height: 1, color: Color(0xFFF2F4F7)),
+                    Divider(height: 1, color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7)),
                 itemBuilder: (ctx, index) {
                   final p = widget.safePlaces[index];
                   return ListTile(
@@ -1760,8 +1865,8 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                     leading: Container(
                       width: 36.r,
                       height: 36.r,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF4F3FF),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF4F3FF),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -1777,7 +1882,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF111827),
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                     subtitle: Text(
@@ -1786,7 +1891,7 @@ class _DestinationSearchSheetState extends State<_DestinationSearchSheet> {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF667085),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
                       ),
                     ),
                     onTap: () {

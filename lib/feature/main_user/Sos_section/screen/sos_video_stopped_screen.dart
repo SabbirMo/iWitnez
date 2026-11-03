@@ -31,7 +31,9 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(sosUploadProvider.notifier).uploadRecording(
+        ref
+            .read(sosUploadProvider.notifier)
+            .uploadRecording(
               alertId: widget.alertId,
               videoFilePath: widget.videoPath,
               durationSeconds: widget.durationSeconds,
@@ -47,17 +49,19 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
     final isUploadSuccess = uploadState.isUploadSuccess;
     final errorMessage = uploadState.errorMessage;
     final formattedDuration = uploadState.formattedDuration;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF1E232C),
+            color: isDark ? Colors.white : const Color(0xFF1E232C),
           ),
           onPressed: () => context.pop(),
         ),
@@ -86,7 +90,7 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                       style: TextStyle(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1E232C),
+                        color: isDark ? Colors.white : const Color(0xFF1E232C),
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -112,7 +116,9 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.5.sp,
-                  color: const Color(0xFF6B7280),
+                  color: isDark
+                      ? const Color(0xFF98A2B3)
+                      : const Color(0xFF6B7280),
                   height: 1.35,
                 ),
               ),
@@ -124,10 +130,14 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.all(16.r),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
+                  color: isDark
+                      ? const Color(0xFF181A26)
+                      : const Color(0xFFF9FAFB),
                   borderRadius: BorderRadius.circular(18.r),
                   border: Border.all(
-                    color: const Color(0xFFF3F4F6),
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF3F4F6),
                     width: 1.0,
                   ),
                 ),
@@ -136,10 +146,10 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                     Container(
                       width: 44.w,
                       height: 44.h,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1F2232) : Colors.white,
                         shape: BoxShape.circle,
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Color(0x0A000000),
                             blurRadius: 6,
@@ -169,19 +179,23 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                             style: TextStyle(
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111827),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF111827),
                             ),
                           ),
                           SizedBox(height: 4.h),
                           Text(
                             isUploadSuccess
                                 ? (formattedDuration != null
-                                    ? 'Incident recording ($formattedDuration) stored safely. Contacts alerted.'
-                                    : 'Your incident file is stored safely. Contacts have received evidence link.')
+                                      ? 'Incident recording ($formattedDuration) stored safely. Contacts alerted.'
+                                      : 'Your incident file is stored safely. Contacts have received evidence link.')
                                 : 'Your recording, live location and alert will be shared with trusted contacts.',
                             style: TextStyle(
                               fontSize: 11.5.sp,
-                              color: const Color(0xFF6B7280),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF6B7280),
                               height: 1.3,
                             ),
                           ),
@@ -213,7 +227,9 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                           color: Colors.red,
                         ),
                         onPressed: () {
-                          ref.read(sosUploadProvider.notifier).uploadRecording(
+                          ref
+                              .read(sosUploadProvider.notifier)
+                              .uploadRecording(
                                 alertId: widget.alertId,
                                 videoFilePath: widget.videoPath,
                                 durationSeconds: widget.durationSeconds,
@@ -253,7 +269,7 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                     style: TextStyle(
                       fontSize: 14.5.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                 ],
@@ -266,21 +282,25 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: const Color(0xFFF3F4F6),
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF3F4F6),
                     width: 1.0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.25 : 0.03,
+                      ),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: _buildContactsContent(uploadState),
+                child: _buildContactsContent(uploadState, isDark),
               ),
 
               SizedBox(height: 20.h),
@@ -290,10 +310,14 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.all(16.r),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
+                  color: isDark
+                      ? const Color(0xFF064E3B).withValues(alpha: 0.3)
+                      : const Color(0xFFF0FDF4),
                   borderRadius: BorderRadius.circular(18.r),
                   border: Border.all(
-                    color: const Color(0xFFDCFCE7),
+                    color: isDark
+                        ? const Color(0xFF065F46)
+                        : const Color(0xFFDCFCE7),
                     width: 1.0,
                   ),
                 ),
@@ -303,14 +327,16 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                     Container(
                       width: 38.w,
                       height: 38.h,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFDCFCE7),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF065F46)
+                            : const Color(0xFFDCFCE7),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
                         child: Icon(
                           Icons.verified_user_rounded,
-                          color: const Color(0xFF15803D),
+                          color: const Color(0xFF10B981),
                           size: 20.sp,
                         ),
                       ),
@@ -325,7 +351,9 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF15803D),
+                              color: isDark
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF15803D),
                             ),
                           ),
                           SizedBox(height: 3.h),
@@ -333,7 +361,9 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                             'Your trusted circle has been alerted. Live evidence and GPS details are accessible securely.',
                             style: TextStyle(
                               fontSize: 11.5.sp,
-                              color: const Color(0xFF6B7280),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF6B7280),
                               height: 1.3,
                             ),
                           ),
@@ -385,7 +415,7 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
     );
   }
 
-  Widget _buildContactsContent(SosUploadState uploadState) {
+  Widget _buildContactsContent(SosUploadState uploadState, bool isDark) {
     if (uploadState.isUploading) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 24.h),
@@ -401,7 +431,9 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 'Sharing evidence with trusted contacts...',
                 style: TextStyle(
                   fontSize: 12.5.sp,
-                  color: const Color(0xFF6B7280),
+                  color: isDark
+                      ? const Color(0xFF98A2B3)
+                      : const Color(0xFF6B7280),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -422,7 +454,7 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 : 'No contacts shared yet.',
             style: TextStyle(
               fontSize: 13.sp,
-              color: const Color(0xFF6B7280),
+              color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -436,15 +468,20 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
           if (i > 0)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 12.h),
-              child: const Divider(height: 1, color: Color(0xFFF3F4F6)),
+              child: Divider(
+                height: 1,
+                color: isDark
+                    ? const Color(0xFF262938)
+                    : const Color(0xFFF3F4F6),
+              ),
             ),
-          _buildContactRow(recipients[i]),
+          _buildContactRow(recipients[i], isDark),
         ],
       ],
     );
   }
 
-  Widget _buildContactRow(SosRecipientModel recipient) {
+  Widget _buildContactRow(SosRecipientModel recipient, bool isDark) {
     return Row(
       children: [
         // Avatar with initial letter or default green ring
@@ -484,7 +521,7 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                   ),
@@ -535,8 +572,10 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
         Container(
           width: 26.w,
           height: 26.h,
-          decoration: const BoxDecoration(
-            color: Color(0xFFECFDF5),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+                : const Color(0xFFECFDF5),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -774,7 +813,9 @@ class _AnimatedSuccessBadgeState extends State<AnimatedSuccessBadge>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF00C853).withValues(alpha: 0.38),
+                          color: const Color(
+                            0xFF00C853,
+                          ).withValues(alpha: 0.38),
                           blurRadius: 18,
                           spreadRadius: 2,
                           offset: const Offset(0, 6),

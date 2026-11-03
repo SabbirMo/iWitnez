@@ -9,9 +9,11 @@ class AlertHistoryView extends StatelessWidget {
   const AlertHistoryView({super.key});
 
   void _showFilterModal(BuildContext context, AlertsProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -34,7 +36,9 @@ class AlertHistoryView extends StatelessWidget {
                     width: 40.w,
                     height: 4.h,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEAECF0),
+                      color: isDark
+                          ? const Color(0xFF344054)
+                          : const Color(0xFFEAECF0),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -45,7 +49,7 @@ class AlertHistoryView extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -62,7 +66,9 @@ class AlertHistoryView extends StatelessWidget {
                             : FontWeight.w500,
                         color: isSelected
                             ? const Color(0xFF7F56D9)
-                            : const Color(0xFF344054),
+                            : (isDark
+                                ? Colors.white70
+                                : const Color(0xFF344054)),
                       ),
                     ),
                     trailing: isSelected
@@ -102,6 +108,7 @@ class AlertHistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AlertsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final history = provider.historyAlerts;
     final isLoading = provider.isHistoryLoading;
     final error = provider.historyError;
@@ -118,7 +125,9 @@ class AlertHistoryView extends StatelessWidget {
               children: [
                 Icon(
                   Icons.calendar_today_rounded,
-                  color: const Color(0xFF7F56D9),
+                  color: isDark
+                      ? const Color(0xFF9E77ED)
+                      : const Color(0xFF7F56D9),
                   size: 18.sp,
                 ),
                 SizedBox(width: 8.w),
@@ -127,7 +136,7 @@ class AlertHistoryView extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
               ],
@@ -142,10 +151,14 @@ class AlertHistoryView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: provider.selectedFilter != 'all'
                       ? const Color(0xFF7F56D9)
-                      : const Color(0xFFF4F3FF),
+                      : (isDark
+                          ? const Color(0xFF261D42)
+                          : const Color(0xFFF4F3FF)),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: const Color(0xFFE9D7FE),
+                    color: isDark
+                        ? const Color(0xFF4C2ECC)
+                        : const Color(0xFFE9D7FE),
                     width: 1.w,
                   ),
                 ),
@@ -156,7 +169,9 @@ class AlertHistoryView extends StatelessWidget {
                       Icons.filter_alt_rounded,
                       color: provider.selectedFilter != 'all'
                           ? Colors.white
-                          : const Color(0xFF7F56D9),
+                          : (isDark
+                              ? const Color(0xFFD6BBFB)
+                              : const Color(0xFF7F56D9)),
                       size: 14.sp,
                     ),
                     SizedBox(width: 4.w),
@@ -167,7 +182,9 @@ class AlertHistoryView extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: provider.selectedFilter != 'all'
                             ? Colors.white
-                            : const Color(0xFF7F56D9),
+                            : (isDark
+                                ? const Color(0xFFD6BBFB)
+                                : const Color(0xFF7F56D9)),
                       ),
                     ),
                   ],
@@ -180,11 +197,11 @@ class AlertHistoryView extends StatelessWidget {
 
         // 2. Alert History Cards List / Loading / Error / Empty States
         if (isLoading && history.isEmpty)
-          _buildLoadingState()
+          _buildLoadingState(isDark)
         else if (error != null && history.isEmpty)
-          _buildErrorState(context, provider, error)
+          _buildErrorState(context, provider, error, isDark)
         else if (history.isEmpty)
-          _buildEmptyState(context, provider)
+          _buildEmptyState(context, provider, isDark)
         else
           Stack(
             children: [
@@ -201,7 +218,8 @@ class AlertHistoryView extends StatelessWidget {
               if (isLoading)
                 Positioned.fill(
                   child: Container(
-                    color: Colors.white.withValues(alpha: 0.4),
+                    color: (isDark ? Colors.black : Colors.white)
+                        .withValues(alpha: 0.4),
                     child: const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF7F56D9),
@@ -215,7 +233,7 @@ class AlertHistoryView extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(bool isDark) {
     return Column(
       children: List.generate(
         3,
@@ -223,9 +241,11 @@ class AlertHistoryView extends StatelessWidget {
           margin: EdgeInsets.only(bottom: 12.h),
           height: 104.h,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF181A26) : Colors.white,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: const Color(0xFFF2F4F7)),
+            border: Border.all(
+              color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+            ),
           ),
           child: Padding(
             padding: EdgeInsets.all(10.w),
@@ -235,7 +255,9 @@ class AlertHistoryView extends StatelessWidget {
                   width: 86.w,
                   height: 98.h,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2F4F7),
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF2F4F7),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
@@ -249,7 +271,9 @@ class AlertHistoryView extends StatelessWidget {
                         width: 100.w,
                         height: 14.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF2F4F7),
+                          color: isDark
+                              ? const Color(0xFF262938)
+                              : const Color(0xFFF2F4F7),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
@@ -258,7 +282,9 @@ class AlertHistoryView extends StatelessWidget {
                         width: 70.w,
                         height: 10.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF2F4F7),
+                          color: isDark
+                              ? const Color(0xFF262938)
+                              : const Color(0xFFF2F4F7),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
@@ -267,7 +293,9 @@ class AlertHistoryView extends StatelessWidget {
                         width: double.infinity,
                         height: 10.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF2F4F7),
+                          color: isDark
+                              ? const Color(0xFF262938)
+                              : const Color(0xFFF2F4F7),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
@@ -279,7 +307,9 @@ class AlertHistoryView extends StatelessWidget {
                   width: 58.w,
                   height: 84.h,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2F4F7),
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF2F4F7),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                 ),
@@ -295,14 +325,17 @@ class AlertHistoryView extends StatelessWidget {
     BuildContext context,
     AlertsProvider provider,
     String error,
+    bool isDark,
   ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 32.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF2F4F7)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -318,7 +351,7 @@ class AlertHistoryView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
+              color: isDark ? Colors.white : const Color(0xFF111827),
             ),
           ),
           SizedBox(height: 6.h),
@@ -328,7 +361,7 @@ class AlertHistoryView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF667085),
+              color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
             ),
           ),
           SizedBox(height: 16.h),
@@ -351,28 +384,38 @@ class AlertHistoryView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, AlertsProvider provider) {
+  Widget _buildEmptyState(
+    BuildContext context,
+    AlertsProvider provider,
+    bool isDark,
+  ) {
     final isFiltered = provider.selectedFilter != 'all';
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 36.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF2F4F7)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: EdgeInsets.all(12.r),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF4F3FF),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF261D42)
+                  : const Color(0xFFF4F3FF),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.history_rounded,
-              color: const Color(0xFF7F56D9),
+              color: isDark
+                  ? const Color(0xFFD6BBFB)
+                  : const Color(0xFF7F56D9),
               size: 32.sp,
             ),
           ),
@@ -382,7 +425,7 @@ class AlertHistoryView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
+              color: isDark ? Colors.white : const Color(0xFF111827),
             ),
           ),
           SizedBox(height: 6.h),
@@ -394,7 +437,7 @@ class AlertHistoryView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF667085),
+              color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
             ),
           ),
           if (isFiltered) ...[
@@ -402,8 +445,14 @@ class AlertHistoryView extends StatelessWidget {
             OutlinedButton(
               onPressed: () => provider.setFilter('all'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF7F56D9),
-                side: const BorderSide(color: Color(0xFF7F56D9)),
+                foregroundColor: isDark
+                    ? const Color(0xFF9E77ED)
+                    : const Color(0xFF7F56D9),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF9E77ED)
+                      : const Color(0xFF7F56D9),
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
                 ),

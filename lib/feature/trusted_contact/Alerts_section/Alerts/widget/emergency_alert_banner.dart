@@ -10,19 +10,23 @@ class EmergencyAlertBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF0F1),
+        color: isDark ? const Color(0xFF2E1318) : const Color(0xFFFFF0F1),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: const Color(0xFFFECDCA),
+          color: isDark ? const Color(0xFF5E1B24) : const Color(0xFFFECDCA),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFF04438).withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : const Color(0xFFF04438).withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -76,7 +80,9 @@ class EmergencyAlertBanner extends StatelessWidget {
                     Text(
                       alert.title,
                       style: GoogleFonts.inter(
-                        color: const Color(0xFFD92D20),
+                        color: isDark
+                            ? const Color(0xFFFF6B6B)
+                            : const Color(0xFFD92D20),
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -85,7 +91,9 @@ class EmergencyAlertBanner extends StatelessWidget {
                       Text(
                         alert.priority,
                         style: GoogleFonts.inter(
-                          color: const Color(0xFFD92D20),
+                          color: isDark
+                              ? const Color(0xFFFF6B6B)
+                              : const Color(0xFFD92D20),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.6,
@@ -97,7 +105,7 @@ class EmergencyAlertBanner extends StatelessWidget {
                 Text(
                   alert.subtitle,
                   style: GoogleFonts.inter(
-                    color: const Color(0xFF1D2939),
+                    color: isDark ? Colors.white : const Color(0xFF1D2939),
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w600,
                   ),

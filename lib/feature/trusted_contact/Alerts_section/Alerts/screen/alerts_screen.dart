@@ -44,7 +44,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
     });
   }
 
-  Widget _buildActiveTab(AlertsProvider provider) {
+  Widget _buildActiveTab(AlertsProvider provider, bool isDark) {
     if (provider.isActiveAlertLoading && provider.activeAlert == null) {
       return Center(
         child: Padding(
@@ -61,9 +61,11 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 32.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF181A26) : Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFF2F4F7)),
+          border: Border.all(
+            color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+          ),
         ),
         child: Column(
           children: [
@@ -78,7 +80,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
               style: GoogleFonts.inter(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
               ),
             ),
             SizedBox(height: 6.h),
@@ -88,7 +90,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
               style: GoogleFonts.inter(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF667085),
+                color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
               ),
             ),
             SizedBox(height: 16.h),
@@ -118,21 +120,27 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 40.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF181A26) : Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFF2F4F7)),
+          border: Border.all(
+            color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+          ),
         ),
         child: Column(
           children: [
             Container(
               padding: EdgeInsets.all(14.r),
-              decoration: const BoxDecoration(
-                color: Color(0xFFECFDF3),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF132F20)
+                    : const Color(0xFFECFDF3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.check_circle_outline_rounded,
-                color: const Color(0xFF039855),
+                color: isDark
+                    ? const Color(0xFF4ADE80)
+                    : const Color(0xFF039855),
                 size: 36.sp,
               ),
             ),
@@ -142,7 +150,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
               ),
             ),
             SizedBox(height: 6.h),
@@ -151,7 +159,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
-                color: const Color(0xFF667085),
+                color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
               ),
             ),
             SizedBox(height: 16.h),
@@ -160,8 +168,14 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
               icon: const Icon(Icons.refresh_rounded, size: 16),
               label: const Text('Refresh Status'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF7F56D9),
-                side: const BorderSide(color: Color(0xFF7F56D9)),
+                foregroundColor: isDark
+                    ? const Color(0xFF9E77ED)
+                    : const Color(0xFF7F56D9),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF9E77ED)
+                      : const Color(0xFF7F56D9),
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
                 ),
@@ -206,11 +220,12 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AlertsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomClearance =
         68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9FAFB),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -227,7 +242,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
                     style: GoogleFonts.inter(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   SizedBox(height: 3.h),
@@ -236,7 +251,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF667085),
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
                     ),
                   ),
                 ],
@@ -246,9 +261,12 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
             // 2. Tabs Row: Active | History
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFEAECF0), width: 1),
+                  bottom: BorderSide(
+                    color: isDark ? const Color(0xFF262938) : const Color(0xFFEAECF0),
+                    width: 1,
+                  ),
                 ),
               ),
               child: Row(
@@ -282,7 +300,9 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
                                   : FontWeight.w500,
                               color: provider.selectedTab == 0
                                   ? const Color(0xFF7F56D9)
-                                  : const Color(0xFF667085),
+                                  : (isDark
+                                      ? const Color(0xFF98A2B3)
+                                      : const Color(0xFF667085)),
                             ),
                           ),
                         ),
@@ -319,7 +339,9 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
                                   : FontWeight.w500,
                               color: provider.selectedTab == 1
                                   ? const Color(0xFF7F56D9)
-                                  : const Color(0xFF667085),
+                                  : (isDark
+                                      ? const Color(0xFF98A2B3)
+                                      : const Color(0xFF667085)),
                             ),
                           ),
                         ),
@@ -346,7 +368,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
                   padding:
                       EdgeInsets.fromLTRB(16.w, 14.h, 16.w, bottomClearance),
                   child: provider.selectedTab == 0
-                      ? _buildActiveTab(provider)
+                      ? _buildActiveTab(provider, isDark)
                       : const AlertHistoryView(),
                 ),
               ),

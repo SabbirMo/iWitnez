@@ -11,16 +11,17 @@ class HelpSupportScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(helpSupportControllerProvider);
     final controller = ref.read(helpSupportControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9F9),
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: isDark ? Colors.white : Colors.black),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -29,10 +30,10 @@ class HelpSupportScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Help & Support',
           style: TextStyle(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -47,8 +48,9 @@ class HelpSupportScreen extends ConsumerWidget {
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: isDark ? const Color(0xFF181A26) : Colors.grey[200],
                 borderRadius: BorderRadius.circular(10),
+                border: isDark ? Border.all(color: const Color(0xFF262938)) : null,
               ),
               child: Row(
                 children: [
@@ -57,12 +59,14 @@ class HelpSupportScreen extends ConsumerWidget {
                     index: 0,
                     currentIndex: state.selectedTabIndex,
                     onTap: () => controller.changeTab(0),
+                    isDark: isDark,
                   ),
                   _buildTab(
                     title: 'Contact Us',
                     index: 1,
                     currentIndex: state.selectedTabIndex,
                     onTap: () => controller.changeTab(1),
+                    isDark: isDark,
                   ),
                 ],
               ),
@@ -72,7 +76,7 @@ class HelpSupportScreen extends ConsumerWidget {
           Expanded(
             child: state.selectedTabIndex == 0
                 ? _buildFaqList(state, controller)
-                : _buildContactUs(context, state, controller),
+                : _buildContactUs(context, state, controller, isDark),
           ),
         ],
       ),
@@ -84,6 +88,7 @@ class HelpSupportScreen extends ConsumerWidget {
     required int index,
     required int currentIndex,
     required VoidCallback onTap,
+    bool isDark = false,
   }) {
     final isSelected = index == currentIndex;
     return Expanded(
@@ -98,7 +103,9 @@ class HelpSupportScreen extends ConsumerWidget {
           child: Text(
             title,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.grey[700],
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? const Color(0xFF98A2B3) : Colors.grey[700]),
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               fontSize: 14,
             ),
@@ -162,19 +169,20 @@ class HelpSupportScreen extends ConsumerWidget {
   Widget _buildContactUs(
     BuildContext context,
     HelpSupportState state,
-    HelpSupportController controller,
-  ) {
+    HelpSupportController controller, [
+    bool isDark = false,
+  ]) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Email Address',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: Colors.black87,
+              color: isDark ? Colors.white : Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
@@ -183,32 +191,36 @@ class HelpSupportScreen extends ConsumerWidget {
             keyboardType: TextInputType.emailAddress,
             enabled: !state.isSubmitting,
             onChanged: (val) => controller.updateEmail(val),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black),
             decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+              prefixIcon: Icon(
+                Icons.email_outlined,
+                color: isDark ? const Color(0xFF98A2B3) : Colors.grey,
+              ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: isDark ? const Color(0xFF181A26) : Colors.white,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: Colors.grey.withValues(alpha: 0.3),
+                  color: isDark ? const Color(0xFF262938) : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: Colors.grey.withValues(alpha: 0.3),
+                  color: isDark ? const Color(0xFF262938) : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Explain the problem',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: Colors.black87,
+              color: isDark ? Colors.white : Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
@@ -218,21 +230,25 @@ class HelpSupportScreen extends ConsumerWidget {
             maxLines: 6,
             enabled: !state.isSubmitting,
             onChanged: (val) => controller.updateProblemDescription(val),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black),
             decoration: InputDecoration(
               hintText: 'Describe your issue in detail...',
+              hintStyle: TextStyle(
+                color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+              ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: isDark ? const Color(0xFF181A26) : Colors.white,
               contentPadding: const EdgeInsets.all(16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: Colors.grey.withValues(alpha: 0.3),
+                  color: isDark ? const Color(0xFF262938) : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: Colors.grey.withValues(alpha: 0.3),
+                  color: isDark ? const Color(0xFF262938) : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
             ),

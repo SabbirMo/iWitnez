@@ -18,6 +18,8 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -30,12 +32,16 @@ class SettingsTile extends StatelessWidget {
               height: 48,
               width: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFF8B5CF6).withValues(alpha: 0.15), // Light purple background
+                color: isDark
+                    ? const Color(0xFF2B1D45)
+                    : const Color(0xFF8B5CF6).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF8B5CF6), // Purple icon
+                color: isDark
+                    ? const Color(0xFFA855F7)
+                    : const Color(0xFF8B5CF6),
                 size: 22,
               ),
             ),
@@ -48,10 +54,10 @@ class SettingsTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -59,7 +65,7 @@ class SettingsTile extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: isDark ? const Color(0xFF98A2B3) : Colors.grey[600],
                       height: 1.3,
                     ),
                   ),

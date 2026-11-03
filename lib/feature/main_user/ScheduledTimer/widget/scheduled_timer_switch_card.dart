@@ -19,14 +19,18 @@ class ScheduledTimerSwitchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -44,7 +48,7 @@ class ScheduledTimerSwitchCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 3.h),
@@ -53,7 +57,7 @@ class ScheduledTimerSwitchCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   ),
                 ),
               ],

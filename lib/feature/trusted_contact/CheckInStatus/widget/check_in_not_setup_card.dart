@@ -16,6 +16,7 @@ class CheckInNotSetupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final displayTitle = (title != null && title!.isNotEmpty)
         ? title!
         : 'Check-In Not Set Up';
@@ -30,15 +31,15 @@ class CheckInNotSetupCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: const Color(0xFFF1F5F9),
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.035),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -47,7 +48,7 @@ class CheckInNotSetupCard extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 20.h),
       child: Column(
         children: [
-          _buildClipboardGraphic(),
+          _buildClipboardGraphic(isDark),
           SizedBox(height: 18.h),
 
           // Title
@@ -56,7 +57,7 @@ class CheckInNotSetupCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 17.5.sp,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF111827),
+              color: isDark ? Colors.white : const Color(0xFF111827),
             ),
             textAlign: TextAlign.center,
           ),
@@ -70,7 +71,7 @@ class CheckInNotSetupCard extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF6B7280),
+                color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                 height: 1.35,
               ),
             ),
@@ -81,7 +82,9 @@ class CheckInNotSetupCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F3FF),
+              color: isDark
+                  ? const Color(0xFF261D42)
+                  : const Color(0xFFF5F3FF),
               borderRadius: BorderRadius.circular(14.r),
             ),
             child: Row(
@@ -90,13 +93,17 @@ class CheckInNotSetupCard extends StatelessWidget {
                 Container(
                   width: 32.r,
                   height: 32.r,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEDE9FE),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF35265C)
+                        : const Color(0xFFEDE9FE),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.notifications_none_rounded,
-                    color: const Color(0xFF7C3AED),
+                    color: isDark
+                        ? const Color(0xFFD6BBFB)
+                        : const Color(0xFF7C3AED),
                     size: 17.sp,
                   ),
                 ),
@@ -106,7 +113,9 @@ class CheckInNotSetupCard extends StatelessWidget {
                     "You'll get alerts when $alertName sets up check-in or marks safe.",
                     style: GoogleFonts.inter(
                       fontSize: 11.5.sp,
-                      color: const Color(0xFF4B5563),
+                      color: isDark
+                          ? const Color(0xFFD6BBFB)
+                          : const Color(0xFF4B5563),
                       height: 1.35,
                     ),
                   ),
@@ -119,7 +128,7 @@ class CheckInNotSetupCard extends StatelessWidget {
     );
   }
 
-  Widget _buildClipboardGraphic() {
+  Widget _buildClipboardGraphic(bool isDark) {
     return SizedBox(
       width: 140.r,
       height: 130.r,
@@ -129,8 +138,10 @@ class CheckInNotSetupCard extends StatelessWidget {
           Container(
             width: 120.r,
             height: 120.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF3F0FF),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF261D42)
+                  : const Color(0xFFF3F0FF),
               shape: BoxShape.circle,
             ),
           ),
@@ -139,7 +150,9 @@ class CheckInNotSetupCard extends StatelessWidget {
             top: 40.h,
             child: Icon(
               Icons.spa_rounded,
-              color: const Color(0xFFDDD6FE),
+              color: isDark
+                  ? const Color(0xFF3D2C68)
+                  : const Color(0xFFDDD6FE),
               size: 26.sp,
             ),
           ),
@@ -150,7 +163,9 @@ class CheckInNotSetupCard extends StatelessWidget {
               flipX: true,
               child: Icon(
                 Icons.spa_rounded,
-                color: const Color(0xFFDDD6FE),
+                color: isDark
+                    ? const Color(0xFF3D2C68)
+                    : const Color(0xFFDDD6FE),
                 size: 26.sp,
               ),
             ),
@@ -159,7 +174,7 @@ class CheckInNotSetupCard extends StatelessWidget {
             width: 80.w,
             height: 98.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1F2232) : Colors.white,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
                 color: const Color(0xFF6C48F5),
@@ -179,8 +194,10 @@ class CheckInNotSetupCard extends StatelessWidget {
                 Container(
                   width: 32.r,
                   height: 32.r,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEDE9FE),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF35265C)
+                        : const Color(0xFFEDE9FE),
                     shape: BoxShape.circle,
                   ),
                   child: Center(

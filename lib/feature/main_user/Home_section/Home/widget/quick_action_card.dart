@@ -64,14 +64,19 @@ class QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isDark ? const Color(0xFF181A26) : AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(width: 0.8.w, color: AppColors.homeQuickCardBorder),
+        border: Border.all(
+          width: 0.8.w,
+          color: isDark ? const Color(0xFF262938) : AppColors.homeQuickCardBorder,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.035),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -128,7 +133,7 @@ class QuickActionCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    color: AppColors.homeQuickLabel,
+                    color: isDark ? Colors.white : AppColors.homeQuickLabel,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                     height: 1.15,

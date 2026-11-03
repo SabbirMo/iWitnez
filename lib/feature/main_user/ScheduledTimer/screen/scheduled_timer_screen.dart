@@ -73,18 +73,21 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(scheduledTimerProvider);
     final notifier = ref.read(scheduledTimerProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFC),
+        backgroundColor:
+            isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -98,7 +101,7 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
             letterSpacing: -0.2,
           ),
         ),
@@ -119,7 +122,9 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                       ),
                     ),
                     SizedBox(height: 2.h),
@@ -128,7 +133,9 @@ class _ScheduledTimerScreenState extends ConsumerState<ScheduledTimerScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                       ),
                     ),
                   ],

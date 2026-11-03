@@ -64,11 +64,11 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
     final state = ref.watch(sosActiveCameraProvider);
     final notifier = ref.read(sosActiveCameraProvider.notifier);
     final cameraCtrl = notifier.cameraController;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       body: SafeArea(
-        bottom: false,
         child: Column(
           children: [
             // ── Top Header Section (Back button, Red Shield, Title) ──
@@ -85,7 +85,7 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                       icon: Icon(
                         Icons.chevron_left_rounded,
                         size: 34.sp,
-                        color: const Color(0xFF1E232C),
+                        color: isDark ? Colors.white : const Color(0xFF1E232C),
                       ),
                       onPressed: () {
                         context.pop();
@@ -133,7 +133,9 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                         style: TextStyle(
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF6B7280),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF6B7280),
                         ),
                       ),
                     ],
@@ -302,11 +304,13 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFFFFF5F5), Colors.white],
+                  colors: isDark
+                      ? [const Color(0xFF1E1418), const Color(0xFF181A26)]
+                      : [const Color(0xFFFFF5F5), Colors.white],
                 ),
               ),
               child: Row(
@@ -320,7 +324,7 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                         style: TextStyle(
                           fontSize: 13.5.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1E232C),
+                          color: isDark ? Colors.white : const Color(0xFF1E232C),
                         ),
                       ),
                       Text(
@@ -328,7 +332,9 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF6B7280),
                         ),
                       ),
                     ],
@@ -351,7 +357,9 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                         shape: BoxShape.circle,
                         color: state.isFlashOn
                             ? const Color(0xFFE52525)
-                            : const Color(0xFF6B7280),
+                            : (isDark
+                                  ? const Color(0xFF262938)
+                                  : const Color(0xFF6B7280)),
                       ),
                       child: Icon(
                         state.isFlashOn
@@ -371,9 +379,11 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                     child: Container(
                       width: 36.w,
                       height: 36.h,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF262938)
+                            : const Color(0xFF6B7280),
                       ),
                       child: Icon(
                         Icons.flip_camera_ios_rounded,
@@ -391,7 +401,9 @@ class _SosActiveCameraScreenState extends ConsumerState<SosActiveCameraScreen> {
                     style: TextStyle(
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF4B5563),
+                      color: isDark
+                          ? const Color(0xFF98A2B3)
+                          : const Color(0xFF4B5563),
                     ),
                   ),
                 ],

@@ -20,18 +20,21 @@ class SafetyTrackingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(safetyTrackingProvider);
     final notifier = ref.read(safetyTrackingProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor:
+            isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -47,7 +50,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
             letterSpacing: -0.2,
           ),
         ),
@@ -66,8 +69,8 @@ class SafetyTrackingScreen extends ConsumerWidget {
             // Tab Content
             Expanded(
               child: state.selectedTabIndex == 0
-                  ? _buildLiveTrackingContent(context, ref, state, notifier)
-                  : _buildHistoryContent(context, ref, state, notifier),
+                  ? _buildLiveTrackingContent(context, ref, state, notifier, isDark)
+                  : _buildHistoryContent(context, ref, state, notifier, isDark),
             ),
           ],
         ),
@@ -80,6 +83,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
     WidgetRef ref,
     SafetyTrackingState state,
     SafetyTrackingNotifier notifier,
+    bool isDark,
   ) {
     return RefreshIndicator(
       onRefresh: () => notifier.fetchSafetyTracking(),
@@ -111,7 +115,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
                             extra: state.safePlaces.first,
                           );
                         } else {
-                          _showManagePlacesSheet(context, ref);
+                          _showManagePlacesSheet(context, ref, isDark);
                         }
                       },
                       onPlaceTap: (place) {
@@ -147,6 +151,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
     WidgetRef ref,
     SafetyTrackingState state,
     SafetyTrackingNotifier notifier,
+    bool isDark,
   ) {
     final historyData = state.historyData;
     final isToday = historyData?.isToday ?? true;
@@ -189,7 +194,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   SizedBox(height: 12.h),
@@ -216,11 +221,18 @@ class SafetyTrackingScreen extends ConsumerWidget {
                         builder: (context, child) {
                           return Theme(
                             data: Theme.of(context).copyWith(
-                              colorScheme: const ColorScheme.light(
-                                primary: Color(0xFF6C48F5),
-                                onPrimary: Colors.white,
-                                onSurface: Color(0xFF111827),
-                              ),
+                              colorScheme: isDark
+                                  ? const ColorScheme.dark(
+                                      primary: Color(0xFF8B5CF6),
+                                      onPrimary: Colors.white,
+                                      surface: Color(0xFF181A26),
+                                      onSurface: Colors.white,
+                                    )
+                                  : const ColorScheme.light(
+                                      primary: Color(0xFF6C48F5),
+                                      onPrimary: Colors.white,
+                                      onSurface: Color(0xFF111827),
+                                    ),
                             ),
                             child: child!,
                           );
@@ -240,10 +252,10 @@ class SafetyTrackingScreen extends ConsumerWidget {
     );
   }
 
-  void _showManagePlacesSheet(BuildContext context, WidgetRef ref) {
+  void _showManagePlacesSheet(BuildContext context, WidgetRef ref, bool isDark) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
@@ -261,7 +273,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
                     width: 40.w,
                     height: 4.h,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -272,7 +284,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -304,6 +316,7 @@ class SafetyTrackingScreen extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                     subtitle: Text(
@@ -312,12 +325,12 @@ class SafetyTrackingScreen extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       ),
                     ),
                     trailing: Icon(
                       Icons.chevron_right_rounded,
-                      color: const Color(0xFF94A3B8),
+                      color: isDark ? const Color(0xFF6B7280) : const Color(0xFF94A3B8),
                       size: 22.sp,
                     ),
                   ),

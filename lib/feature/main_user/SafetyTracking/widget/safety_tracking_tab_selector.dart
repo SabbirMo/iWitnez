@@ -9,7 +9,7 @@ class SafetyTrackingTabSelector extends StatelessWidget {
   final ValueChanged<int> onTabSelected;
   final Color activeColor;
   final Color inactiveTextColor;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final EdgeInsetsGeometry? padding;
   final double? height;
 
@@ -20,13 +20,21 @@ class SafetyTrackingTabSelector extends StatelessWidget {
     required this.onTabSelected,
     this.activeColor = AppColors.callsPurple,
     this.inactiveTextColor = AppColors.onboardingDesc,
-    this.backgroundColor = const Color(0xFFF3F4F6),
+    this.backgroundColor,
     this.padding,
     this.height,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveBg =
+        backgroundColor ??
+        (isDark ? const Color(0xFF1F2232) : const Color(0xFFF3F4F6));
+    final effectiveInactiveColor = isDark
+        ? const Color(0xFF98A2B3)
+        : inactiveTextColor;
+
     return Padding(
       padding:
           padding ?? EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
@@ -34,7 +42,7 @@ class SafetyTrackingTabSelector extends StatelessWidget {
         height: height ?? 46.h,
         padding: EdgeInsets.all(4.r),
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: effectiveBg,
           borderRadius: BorderRadius.circular(26.r),
         ),
         child: Row(
@@ -72,7 +80,7 @@ class SafetyTrackingTabSelector extends StatelessWidget {
                             : FontWeight.w500,
                         color: selectedIndex == i
                             ? Colors.white
-                            : inactiveTextColor,
+                            : effectiveInactiveColor,
                       ),
                     ),
                   ),

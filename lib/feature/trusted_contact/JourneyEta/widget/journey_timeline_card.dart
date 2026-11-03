@@ -20,17 +20,19 @@ class JourneyTimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(22.r),
         border: Border.all(
-          color: const Color(0xFFF1F5F9),
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.035),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -57,7 +59,9 @@ class JourneyTimelineCard extends StatelessWidget {
                     Icon(
                       Icons.history_toggle_off_rounded,
                       size: 32.sp,
-                      color: const Color(0xFFCBD5E1),
+                      color: isDark
+                          ? const Color(0xFF475467)
+                          : const Color(0xFFCBD5E1),
                     ),
                     SizedBox(height: 8.h),
                     Text(
@@ -65,7 +69,9 @@ class JourneyTimelineCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF94A3B8),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF94A3B8),
                       ),
                     ),
                   ],
@@ -78,6 +84,7 @@ class JourneyTimelineCard extends StatelessWidget {
                 item: items[i],
                 isFirst: i == 0,
                 isLast: i == items.length - 1,
+                isDark: isDark,
               ),
             SizedBox(height: 12.h),
 
@@ -86,7 +93,9 @@ class JourneyTimelineCard extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F3FF),
+                color: isDark
+                    ? const Color(0xFF261D42)
+                    : const Color(0xFFF5F3FF),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text.rich(
@@ -96,7 +105,9 @@ class JourneyTimelineCard extends StatelessWidget {
                       text: 'Showing history for ',
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                       ),
                     ),
                     TextSpan(
@@ -104,14 +115,18 @@ class JourneyTimelineCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF6C48F5),
+                        color: isDark
+                            ? const Color(0xFFD6BBFB)
+                            : const Color(0xFF6C48F5),
                       ),
                     ),
                     TextSpan(
                       text: ' • All times are in local time.',
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                       ),
                     ),
                   ],
@@ -128,11 +143,12 @@ class JourneyTimelineCard extends StatelessWidget {
     required JourneyTimelineItem item,
     required bool isFirst,
     required bool isLast,
+    required bool isDark,
   }) {
     final (indicatorColor, labelColor) = switch (item.pointType.toLowerCase()) {
       'start' => (const Color(0xFF2ECC71), const Color(0xFF16A34A)),
       'end' => (const Color(0xFFE74C3C), const Color(0xFFEF4444)),
-      _ => (const Color(0xFF6C5CE7), const Color(0xFF6C5CE7)),
+      _ => (const Color(0xFF6C5CE7), isDark ? const Color(0xFFD6BBFB) : const Color(0xFF6C5CE7)),
     };
 
     return IntrinsicHeight(
@@ -170,7 +186,9 @@ class JourneyTimelineCard extends StatelessWidget {
                   child: CustomPaint(
                     size: const Size(2, double.infinity),
                     painter: _DottedVerticalLinePainter(
-                      color: const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF2C3044)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                 ),
@@ -194,7 +212,7 @@ class JourneyTimelineCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14.5.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark ? Colors.white : const Color(0xFF111827),
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -230,7 +248,9 @@ class JourneyTimelineCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
+                        color: isDark
+                            ? const Color(0xFF98A2B3)
+                            : const Color(0xFF6B7280),
                         height: 1.35,
                       ),
                     ),

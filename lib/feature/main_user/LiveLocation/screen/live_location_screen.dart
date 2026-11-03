@@ -222,18 +222,19 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen> {
   Widget build(BuildContext context) {
     final liveState = ref.watch(liveLocationScreenProvider);
     final trustedCount = liveState.contacts.where((c) => c.id != 'self').length;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -251,7 +252,7 @@ class _LiveLocationScreenState extends ConsumerState<LiveLocationScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
                 letterSpacing: -0.3,
               ),
             ),

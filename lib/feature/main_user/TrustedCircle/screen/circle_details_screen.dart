@@ -48,11 +48,12 @@ class CircleDetailsScreen extends ConsumerWidget {
       (c) => c.title.toLowerCase() == targetTitle.toLowerCase(),
       orElse: () => circle ?? circles.first,
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
@@ -60,7 +61,7 @@ class CircleDetailsScreen extends ConsumerWidget {
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -75,7 +76,7 @@ class CircleDetailsScreen extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
             letterSpacing: -0.2,
           ),
         ),
@@ -117,7 +118,7 @@ class CircleDetailsScreen extends ConsumerWidget {
                 SizedBox(height: 8.h),
 
                 // Overlapping Avatar Cluster with Badge
-                _buildTopAvatarCluster(activeCircle),
+                _buildTopAvatarCluster(activeCircle, isDark),
                 SizedBox(height: 16.h),
 
                 // Title: "X Members" or "1 Member"
@@ -128,7 +129,7 @@ class CircleDetailsScreen extends ConsumerWidget {
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -143,7 +144,7 @@ class CircleDetailsScreen extends ConsumerWidget {
                     style: GoogleFonts.inter(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF6B7280),
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       height: 1.4,
                     ),
                   ),
@@ -160,7 +161,7 @@ class CircleDetailsScreen extends ConsumerWidget {
                         Icon(
                           Icons.people_outline_rounded,
                           size: 48.sp,
-                          color: const Color(0xFFCBD5E1),
+                          color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
                         ),
                         SizedBox(height: 12.h),
                         Text(
@@ -168,7 +169,7 @@ class CircleDetailsScreen extends ConsumerWidget {
                           style: GoogleFonts.inter(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                           ),
                         ),
                       ],
@@ -212,7 +213,7 @@ class CircleDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTopAvatarCluster(TrustedCircleItem circle) {
+  Widget _buildTopAvatarCluster(TrustedCircleItem circle, bool isDark) {
     final displayMembers = circle.members.take(3).toList();
     const double avatarSize = 54.0;
     const double overlap = 28.0;
@@ -253,7 +254,10 @@ class CircleDetailsScreen extends ConsumerWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2.5.w),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF0D0E15) : Colors.white,
+                      width: 2.5.w,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.08),
@@ -268,22 +272,24 @@ class CircleDetailsScreen extends ConsumerWidget {
                 ),
               ),
 
-            // Little badge at the bottom right corner
+            // Badge Icon attached at bottom-right
             Positioned(
               right: 0,
-              bottom: 4.h,
-              width: 22.r,
-              height: 22.r,
+              bottom: 0,
               child: Container(
+                width: 26.r,
+                height: 26.r,
                 decoration: BoxDecoration(
                   color: circle.badgeBg,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5.w),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF0D0E15) : Colors.white,
+                    width: 2.w,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
                     ),
                   ],
                 ),
@@ -291,7 +297,7 @@ class CircleDetailsScreen extends ConsumerWidget {
                   child: Icon(
                     circle.badgeIcon,
                     color: circle.badgeIconColor,
-                    size: 12.sp,
+                    size: 14.sp,
                   ),
                 ),
               ),

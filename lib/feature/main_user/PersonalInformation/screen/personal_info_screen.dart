@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/core/network/base_url/api_base_url.dart';
 import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/widgets/custom_snackbar.dart';
@@ -141,6 +142,7 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       }
     } catch (_) {}
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -148,18 +150,33 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF8B5CF6),
-              onPrimary: Colors.white,
-              onSurface: Color(0xFF101828),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF8B5CF6),
-              ),
-            ),
-          ),
+          data: isDark
+              ? ThemeData.dark().copyWith(
+                  colorScheme: const ColorScheme.dark(
+                    primary: Color(0xFF8B5CF6),
+                    onPrimary: Colors.white,
+                    surface: Color(0xFF181A26),
+                    onSurface: Colors.white,
+                  ),
+                  dialogBackgroundColor: const Color(0xFF181A26),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFFA855F7),
+                    ),
+                  ),
+                )
+              : Theme.of(context).copyWith(
+                  colorScheme: const ColorScheme.light(
+                    primary: Color(0xFF8B5CF6),
+                    onPrimary: Colors.white,
+                    onSurface: Color(0xFF101828),
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF8B5CF6),
+                    ),
+                  ),
+                ),
           child: child!,
         );
       },
@@ -217,16 +234,21 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       {'label': 'Other', 'icon': Icons.transgender_rounded},
     ];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selected = await showMenu<String>(
       context: context,
       position: position,
       elevation: 6,
-      shadowColor: Colors.black.withValues(alpha: 0.12),
-      color: Colors.white,
+      shadowColor: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
+      color: isDark ? const Color(0xFF1F2232) : Colors.white,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+        side: BorderSide(
+          color: isDark
+              ? const Color(0xFF2C3044)
+              : Colors.grey.withValues(alpha: 0.2),
+        ),
       ),
       constraints: BoxConstraints(
         minWidth: renderBox.size.width,
@@ -248,15 +270,21 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                 height: 34.r,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFFF4F3FF)
-                      : const Color(0xFFF9FAFB),
+                      ? (isDark
+                          ? const Color(0xFF261D42)
+                          : const Color(0xFFF4F3FF))
+                      : (isDark
+                          ? const Color(0xFF181A26)
+                          : const Color(0xFFF9FAFB)),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
                   color: isSelected
                       ? const Color(0xFF8B5CF6)
-                      : const Color(0xFF667085),
+                      : (isDark
+                          ? const Color(0xFF98A2B3)
+                          : const Color(0xFF667085)),
                   size: 18.sp,
                 ),
               ),
@@ -268,8 +296,10 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                     fontSize: 14.sp,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
-                        ? const Color(0xFF8B5CF6)
-                        : const Color(0xFF344054),
+                        ? (isDark
+                            ? const Color(0xFFA855F7)
+                            : const Color(0xFF8B5CF6))
+                        : (isDark ? Colors.white : const Color(0xFF344054)),
                   ),
                 ),
               ),
@@ -366,19 +396,26 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       }
     });
 
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark ||
+        Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(personalInfoControllerProvider);
     final user = state.userInfo;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: isDark
+          ? const Color(0xFF0D0E15)
+          : const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9F9),
+        backgroundColor: isDark
+            ? const Color(0xFF0D0E15)
+            : const Color(0xFFF9F9F9),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -386,10 +423,10 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Personal Information',
           style: TextStyle(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -448,11 +485,19 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                   child: Container(
                     padding: EdgeInsets.all(20.w),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF181A26) : Colors.white,
                       borderRadius: BorderRadius.circular(20),
+                      border: isDark
+                          ? Border.all(
+                              color: const Color(0xFF262938),
+                              width: 1.w,
+                            )
+                          : null,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.05),
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.3)
+                              : Colors.grey.withValues(alpha: 0.05),
                           spreadRadius: 2,
                           blurRadius: 10,
                           offset: const Offset(0, 4),
@@ -476,9 +521,13 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                                     width: 70,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.grey.shade200,
+                                      color: isDark
+                                          ? const Color(0xFF1E2030)
+                                          : Colors.grey.shade200,
                                       border: Border.all(
-                                        color: Colors.white,
+                                        color: isDark
+                                            ? const Color(0xFF262938)
+                                            : Colors.white,
                                         width: 2,
                                       ),
                                       image: profileImage != null
@@ -492,7 +541,9 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                                     child: profileImage == null
                                         ? Icon(
                                             Icons.person,
-                                            color: Colors.grey.shade400,
+                                            color: isDark
+                                                ? Colors.grey.shade500
+                                                : Colors.grey.shade400,
                                             size: 34,
                                           )
                                         : null,
@@ -528,10 +579,12 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                                     user.fullName.isNotEmpty
                                         ? user.fullName
                                         : 'User',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                   ),
                                   if (user.phoneNumber.isNotEmpty) ...[
@@ -540,7 +593,9 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
                                       user.phoneNumber,
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey[600],
+                                        color: isDark
+                                            ? const Color(0xFF98A2B3)
+                                            : Colors.grey[600],
                                       ),
                                     ),
                                   ],

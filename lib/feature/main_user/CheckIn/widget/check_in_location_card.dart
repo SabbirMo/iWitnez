@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 
 class CheckInLocationCard extends StatelessWidget {
   final double? latitude;
@@ -25,6 +26,7 @@ class CheckInLocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasCoordinates = latitude != null &&
         longitude != null &&
         latitude != 0.0 &&
@@ -32,12 +34,14 @@ class CheckInLocationCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -56,7 +60,7 @@ class CheckInLocationCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 14.5.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF111827),
+                  color: isDark ? Colors.white : const Color(0xFF111827),
                 ),
               ),
               InkWell(
@@ -70,15 +74,19 @@ class CheckInLocationCard extends StatelessWidget {
                         SizedBox(
                           width: 14.r,
                           height: 14.r,
-                          child: const CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Color(0xFF8B5CF6),
+                            color: isDark
+                                ? const Color(0xFFA855F7)
+                                : const Color(0xFF8B5CF6),
                           ),
                         )
                       else
                         Icon(
                           Icons.refresh_rounded,
-                          color: const Color(0xFF8B5CF6),
+                          color: isDark
+                              ? const Color(0xFFA855F7)
+                              : const Color(0xFF8B5CF6),
                           size: 16.sp,
                         ),
                       SizedBox(width: 4.w),
@@ -87,7 +95,9 @@ class CheckInLocationCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF8B5CF6),
+                          color: isDark
+                              ? const Color(0xFFA855F7)
+                              : const Color(0xFF8B5CF6),
                         ),
                       ),
                     ],
@@ -112,7 +122,8 @@ class CheckInLocationCard extends StatelessWidget {
                 if (hasCoordinates)
                   Positioned.fill(
                     child: GoogleMap(
-                      key: ValueKey('${latitude}_$longitude'),
+                      key: ValueKey('${latitude}_${longitude}_$isDark'),
+                      style: isDark ? darkMapStyleJson : null,
                       initialCameraPosition: CameraPosition(
                         target: LatLng(latitude!, longitude!),
                         zoom: 15.0,
@@ -162,7 +173,9 @@ class CheckInLocationCard extends StatelessWidget {
                       // Center pin
                       Icon(
                         Icons.location_on_rounded,
-                        color: const Color(0xFF7C3AED),
+                        color: isDark
+                            ? const Color(0xFFA855F7)
+                            : const Color(0xFF7C3AED),
                         size: 26.sp,
                       ),
                     ],
@@ -179,7 +192,9 @@ class CheckInLocationCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.location_on_rounded,
-                color: const Color(0xFF7C3AED),
+                color: isDark
+                    ? const Color(0xFFA855F7)
+                    : const Color(0xFF7C3AED),
                 size: 20.sp,
               ),
               SizedBox(width: 12.w),
@@ -192,7 +207,7 @@ class CheckInLocationCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1E293B),
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
                         height: 1.35,
                       ),
                     ),
@@ -205,7 +220,9 @@ class CheckInLocationCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.onboardingDesc,
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : AppColors.onboardingDesc,
                         ),
                       ),
                     ],

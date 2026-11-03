@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import '../provider/journey_eta_provider.dart';
 
 class JourneyMapView extends ConsumerStatefulWidget {
@@ -66,6 +67,7 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(journeyEtaProvider);
     final journey = state.data;
     final route = journey?.route ?? [];
@@ -78,7 +80,7 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
 
     if (route.isEmpty) {
       return Container(
-        color: const Color(0xFFF1F5F9),
+        color: isDark ? const Color(0xFF181A26) : const Color(0xFFF1F5F9),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -86,7 +88,9 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
               Icon(
                 Icons.map_outlined,
                 size: 38.sp,
-                color: const Color(0xFF94A3B8),
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
               SizedBox(height: 8.h),
               Text(
@@ -94,7 +98,9 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -153,10 +159,12 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
       children: [
         // 1. Interactive Google Map
         GoogleMap(
+          key: ValueKey('journey_map_${route.length}_$isDark'),
           initialCameraPosition: CameraPosition(
             target: route.first,
             zoom: 14.0,
           ),
+          style: isDark ? darkMapStyleJson : null,
           myLocationButtonEnabled: false,
           zoomControlsEnabled: false,
           compassEnabled: false,
@@ -170,6 +178,9 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
           },
           onMapCreated: (controller) {
             _mapController = controller;
+            if (isDark) {
+              controller.setMapStyle(darkMapStyleJson);
+            }
             Future.delayed(const Duration(milliseconds: 300), () {
               _fitRouteBounds(route);
             });
@@ -184,16 +195,20 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
             children: [
               _buildControlButton(
                 icon: Icons.filter_center_focus_rounded,
+                isDark: isDark,
                 onTap: () => _fitRouteBounds(route),
               ),
               SizedBox(height: 10.h),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1F2232) : Colors.white,
                   borderRadius: BorderRadius.circular(10.r),
+                  border: isDark
+                      ? Border.all(color: const Color(0xFF2C3044))
+                      : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -203,16 +218,20 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
                   children: [
                     _buildZoomButton(
                       icon: Icons.add,
+                      isDark: isDark,
                       onTap: () =>
                           _mapController?.animateCamera(CameraUpdate.zoomIn()),
                     ),
                     Container(
                       width: 24.w,
                       height: 1.h,
-                      color: const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF2C3044)
+                          : const Color(0xFFE2E8F0),
                     ),
                     _buildZoomButton(
                       icon: Icons.remove,
+                      isDark: isDark,
                       onTap: () =>
                           _mapController?.animateCamera(CameraUpdate.zoomOut()),
                     ),
@@ -228,15 +247,19 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
 
   Widget _buildControlButton({
     required IconData icon,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1F2232) : Colors.white,
         borderRadius: BorderRadius.circular(10.r),
+        border: isDark
+            ? Border.all(color: const Color(0xFF2C3044))
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -249,7 +272,11 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
           borderRadius: BorderRadius.circular(10.r),
           child: Padding(
             padding: EdgeInsets.all(8.r),
-            child: Icon(icon, size: 20.sp, color: const Color(0xFF4B5563)),
+            child: Icon(
+              icon,
+              size: 20.sp,
+              color: isDark ? Colors.white : const Color(0xFF4B5563),
+            ),
           ),
         ),
       ),
@@ -258,6 +285,7 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
 
   Widget _buildZoomButton({
     required IconData icon,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return Material(
@@ -267,7 +295,11 @@ class _JourneyMapViewState extends ConsumerState<JourneyMapView> {
         borderRadius: BorderRadius.circular(10.r),
         child: Padding(
           padding: EdgeInsets.all(8.r),
-          child: Icon(icon, size: 20.sp, color: const Color(0xFF4B5563)),
+          child: Icon(
+            icon,
+            size: 20.sp,
+            color: isDark ? Colors.white : const Color(0xFF4B5563),
+          ),
         ),
       ),
     );

@@ -35,11 +35,12 @@ class _TrustedCircleScreenState extends ConsumerState<TrustedCircleScreen> {
   @override
   Widget build(BuildContext context) {
     final circles = ref.watch(trustedCircleProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
@@ -47,7 +48,7 @@ class _TrustedCircleScreenState extends ConsumerState<TrustedCircleScreen> {
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF1E293B),
+            color: isDark ? Colors.white : const Color(0xFF1E293B),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -62,7 +63,7 @@ class _TrustedCircleScreenState extends ConsumerState<TrustedCircleScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
         ),
         actions: [
@@ -100,7 +101,7 @@ class _TrustedCircleScreenState extends ConsumerState<TrustedCircleScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 13.5.sp,
-                  color: const Color(0xFF6B7280),
+                  color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   height: 1.4,
                 ),
               ),

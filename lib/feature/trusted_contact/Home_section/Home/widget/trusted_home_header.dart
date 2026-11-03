@@ -14,6 +14,7 @@ class TrustedHomeHeader extends StatelessWidget {
     required this.avatarUrl,
     required this.hasNotification,
     this.unreadNotificationsCount = 0,
+    this.isDark,
     this.onNotificationTap,
   });
 
@@ -23,10 +24,13 @@ class TrustedHomeHeader extends StatelessWidget {
   final String avatarUrl;
   final bool hasNotification;
   final int unreadNotificationsCount;
+  final bool? isDark;
   final VoidCallback? onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
+    final dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -38,7 +42,7 @@ class TrustedHomeHeader extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: Colors.black.withValues(alpha: dark ? 0.25 : 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -50,9 +54,9 @@ class TrustedHomeHeader extends StatelessWidget {
                     avatarUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
-                        _buildFallbackAvatar(),
+                        _buildFallbackAvatar(dark),
                   )
-                : _buildFallbackAvatar(),
+                : _buildFallbackAvatar(dark),
           ),
         ),
         SizedBox(width: 14.w),
@@ -70,7 +74,7 @@ class TrustedHomeHeader extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1D2939),
+                  color: dark ? Colors.white : const Color(0xFF1D2939),
                   height: 1.2,
                 ),
               ),
@@ -80,7 +84,7 @@ class TrustedHomeHeader extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 12.5.sp,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF667085),
+                  color: dark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
                 ),
               ),
             ],
@@ -104,8 +108,8 @@ class TrustedHomeHeader extends StatelessWidget {
                     ImageAssets.notificatioBell,
                     width: 24.w,
                     height: 24.h,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFF1D2939),
+                    colorFilter: ColorFilter.mode(
+                      dark ? Colors.white : const Color(0xFF1D2939),
                       BlendMode.srcIn,
                     ),
                   ),
@@ -119,7 +123,10 @@ class TrustedHomeHeader extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color(0xFF9124FF),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.5.w),
+                          border: Border.all(
+                            color: dark ? const Color(0xFF0D0E15) : Colors.white,
+                            width: 1.5.w,
+                          ),
                         ),
                       ),
                     ),
@@ -132,9 +139,9 @@ class TrustedHomeHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildFallbackAvatar() {
+  Widget _buildFallbackAvatar(bool dark) {
     return Container(
-      color: const Color(0xFFF3E8FF),
+      color: dark ? const Color(0xFF261D42) : const Color(0xFFF3E8FF),
       child: Center(
         child: Icon(
           Icons.person_rounded,

@@ -57,13 +57,35 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.black,
+      scaffoldBackgroundColor: const Color(0xFF0D0E15),
       cardColor: const Color(0xFF181A26),
-      dividerColor: Colors.white12,
+      canvasColor: const Color(0xFF181A26),
+      dialogBackgroundColor: const Color(0xFF181A26),
+      dividerColor: const Color(0xFF262938),
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFF9023FF),
+        surface: Color(0xFF181A26),
+        onSurface: Colors.white,
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF0D0E15),
+        foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
         elevation: 0,
         scrolledUnderElevation: 0,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Color(0xFF181A26),
+        surfaceTintColor: Colors.transparent,
+      ),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: Color(0xFF181A26),
+        surfaceTintColor: Colors.transparent,
       ),
       inputDecorationTheme: InputDecorationTheme(
         prefixIconColor: const Color(0xFF9CA3AF),

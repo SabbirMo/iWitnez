@@ -7,15 +7,19 @@ class CheckInCompleteBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -31,7 +35,7 @@ class CheckInCompleteBannerCard extends StatelessWidget {
             bottom: 0,
             height: 70.h,
             child: CustomPaint(
-              painter: _GreenWavePainter(),
+              painter: _GreenWavePainter(isDark: isDark),
             ),
           ),
 
@@ -51,7 +55,7 @@ class CheckInCompleteBannerCard extends StatelessWidget {
                         width: 76.r,
                         height: 76.r,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7).withValues(alpha: 0.5),
+                          color: const Color(0xFFDCFCE7).withValues(alpha: isDark ? 0.15 : 0.5),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -60,7 +64,7 @@ class CheckInCompleteBannerCard extends StatelessWidget {
                         width: 58.r,
                         height: 58.r,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFBBF7D0).withValues(alpha: 0.7),
+                          color: const Color(0xFFBBF7D0).withValues(alpha: isDark ? 0.25 : 0.7),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -69,7 +73,7 @@ class CheckInCompleteBannerCard extends StatelessWidget {
                         width: 44.r,
                         height: 44.r,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1E2232) : Colors.white,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: const Color(0xFF22C55E),
@@ -148,7 +152,7 @@ class CheckInCompleteBannerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF16A34A),
+                    color: const Color(0xFF22C55E),
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -161,7 +165,7 @@ class CheckInCompleteBannerCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF4B5563),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF4B5563),
                     height: 1.45,
                   ),
                 ),
@@ -176,10 +180,13 @@ class CheckInCompleteBannerCard extends StatelessWidget {
 }
 
 class _GreenWavePainter extends CustomPainter {
+  final bool isDark;
+  _GreenWavePainter({this.isDark = false});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint1 = Paint()
-      ..color = const Color(0xFFDCFCE7).withValues(alpha: 0.45)
+      ..color = const Color(0xFF22C55E).withValues(alpha: isDark ? 0.08 : 0.25)
       ..style = PaintingStyle.fill;
 
     final path1 = Path();
@@ -202,7 +209,7 @@ class _GreenWavePainter extends CustomPainter {
     canvas.drawPath(path1, paint1);
 
     final paint2 = Paint()
-      ..color = const Color(0xFFF0FDF4).withValues(alpha: 0.9)
+      ..color = const Color(0xFF22C55E).withValues(alpha: isDark ? 0.04 : 0.15)
       ..style = PaintingStyle.fill;
 
     final path2 = Path();
@@ -220,6 +227,5 @@ class _GreenWavePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _GreenWavePainter oldDelegate) => oldDelegate.isDark != isDark;
 }
-

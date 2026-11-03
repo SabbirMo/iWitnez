@@ -18,14 +18,18 @@ class CheckInTimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -44,8 +48,8 @@ class CheckInTimeCard extends StatelessWidget {
                 Container(
                   width: 36.r,
                   height: 36.r,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF3E8FF),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -53,7 +57,7 @@ class CheckInTimeCard extends StatelessWidget {
                       isCompleted
                           ? Icons.calendar_today_rounded
                           : Icons.notifications_active_rounded,
-                      color: const Color(0xFF7C3AED),
+                      color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
                       size: 18.sp,
                     ),
                   ),
@@ -68,7 +72,7 @@ class CheckInTimeCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -77,7 +81,7 @@ class CheckInTimeCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                          color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                         ),
                       ),
                     ],
@@ -90,7 +94,9 @@ class CheckInTimeCard extends StatelessWidget {
                       vertical: 4.5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
+                      color: isDark
+                          ? const Color(0xFF22C55E).withValues(alpha: 0.18)
+                          : const Color(0xFFDCFCE7),
                       borderRadius: BorderRadius.circular(16.r),
                     ),
                     child: Row(
@@ -99,7 +105,7 @@ class CheckInTimeCard extends StatelessWidget {
                         Icon(
                           Icons.check_rounded,
                           size: 13.sp,
-                          color: const Color(0xFF16A34A),
+                          color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                         ),
                         SizedBox(width: 4.w),
                         Text(
@@ -107,7 +113,7 @@ class CheckInTimeCard extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF16A34A),
+                            color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                           ),
                         ),
                       ],
@@ -116,7 +122,7 @@ class CheckInTimeCard extends StatelessWidget {
                 else
                   Icon(
                     Icons.chevron_right_rounded,
-                    color: const Color(0xFF9CA3AF),
+                    color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                     size: 22.sp,
                   ),
               ],

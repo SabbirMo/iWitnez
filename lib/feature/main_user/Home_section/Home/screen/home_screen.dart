@@ -13,13 +13,14 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final asyncHome = ref.watch(homeProvider);
     final state = asyncHome.value ?? HomeState.initial();
     final bottomClearance =
         68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(

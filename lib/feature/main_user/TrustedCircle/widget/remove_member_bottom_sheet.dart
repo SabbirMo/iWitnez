@@ -37,9 +37,11 @@ class RemoveMemberBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
@@ -58,12 +60,14 @@ class RemoveMemberBottomSheet extends StatelessWidget {
                   width: 32.r,
                   height: 32.r,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6).withValues(alpha: 0.8),
+                    color: isDark
+                        ? const Color(0xFF262938)
+                        : const Color(0xFFF3F4F6).withValues(alpha: 0.8),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.close_rounded,
-                    color: const Color(0xFF374151),
+                    color: isDark ? Colors.white : const Color(0xFF374151),
                     size: 18.sp,
                   ),
                 ),
@@ -80,7 +84,7 @@ class RemoveMemberBottomSheet extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
                 letterSpacing: -0.3,
               ),
               textAlign: TextAlign.center,
@@ -93,7 +97,7 @@ class RemoveMemberBottomSheet extends StatelessWidget {
               text: TextSpan(
                 style: GoogleFonts.inter(
                   fontSize: 13.5.sp,
-                  color: const Color(0xFF64748B),
+                  color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                   height: 1.4,
                 ),
                 children: [
@@ -117,9 +121,14 @@ class RemoveMemberBottomSheet extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF1F2).withValues(alpha: 0.6),
+                color: isDark
+                    ? const Color(0xFF2E1922)
+                    : const Color(0xFFFFF1F2).withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(color: const Color(0xFFFFE4E6), width: 1),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF4C1D24) : const Color(0xFFFFE4E6),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
@@ -146,7 +155,7 @@ class RemoveMemberBottomSheet extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF475569),
+                        color: isDark ? const Color(0xFFFDA4AF) : const Color(0xFF475569),
                         height: 1.35,
                       ),
                     ),
@@ -167,7 +176,7 @@ class RemoveMemberBottomSheet extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    backgroundColor: Colors.white,
+                    backgroundColor: isDark ? const Color(0xFF1F2232) : Colors.white,
                     textColor: const Color(0xFFEF4444),
                     isBorder: true,
                   ),

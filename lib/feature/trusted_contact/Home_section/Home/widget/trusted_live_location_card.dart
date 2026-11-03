@@ -14,6 +14,7 @@ class TrustedLiveLocationCard extends StatefulWidget {
     this.isOnline = true,
     this.latitude,
     this.longitude,
+    this.isDark,
     this.onViewFullMapTap,
   });
 
@@ -24,6 +25,7 @@ class TrustedLiveLocationCard extends StatefulWidget {
   final bool isOnline;
   final double? latitude;
   final double? longitude;
+  final bool? isDark;
   final VoidCallback? onViewFullMapTap;
 
   @override
@@ -34,6 +36,27 @@ class TrustedLiveLocationCard extends StatefulWidget {
 class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
   final Set<Marker> _markers = {};
   GoogleMapController? _mapController;
+
+  static const String _darkMapStyle = '''[
+  {"elementType": "geometry", "stylers": [{"color": "#242f3e"}]},
+  {"elementType": "labels.text.fill", "stylers": [{"color": "#746855"}]},
+  {"elementType": "labels.text.stroke", "stylers": [{"color": "#242f3e"}]},
+  {"featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{"color": "#d59563"}]},
+  {"featureType": "poi", "elementType": "labels.text.fill", "stylers": [{"color": "#d59563"}]},
+  {"featureType": "poi.park", "elementType": "geometry", "stylers": [{"color": "#263c3f"}]},
+  {"featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{"color": "#6b9a76"}]},
+  {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#38414e"}]},
+  {"featureType": "road", "elementType": "geometry.stroke", "stylers": [{"color": "#212a37"}]},
+  {"featureType": "road", "elementType": "labels.text.fill", "stylers": [{"color": "#9ca5b3"}]},
+  {"featureType": "road.highway", "elementType": "geometry", "stylers": [{"color": "#746855"}]},
+  {"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [{"color": "#1f2835"}]},
+  {"featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [{"color": "#f3d19c"}]},
+  {"featureType": "transit", "elementType": "geometry", "stylers": [{"color": "#2f3948"}]},
+  {"featureType": "transit.station", "elementType": "labels.text.fill", "stylers": [{"color": "#d59563"}]},
+  {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#17263c"}]},
+  {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#515c6d"}]},
+  {"featureType": "water", "elementType": "labels.text.stroke", "stylers": [{"color": "#17263c"}]}
+]''';
 
   @override
   void initState() {
@@ -50,6 +73,10 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
   @override
   void didUpdateWidget(covariant TrustedLiveLocationCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.isDark != widget.isDark && _mapController != null) {
+      final dark = widget.isDark ?? (Theme.of(context).brightness == Brightness.dark);
+      _mapController!.setMapStyle(dark ? _darkMapStyle : null);
+    }
     if (oldWidget.latitude != widget.latitude ||
         oldWidget.longitude != widget.longitude ||
         oldWidget.wardName != widget.wardName ||
@@ -100,6 +127,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = widget.isDark ?? (Theme.of(context).brightness == Brightness.dark);
     final hasValidCoords = widget.latitude != null &&
         widget.longitude != null &&
         (widget.latitude != 0.0 || widget.longitude != 0.0);
@@ -108,12 +136,15 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
       width: double.infinity,
       height: 172.h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(width: 1.w, color: const Color(0xFFF1F5F9)),
+        border: Border.all(
+          width: 1.w,
+          color: dark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: dark ? 0.35 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -127,7 +158,9 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
             Container(
               width: 140.w,
               padding: EdgeInsets.fromLTRB(12.w, 12.h, 10.w, 12.h),
-              decoration: const BoxDecoration(color: Colors.white),
+              decoration: BoxDecoration(
+                color: dark ? const Color(0xFF181A26) : Colors.white,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -151,7 +184,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                                   ? "${widget.wardName}'s\nLive Location"
                                   : "Live Location",
                               style: GoogleFonts.inter(
-                                color: const Color(0xFF111827),
+                                color: dark ? Colors.white : const Color(0xFF111827),
                                 fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w800,
                                 height: 1.2,
@@ -183,8 +216,8 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.inter(
                                   color: widget.isOnline
-                                      ? const Color(0xFF16A34A)
-                                      : const Color(0xFF6B7280),
+                                      ? (dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+                                      : (dark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                                   fontSize: 9.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -200,7 +233,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            color: const Color(0xFF111827),
+                            color: dark ? const Color(0xFFE5E7EB) : const Color(0xFF111827),
                             fontSize: 8.6.sp,
                             fontWeight: FontWeight.w700,
                             height: 1.25,
@@ -249,7 +282,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                         children: [
                           GoogleMap(
                             key: ValueKey(
-                              '${widget.latitude}_${widget.longitude}',
+                              '${widget.latitude}_${widget.longitude}_$dark',
                             ),
                             initialCameraPosition: CameraPosition(
                               target: LatLng(
@@ -259,6 +292,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                               zoom: 15.0,
                             ),
                             markers: _markers,
+                            style: dark ? _darkMapStyle : null,
                             liteModeEnabled: false,
                             zoomControlsEnabled: false,
                             myLocationButtonEnabled: false,
@@ -270,6 +304,9 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                             zoomGesturesEnabled: false,
                             onMapCreated: (controller) {
                               _mapController = controller;
+                              if (dark) {
+                                controller.setMapStyle(_darkMapStyle);
+                              }
                             },
                           ),
 
@@ -285,7 +322,7 @@ class _TrustedLiveLocationCardState extends State<TrustedLiveLocationCard> {
                         ],
                       )
                     : Container(
-                        color: const Color(0xFFF8FAFC),
+                        color: dark ? const Color(0xFF181A26) : const Color(0xFFF8FAFC),
                         child: const Center(
                           child: SizedBox(
                             width: 24,

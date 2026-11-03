@@ -16,15 +16,20 @@ class TrustedCircleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: EdgeInsets.only(bottom: 14.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF1F3F7), width: 1),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F3F7),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -51,7 +56,7 @@ class TrustedCircleCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1E293B),
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
                         ),
                       ),
                       SizedBox(height: 4.h),
@@ -62,7 +67,7 @@ class TrustedCircleCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -71,7 +76,7 @@ class TrustedCircleCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14.sp,
-                  color: const Color(0xFF9CA3AF),
+                  color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                 ),
               ],
             ),

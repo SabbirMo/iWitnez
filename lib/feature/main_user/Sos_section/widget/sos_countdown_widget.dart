@@ -188,6 +188,7 @@ class SosHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Text(
@@ -196,7 +197,7 @@ class SosHeaderSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 21.sp,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF1E232C),
+            color: isDark ? Colors.white : const Color(0xFF1E232C),
             letterSpacing: -0.2,
           ),
         ),
@@ -209,7 +210,9 @@ class SosHeaderSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.5.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: isDark
+                  ? const Color(0xFF98A2B3)
+                  : const Color(0xFF6B7280),
               height: 1.35,
             ),
           ),
@@ -234,14 +237,15 @@ class SosTimerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF7F7),
+        color: isDark ? const Color(0xFF1E1418) : const Color(0xFFFFF7F7),
         borderRadius: BorderRadius.circular(24.r),
         border: Border.all(
-          color: const Color(0xFFFFECEE),
+          color: isDark ? const Color(0xFF381F26) : const Color(0xFFFFECEE),
           width: 1.2,
         ),
       ),
@@ -262,7 +266,9 @@ class SosTimerCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.5.sp,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF4B5563),
+              color: isDark
+                  ? const Color(0xFF98A2B3)
+                  : const Color(0xFF4B5563),
             ),
           ),
           SizedBox(height: 6.h),

@@ -210,6 +210,7 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final heights = _waveHeights;
     final ratio = _totalDuration.inMilliseconds > 0
         ? (_currentPosition.inMilliseconds / _totalDuration.inMilliseconds)
@@ -222,12 +223,17 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFEAECF0), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFEAECF0),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -255,7 +261,7 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                     style: GoogleFonts.inter(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                 ],
@@ -267,7 +273,9 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF7F56D9),
+                  color: isDark
+                      ? const Color(0xFF9E77ED)
+                      : const Color(0xFF7F56D9),
                 ),
               ),
             ],
@@ -278,9 +286,12 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FC),
+              color: isDark ? const Color(0xFF1F2232) : const Color(0xFFF8F9FC),
               borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: const Color(0xFFF2F4F7), width: 1.w),
+              border: Border.all(
+                color: isDark ? const Color(0xFF2C3044) : const Color(0xFFF2F4F7),
+                width: 1.w,
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -296,7 +307,9 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                     decoration: BoxDecoration(
                       color: _isPlaying
                           ? const Color(0xFF7F56D9)
-                          : const Color(0xFFE0EAFF),
+                          : (isDark
+                              ? const Color(0xFF261D42)
+                              : const Color(0xFFE0EAFF)),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -325,7 +338,9 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                                   : Icons.play_arrow_rounded,
                               color: _isPlaying
                                   ? Colors.white
-                                  : const Color(0xFF444CE7),
+                                  : (isDark
+                                      ? const Color(0xFFD6BBFB)
+                                      : const Color(0xFF444CE7)),
                               size: 24.sp,
                             ),
                     ),
@@ -398,7 +413,9 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                                         decoration: BoxDecoration(
                                           color: isPlayed
                                               ? const Color(0xFF7F56D9)
-                                              : const Color(0xFFD0D5DD),
+                                              : (isDark
+                                                  ? const Color(0xFF475467)
+                                                  : const Color(0xFFD0D5DD)),
                                           borderRadius: BorderRadius.circular(
                                             4.r,
                                           ),
@@ -443,7 +460,9 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                                     ? widget.audio.durationDisplay
                                     : '00:00'),
                             style: GoogleFonts.inter(
-                              color: const Color(0xFF667085),
+                              color: isDark
+                                  ? const Color(0xFF98A2B3)
+                                  : const Color(0xFF667085),
                               fontSize: 10.5.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -469,12 +488,16 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                     width: 36.r,
                     height: 36.r,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F3FF),
+                      color: isDark
+                          ? const Color(0xFF261D42)
+                          : const Color(0xFFF4F3FF),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Icon(
                       Icons.calendar_today_rounded,
-                      color: const Color(0xFF7F56D9),
+                      color: isDark
+                          ? const Color(0xFF9E77ED)
+                          : const Color(0xFF7F56D9),
                       size: 18.sp,
                     ),
                   ),
@@ -489,7 +512,9 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF667085),
+                          color: isDark
+                              ? const Color(0xFF98A2B3)
+                              : const Color(0xFF667085),
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -500,7 +525,7 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                         style: GoogleFonts.inter(
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                     ],
@@ -514,6 +539,7 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                   if (widget.audio.canDownload) ...[
                     _buildCircleAction(
                       icon: Icons.download_rounded,
+                      isDark: isDark,
                       onTap: () {
                         MediaDownloadHelper.downloadMedia(
                           context: context,
@@ -529,6 +555,7 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
                   if (widget.audio.canShare)
                     _buildCircleAction(
                       icon: Icons.share_rounded,
+                      isDark: isDark,
                       onTap: () {
                         AlertShareBottomSheet.show(
                           context,
@@ -554,6 +581,7 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
 
   Widget _buildCircleAction({
     required IconData icon,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return InkWell(
@@ -563,12 +591,19 @@ class _AlertAudioRecordingCardState extends State<AlertAudioRecordingCard>
         width: 38.r,
         height: 38.r,
         decoration: BoxDecoration(
-          color: const Color(0xFFF4F3FF),
+          color: isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF),
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFE9D7FE), width: 1.w),
+          border: Border.all(
+            color: isDark ? const Color(0xFF4C2ECC) : const Color(0xFFE9D7FE),
+            width: 1.w,
+          ),
         ),
         child: Center(
-          child: Icon(icon, color: const Color(0xFF7F56D9), size: 18.sp),
+          child: Icon(
+            icon,
+            color: isDark ? const Color(0xFFD6BBFB) : const Color(0xFF7F56D9),
+            size: 18.sp,
+          ),
         ),
       ),
     );

@@ -105,6 +105,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
   }
 
   void _showSuccessDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -115,7 +116,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.r),
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: isDark ? const Color(0xFF181A26) : Colors.white,
             insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
@@ -150,7 +151,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                     "Password Changed!",
                     textAlign: TextAlign.center,
                     style: CustomTextStyle.bold30(
-                      AppColors.textDark,
+                      isDark ? AppColors.white : AppColors.textDark,
                     ).copyWith(fontSize: 22.sp),
                   ),
                   SizedBox(height: 8.h),
@@ -158,7 +159,9 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                     "Your new password has been set successfully. You can now login to your account.",
                     textAlign: TextAlign.center,
                     style: CustomTextStyle.regular14(
-                      AppColors.onboardingDesc,
+                      isDark
+                          ? const Color(0xFF98A2B3)
+                          : AppColors.onboardingDesc,
                     ).copyWith(fontSize: 13.sp, height: 1.4),
                   ),
                   SizedBox(height: 24.h),
@@ -182,6 +185,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(newPasswordProvider);
     final notifier = ref.read(newPasswordProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -201,14 +205,18 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                           SizedBox(height: 16.h),
                           Text(
                             AppString.newPasswordTitle,
-                            style: CustomTextStyle.bold30(AppColors.textDark),
+                            style: CustomTextStyle.bold30(
+                              isDark ? AppColors.white : AppColors.textDark,
+                            ),
                           ),
                           SizedBox(height: 4.h),
                           Text(
                             AppString.newPasswordDescription,
                             textAlign: TextAlign.center,
                             style: CustomTextStyle.regular16(
-                              AppColors.gray,
+                              isDark
+                                  ? AppColors.white.withValues(alpha: 0.65)
+                                  : AppColors.gray,
                             ).copyWith(fontSize: 12.sp),
                           ),
                           SizedBox(height: 16.h),
@@ -226,6 +234,11 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                                   autocorrect: false,
                                   enableSuggestions: false,
                                   keyboardType: TextInputType.visiblePassword,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? AppColors.white
+                                        : AppColors.black,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: "Enter new password",
                                     prefixIcon: Padding(
@@ -236,6 +249,12 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                                       child: SvgPicture.asset(
                                         ImageAssets.lockSvg,
                                         width: 6.w,
+                                        colorFilter: ColorFilter.mode(
+                                          isDark
+                                              ? AppColors.buttonPrimaryLight
+                                              : AppColors.gray,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                     suffixIcon: IconButton(
@@ -245,7 +264,9 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                                         state.isPasswordVisible
                                             ? Icons.visibility
                                             : Icons.visibility_off,
-                                        color: AppColors.onboardingDesc,
+                                        color: isDark
+                                            ? const Color(0xFF98A2B3)
+                                            : AppColors.onboardingDesc,
                                       ),
                                     ),
                                   ),
@@ -266,6 +287,11 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                                   autocorrect: false,
                                   enableSuggestions: false,
                                   keyboardType: TextInputType.visiblePassword,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? AppColors.white
+                                        : AppColors.black,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: "Confirm new password",
                                     prefixIcon: Padding(
@@ -276,6 +302,12 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                                       child: SvgPicture.asset(
                                         ImageAssets.lockSvg,
                                         width: 6.w,
+                                        colorFilter: ColorFilter.mode(
+                                          isDark
+                                              ? AppColors.buttonPrimaryLight
+                                              : AppColors.gray,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                     suffixIcon: IconButton(
@@ -285,7 +317,9 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                                         state.isConfirmPasswordVisible
                                             ? Icons.visibility
                                             : Icons.visibility_off,
-                                        color: AppColors.onboardingDesc,
+                                        color: isDark
+                                            ? const Color(0xFF98A2B3)
+                                            : AppColors.onboardingDesc,
                                       ),
                                     ),
                                   ),
@@ -305,7 +339,11 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen>
                           RichText(
                             text: TextSpan(
                               text: "Remember your password? ",
-                              style: CustomTextStyle.regular14(AppColors.gray),
+                              style: CustomTextStyle.regular14(
+                                isDark
+                                    ? const Color(0xFF98A2B3)
+                                    : AppColors.gray,
+                              ),
                               children: [
                                 TextSpan(
                                   text: "Login",

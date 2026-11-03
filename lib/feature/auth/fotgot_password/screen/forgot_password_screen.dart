@@ -87,6 +87,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
   @override
   Widget build(BuildContext context) {
     final forgotPasswordState = ref.watch(forgotPasswordNotifierProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -106,14 +107,18 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                           SizedBox(height: 16.h),
                           Text(
                             AppString.forgotPasswordTitle,
-                            style: CustomTextStyle.bold30(AppColors.textDark),
+                            style: CustomTextStyle.bold30(
+                              isDark ? AppColors.white : AppColors.textDark,
+                            ),
                           ),
                           SizedBox(height: 4.h),
                           Text(
                             AppString.forgotPasswordDescription,
                             textAlign: TextAlign.center,
                             style: CustomTextStyle.regular16(
-                              AppColors.gray,
+                              isDark
+                                  ? AppColors.white.withValues(alpha: 0.65)
+                                  : AppColors.gray,
                             ).copyWith(fontSize: 12.sp),
                           ),
                           SizedBox(height: 16.h),
@@ -130,6 +135,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                                   keyboardType: TextInputType.emailAddress,
                                   autocorrect: false,
                                   enableSuggestions: false,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? AppColors.white
+                                        : AppColors.black,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: "example@gmail.com",
                                     prefixIcon: Padding(
@@ -140,6 +150,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                                       child: SvgPicture.asset(
                                         ImageAssets.emailSvg,
                                         width: 6.w,
+                                        colorFilter: ColorFilter.mode(
+                                          isDark
+                                              ? AppColors.buttonPrimaryLight
+                                              : AppColors.gray,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                   ),

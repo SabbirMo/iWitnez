@@ -53,22 +53,23 @@ class _StopSharingLocationScreenState
   @override
   Widget build(BuildContext context) {
     final liveState = ref.watch(liveLocationScreenProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     // Filter out "Emma (You)" so we display the trusted contacts
     final stoppedContacts = liveState.contacts
         .where((c) => !c.name.toLowerCase().contains('(you)'))
         .toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: _handleCancel,
         ),
@@ -90,7 +91,7 @@ class _StopSharingLocationScreenState
                 style: GoogleFonts.inter(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
+                  color: isDark ? Colors.white : AppColors.textDark,
                   letterSpacing: -0.4,
                 ),
               ),
@@ -105,7 +106,7 @@ class _StopSharingLocationScreenState
                   style: GoogleFonts.inter(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.onboardingDesc,
+                    color: isDark ? const Color(0xFF98A2B3) : AppColors.onboardingDesc,
                     height: 1.4,
                   ),
                 ),
@@ -117,9 +118,12 @@ class _StopSharingLocationScreenState
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
+                  color: isDark ? const Color(0xFF181A26) : const Color(0xFFF9FAFB),
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+                    width: 1,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +133,7 @@ class _StopSharingLocationScreenState
                       style: GoogleFonts.inter(
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                     SizedBox(height: 14.h),
@@ -142,7 +146,7 @@ class _StopSharingLocationScreenState
                           'All contacts',
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -156,7 +160,7 @@ class _StopSharingLocationScreenState
                             SizedBox(height: 12.h),
                         itemBuilder: (context, index) {
                           final person = stoppedContacts[index];
-                          return _buildContactRow(person);
+                          return _buildContactRow(person, isDark);
                         },
                       ),
                   ],
@@ -164,15 +168,20 @@ class _StopSharingLocationScreenState
               ),
               SizedBox(height: 16.h),
 
-              // Info Box (Lavender)
+              // Info Box (Lavender / Dark)
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: AppColors.liveLocationLightPurple.withValues(
-                    alpha: 0.5,
-                  ),
+                  color: isDark
+                      ? const Color(0xFF1F2232)
+                      : AppColors.liveLocationLightPurple.withValues(
+                          alpha: 0.5,
+                        ),
                   borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF262938) : Colors.transparent,
+                  ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -197,7 +206,7 @@ class _StopSharingLocationScreenState
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.onboardingDesc,
+                          color: isDark ? const Color(0xFF98A2B3) : AppColors.onboardingDesc,
                           height: 1.35,
                         ),
                       ),
@@ -232,10 +241,10 @@ class _StopSharingLocationScreenState
                   width: double.infinity,
                   height: 52.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF181A26) : Colors.white,
                     borderRadius: BorderRadius.circular(30.r),
                     border: Border.all(
-                      color: const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0),
                       width: 1.2,
                     ),
                   ),
@@ -245,7 +254,7 @@ class _StopSharingLocationScreenState
                       style: GoogleFonts.inter(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF374151),
+                        color: isDark ? Colors.white : const Color(0xFF374151),
                       ),
                     ),
                   ),
@@ -259,7 +268,7 @@ class _StopSharingLocationScreenState
     );
   }
 
-  Widget _buildContactRow(SharingPersonModel person) {
+  Widget _buildContactRow(SharingPersonModel person, bool isDark) {
     return Row(
       children: [
         // Avatar with green status dot
@@ -271,7 +280,10 @@ class _StopSharingLocationScreenState
               height: 44.r,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.5.w),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
+                  width: 1.5.w,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.08),
@@ -327,7 +339,10 @@ class _StopSharingLocationScreenState
                 decoration: BoxDecoration(
                   color: const Color(0xFF22C55E),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2.w),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF181A26) : Colors.white,
+                    width: 2.w,
+                  ),
                 ),
               ),
             ),
@@ -344,7 +359,7 @@ class _StopSharingLocationScreenState
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
               ),
             ),
             SizedBox(height: 3.h),

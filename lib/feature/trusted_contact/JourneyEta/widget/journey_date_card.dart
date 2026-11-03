@@ -34,18 +34,22 @@ class JourneyDateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final displayText = selectedDate != null
         ? _formatDate(selectedDate!)
         : (dateDisplay.isNotEmpty ? dateDisplay : 'Select Date');
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.w),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.035),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -64,7 +68,7 @@ class JourneyDateCard extends StatelessWidget {
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 20.sp,
-                  color: const Color(0xFF111827),
+                  color: isDark ? Colors.white : const Color(0xFF111827),
                 ),
                 SizedBox(width: 10.w),
                 Text(
@@ -72,7 +76,7 @@ class JourneyDateCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14.5.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 const Spacer(),
@@ -81,14 +85,18 @@ class JourneyDateCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF6B7280),
+                    color: isDark
+                        ? const Color(0xFF98A2B3)
+                        : const Color(0xFF6B7280),
                   ),
                 ),
                 SizedBox(width: 4.w),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
                   size: 20.sp,
-                  color: const Color(0xFF6B7280),
+                  color: isDark
+                      ? const Color(0xFF98A2B3)
+                      : const Color(0xFF6B7280),
                 ),
               ],
             ),

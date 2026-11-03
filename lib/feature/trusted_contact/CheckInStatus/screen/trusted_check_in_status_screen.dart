@@ -16,18 +16,21 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusState = ref.watch(checkInStatusProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
+      backgroundColor: isDark
+          ? const Color(0xFF0D0E15)
+          : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (context.canPop()) {
@@ -43,7 +46,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
             letterSpacing: -0.2,
           ),
         ),
@@ -148,7 +151,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
                     ] else if (data.isMissed) ...[
                       // Screen 129: Emma hasn't Checked In
                       if (data.note.isNotEmpty) ...[
-                        _buildNoteSection(data.wardName, data.note),
+                        _buildNoteSection(context, data.wardName, data.note),
                         SizedBox(height: 16.h),
                       ],
                       if (data.location.isAvailable) ...[
@@ -175,7 +178,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
                     ] else ...[
                       // Screen 127: Emma is Checked In (Default / checked_in)
                       if (data.note.isNotEmpty) ...[
-                        _buildNoteSection(data.wardName, data.note),
+                        _buildNoteSection(context, data.wardName, data.note),
                         SizedBox(height: 16.h),
                       ],
                       if (data.location.isAvailable ||
@@ -211,7 +214,8 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNoteSection(String wardName, String note) {
+  Widget _buildNoteSection(BuildContext context, String wardName, String note) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -220,7 +224,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
         ),
         SizedBox(height: 8.h),
@@ -228,15 +232,16 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
-            color: const Color(0xFFEDF8F1),
+            color: isDark ? const Color(0xFF132B1D) : const Color(0xFFEDF8F1),
             borderRadius: BorderRadius.circular(12.r),
+            border: isDark ? Border.all(color: const Color(0xFF1E462E)) : null,
           ),
           child: Text(
             note,
             style: GoogleFonts.inter(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF374151),
+              color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF374151),
             ),
           ),
         ),

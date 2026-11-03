@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/provider/home_provider.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/provider/safety_tracking_provider.dart';
@@ -146,6 +147,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
 
     final state = ref.watch(safetyTrackingProvider);
     final notifier = ref.read(safetyTrackingProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final userLat = _resolveUserLat();
     final userLng = _resolveUserLng();
@@ -160,6 +162,8 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
             Positioned.fill(
               child: hasCoords
                   ? GoogleMap(
+                      key: ValueKey('tracking_map_${userLat}_${userLng}_$isDark'),
+                      style: isDark ? darkMapStyleJson : null,
                       initialCameraPosition: CameraPosition(
                         target: LatLng(userLat, userLng),
                         zoom: 14.5,
@@ -186,7 +190,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                       zoomGesturesEnabled: true,
                     )
                   : Container(
-                      color: const Color(0xFFF8FAFC),
+                      color: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF8FAFC),
                       child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -210,7 +214,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                                   ? 'Loading live location...'
                                   : 'Location coordinates not available',
                               style: GoogleFonts.inter(
-                                color: const Color(0xFF64748B),
+                                color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -229,15 +233,15 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF181A26) : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(
-                    color: const Color(0xFFF1F5F9),
+                    color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
                     width: 1.w,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -251,8 +255,8 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                       height: 34.r,
                       decoration: BoxDecoration(
                         color: state.isLocationSharingActive
-                            ? const Color(0xFFDCFCE7)
-                            : const Color(0xFFF1F5F9),
+                            ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7))
+                            : (isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9)),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -282,7 +286,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                             style: GoogleFonts.inter(
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111827),
+                              color: isDark ? Colors.white : const Color(0xFF111827),
                             ),
                           ),
                           SizedBox(height: 2.h),
@@ -293,7 +297,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                             style: GoogleFonts.inter(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w400,
-                              color: AppColors.onboardingDesc,
+                              color: isDark ? const Color(0xFF98A2B3) : AppColors.onboardingDesc,
                             ),
                           ),
                         ],
@@ -328,6 +332,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                     // My Location Button
                     _buildCircularButton(
                       icon: Icons.my_location_rounded,
+                      isDark: isDark,
                       onTap: () {
                         _mapController?.animateCamera(
                           CameraUpdate.newLatLng(LatLng(userLat, userLng)),
@@ -339,6 +344,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                     // Layers Button
                     _buildCircularButton(
                       icon: Icons.layers_rounded,
+                      isDark: isDark,
                       onTap: _toggleMapType,
                     ),
                     SizedBox(height: 10.h),
@@ -347,11 +353,14 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                     Container(
                       width: 38.r,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF181A26) : Colors.white,
                         borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF262938) : Colors.transparent,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
+                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -375,7 +384,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                               padding: EdgeInsets.symmetric(vertical: 8.h),
                               child: Icon(
                                 Icons.add_rounded,
-                                color: const Color(0xFF2563EB),
+                                color: isDark ? const Color(0xFFA855F7) : const Color(0xFF2563EB),
                                 size: 19.sp,
                               ),
                             ),
@@ -384,7 +393,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                           Container(
                             width: 20.w,
                             height: 1.h,
-                            color: const Color(0xFFE2E8F0),
+                            color: isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0),
                           ),
                           // Zoom out
                           InkWell(
@@ -401,7 +410,7 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
                               padding: EdgeInsets.symmetric(vertical: 8.h),
                               child: Icon(
                                 Icons.remove_rounded,
-                                color: const Color(0xFF2563EB),
+                                color: isDark ? const Color(0xFFA855F7) : const Color(0xFF2563EB),
                                 size: 19.sp,
                               ),
                             ),
@@ -421,16 +430,20 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
   Widget _buildCircularButton({
     required IconData icon,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return Container(
       width: 38.r,
       height: 38.r,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : Colors.transparent,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -443,7 +456,11 @@ class _SafetyTrackingMapViewState extends ConsumerState<SafetyTrackingMapView> {
           customBorder: const CircleBorder(),
           onTap: onTap,
           child: Center(
-            child: Icon(icon, color: const Color(0xFF2563EB), size: 20.sp),
+            child: Icon(
+              icon,
+              color: isDark ? const Color(0xFFA855F7) : const Color(0xFF2563EB),
+              size: 20.sp,
+            ),
           ),
         ),
       ),

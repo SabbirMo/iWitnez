@@ -7,16 +7,20 @@ class TrustedRecentActivitySection extends StatelessWidget {
   const TrustedRecentActivitySection({
     super.key,
     required this.activities,
+    this.isDark,
     this.onViewAllTap,
     this.onItemTap,
   });
 
   final List<TrustedActivityItem> activities;
+  final bool? isDark;
   final VoidCallback? onViewAllTap;
   final ValueChanged<TrustedActivityItem>? onItemTap;
 
   @override
   Widget build(BuildContext context) {
+    final dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -30,7 +34,7 @@ class TrustedRecentActivitySection extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1D2939),
+                color: dark ? Colors.white : const Color(0xFF1D2939),
               ),
             ),
             InkWell(
@@ -67,15 +71,15 @@ class TrustedRecentActivitySection extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: dark ? const Color(0xFF181A26) : Colors.white,
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
               width: 1.w,
-              color: const Color(0xFFF2F4F7),
+              color: dark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
+                color: Colors.black.withValues(alpha: dark ? 0.3 : 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -90,7 +94,7 @@ class TrustedRecentActivitySection extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF98A2B3),
+                        color: dark ? const Color(0xFF6B7280) : const Color(0xFF98A2B3),
                       ),
                     ),
                   ),
@@ -99,7 +103,7 @@ class TrustedRecentActivitySection extends StatelessWidget {
                   children: [
                     for (int i = 0; i < activities.length; i++) ...[
                       if (i > 0) SizedBox(height: 18.h),
-                      _buildActivityTile(activities[i]),
+                      _buildActivityTile(activities[i], dark),
                     ],
                   ],
                 ),
@@ -108,7 +112,7 @@ class TrustedRecentActivitySection extends StatelessWidget {
     );
   }
 
-  Widget _buildActivityTile(TrustedActivityItem item) {
+  Widget _buildActivityTile(TrustedActivityItem item, bool dark) {
     final isCheckIn = item.type == TrustedActivityType.checkIn ||
         item.activityType == 'check_in';
     final isSafePlace = item.activityType == 'safe_place' ||
@@ -120,12 +124,12 @@ class TrustedRecentActivitySection extends StatelessWidget {
     final IconData iconData;
 
     if (isCheckIn) {
-      circleColor = const Color(0xFFD1FADF);
-      iconColor = const Color(0xFF039855);
+      circleColor = dark ? const Color(0xFF132F20) : const Color(0xFFD1FADF);
+      iconColor = dark ? const Color(0xFF4ADE80) : const Color(0xFF039855);
       iconData = Icons.check_circle_outline_rounded;
     } else {
-      circleColor = const Color(0xFFFFE4E6);
-      iconColor = const Color(0xFFE11D48);
+      circleColor = dark ? const Color(0xFF35161E) : const Color(0xFFFFE4E6);
+      iconColor = dark ? const Color(0xFFF87171) : const Color(0xFFE11D48);
       iconData = Icons.notifications_none_rounded;
     }
 
@@ -135,26 +139,28 @@ class TrustedRecentActivitySection extends StatelessWidget {
 
     switch (item.badgeColor.toLowerCase()) {
       case 'green':
-        badgeBg = const Color(0xFFD1FADF);
-        badgeTextColor = const Color(0xFF039855);
+        badgeBg = dark ? const Color(0xFF0F3222) : const Color(0xFFD1FADF);
+        badgeTextColor = dark ? const Color(0xFF4ADE80) : const Color(0xFF039855);
         break;
       case 'purple':
-        badgeBg = const Color(0xFFF4F3FF);
-        badgeTextColor = const Color(0xFF6941C6);
+        badgeBg = dark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF);
+        badgeTextColor = dark ? const Color(0xFFA78BFA) : const Color(0xFF6941C6);
         break;
       case 'red':
-        badgeBg = const Color(0xFFFFE4E6);
-        badgeTextColor = const Color(0xFFE11D48);
+        badgeBg = dark ? const Color(0xFF35161E) : const Color(0xFFFFE4E6);
+        badgeTextColor = dark ? const Color(0xFFF87171) : const Color(0xFFE11D48);
         break;
       case 'blue':
-        badgeBg = const Color(0xFFEFF8FF);
-        badgeTextColor = const Color(0xFF007AFF);
+        badgeBg = dark ? const Color(0xFF0F253E) : const Color(0xFFEFF8FF);
+        badgeTextColor = dark ? const Color(0xFF60A5FA) : const Color(0xFF007AFF);
         break;
       default:
-        badgeBg =
-            isCheckIn ? const Color(0xFFD1FADF) : const Color(0xFFF4F3FF);
-        badgeTextColor =
-            isCheckIn ? const Color(0xFF039855) : const Color(0xFF6941C6);
+        badgeBg = isCheckIn
+            ? (dark ? const Color(0xFF0F3222) : const Color(0xFFD1FADF))
+            : (dark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF));
+        badgeTextColor = isCheckIn
+            ? (dark ? const Color(0xFF4ADE80) : const Color(0xFF039855))
+            : (dark ? const Color(0xFFA78BFA) : const Color(0xFF6941C6));
     }
 
     return InkWell(
@@ -190,7 +196,7 @@ class TrustedRecentActivitySection extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1D2939),
+                    color: dark ? Colors.white : const Color(0xFF1D2939),
                   ),
                 ),
                 SizedBox(height: 3.h),
@@ -199,7 +205,7 @@ class TrustedRecentActivitySection extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF667085),
+                    color: dark ? const Color(0xFF98A2B3) : const Color(0xFF667085),
                   ),
                 ),
               ],

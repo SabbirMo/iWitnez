@@ -9,17 +9,21 @@ class TrustedQuickActions extends StatelessWidget {
   const TrustedQuickActions({
     super.key,
     required this.actions,
+    this.isDark,
     this.onCheckInStatusTap,
     this.onJourneyEtaTap,
   });
 
   final List<QuickActionModel> actions;
+  final bool? isDark;
   final VoidCallback? onCheckInStatusTap;
   final VoidCallback? onJourneyEtaTap;
 
   @override
   Widget build(BuildContext context) {
     if (actions.isEmpty) return const SizedBox.shrink();
+
+    final dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +33,7 @@ class TrustedQuickActions extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D2939),
+            color: dark ? Colors.white : const Color(0xFF1D2939),
           ),
         ),
         SizedBox(height: 14.h),
@@ -38,7 +42,7 @@ class TrustedQuickActions extends StatelessWidget {
             for (int i = 0; i < actions.length; i++) ...[
               if (i > 0) SizedBox(width: 14.w),
               Expanded(
-                child: _buildActionItem(actions[i]),
+                child: _buildActionItem(actions[i], dark),
               ),
             ],
           ],
@@ -47,15 +51,18 @@ class TrustedQuickActions extends StatelessWidget {
     );
   }
 
-  Widget _buildActionItem(QuickActionModel action) {
+  Widget _buildActionItem(QuickActionModel action, bool dark) {
     final isCheckIn = action.id == 'check_in_status';
     final isJourney = action.id == 'journey_eta';
 
     return _buildActionCard(
       label: action.title,
+      dark: dark,
       circleColor: isCheckIn
-          ? const Color(0xFFE8FDF0)
-          : (isJourney ? const Color(0xFFEFF8FF) : const Color(0xFFF4F3FF)),
+          ? (dark ? const Color(0xFF132F20) : const Color(0xFFE8FDF0))
+          : (isJourney
+              ? (dark ? const Color(0xFF0F253E) : const Color(0xFFEFF8FF))
+              : (dark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF))),
       svgAsset: isCheckIn
           ? ImageAssets.quickCheckIn
           : (isJourney ? ImageAssets.quickTimer : null),
@@ -73,6 +80,7 @@ class TrustedQuickActions extends StatelessWidget {
 
   Widget _buildActionCard({
     required String label,
+    required bool dark,
     required Color circleColor,
     required String? svgAsset,
     required IconData fallbackIcon,
@@ -81,12 +89,15 @@ class TrustedQuickActions extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(width: 1.w, color: const Color(0xFFF2F4F7)),
+        border: Border.all(
+          width: 1.w,
+          color: dark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: dark ? 0.3 : 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -140,7 +151,7 @@ class TrustedQuickActions extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF344054),
+                    color: dark ? Colors.white : const Color(0xFF344054),
                   ),
                 ),
               ],

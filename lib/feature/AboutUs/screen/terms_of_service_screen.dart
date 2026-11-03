@@ -53,16 +53,18 @@ class TermsOfServiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9FB),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9FB),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9FB),
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9FB),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
             size: 20,
           ),
           onPressed: () {
@@ -76,7 +78,7 @@ class TermsOfServiceScreen extends StatelessWidget {
         title: Text(
           'Terms Of Service',
           style: GoogleFonts.inter(
-            color: const Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
             fontWeight: FontWeight.w700,
             fontSize: 18.sp,
           ),
@@ -89,12 +91,15 @@ class TermsOfServiceScreen extends StatelessWidget {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF181A26) : Colors.white,
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+              border: Border.all(
+                color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
+                width: 1,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -118,7 +123,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1E293B),
+                            color: isDark ? Colors.white : const Color(0xFF1E293B),
                           ),
                         ),
                         SizedBox(height: 6.h),
@@ -127,16 +132,16 @@ class TermsOfServiceScreen extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                             height: 1.55,
                           ),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 14.h),
-                          child: const Divider(
+                          child: Divider(
                             height: 1,
                             thickness: 1,
-                            color: Color(0xFFF1F5F9),
+                            color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
                           ),
                         ),
                       ],
@@ -149,7 +154,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF64748B),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                     height: 1.55,
                   ),
                 ),
@@ -158,7 +163,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                   'Last updated: May 27, 2026',
                   style: GoogleFonts.inter(
                     fontSize: 12.5.sp,
-                    color: const Color(0xFF64748B),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -181,4 +186,3 @@ class _TermsSection {
   final String title;
   final String body;
 }
-

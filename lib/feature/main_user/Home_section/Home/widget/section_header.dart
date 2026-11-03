@@ -20,6 +20,8 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -28,7 +30,7 @@ class SectionHeader extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
+            color: isDark ? Colors.white : AppColors.textDark,
             height: 1.15,
           ),
         ),

@@ -13,14 +13,20 @@ class OurMissionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(ourMissionControllerProvider);
     final missionData = state.missionData;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F9F9),
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF9F9F9),
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Colors.white : Colors.black,
+            size: 20,
+          ),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -29,10 +35,10 @@ class OurMissionScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Our Mission',
           style: TextStyle(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -45,8 +51,6 @@ class OurMissionScreen extends ConsumerWidget {
           child: MissionContent(
             title: missionData.title,
             description: missionData.description,
-            
-            // --- FIX: Use your ImageAssets constant ---
             image: ImageAssets.ourMissionImage, 
           ),
         ),

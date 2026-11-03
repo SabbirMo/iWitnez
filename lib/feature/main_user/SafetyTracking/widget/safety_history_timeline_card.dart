@@ -21,17 +21,19 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(22.r),
         border: Border.all(
-          color: const Color(0xFFF1F5F9),
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF1F5F9),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.035),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -58,7 +60,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                     Icon(
                       Icons.history_toggle_off_rounded,
                       size: 32.sp,
-                      color: const Color(0xFFCBD5E1),
+                      color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
                     ),
                     SizedBox(height: 8.h),
                     Text(
@@ -66,7 +68,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF94A3B8),
                       ),
                     ),
                   ],
@@ -79,6 +81,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                 item: items[i],
                 isFirst: i == 0,
                 isLast: i == items.length - 1,
+                isDark: isDark,
               ),
             SizedBox(height: 12.h),
 
@@ -87,8 +90,11 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F3FF),
+                color: isDark ? const Color(0xFF1F2232) : const Color(0xFFF5F3FF),
                 borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF262938) : Colors.transparent,
+                ),
               ),
               child: Text.rich(
                 TextSpan(
@@ -97,7 +103,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                       text: 'Showing history for ',
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       ),
                     ),
                     TextSpan(
@@ -105,14 +111,14 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.callsPurple,
+                        color: isDark ? const Color(0xFFA855F7) : AppColors.callsPurple,
                       ),
                     ),
                     TextSpan(
                       text: ' • All times are in local time.',
                       style: GoogleFonts.inter(
                         fontSize: 11.2.sp,
-                        color: const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                       ),
                     ),
                   ],
@@ -129,6 +135,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
     required LocationHistoryTimelineItem item,
     required bool isFirst,
     required bool isLast,
+    required bool isDark,
   }) {
     // Dot indicator color mapping:
     // start -> Green (#2ECC71 / #16A34A)
@@ -137,7 +144,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
     final (indicatorColor, labelColor) = switch (item.pointType.toLowerCase()) {
       'start' => (const Color(0xFF2ECC71), const Color(0xFF16A34A)),
       'end' => (const Color(0xFFE74C3C), const Color(0xFFEF4444)),
-      _ => (const Color(0xFF6C5CE7), const Color(0xFF6C5CE7)),
+      _ => (const Color(0xFF6C5CE7), isDark ? const Color(0xFFA855F7) : const Color(0xFF6C5CE7)),
     };
 
     return IntrinsicHeight(
@@ -175,7 +182,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                   child: CustomPaint(
                     size: const Size(2, double.infinity),
                     painter: _DottedVerticalLinePainter(
-                      color: const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF262938) : const Color(0xFFE2E8F0),
                     ),
                   ),
                 ),
@@ -199,7 +206,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
+                          color: isDark ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                       if (item.isStart)
@@ -227,7 +234,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                             Icon(
                               Icons.access_time_rounded,
                               size: 13.sp,
-                              color: const Color(0xFF6C5CE7),
+                              color: isDark ? const Color(0xFFA855F7) : const Color(0xFF6C5CE7),
                             ),
                             SizedBox(width: 4.w),
                             Text(
@@ -235,7 +242,7 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF6C5CE7),
+                                color: isDark ? const Color(0xFFA855F7) : const Color(0xFF6C5CE7),
                               ),
                             ),
                           ],
@@ -250,22 +257,42 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
                     Text(
                       'Start',
                       style: GoogleFonts.inter(
-                        fontSize: 11.8.sp,
+                        fontSize: 11.5.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF16A34A),
+                        color: labelColor,
                       ),
                     ),
-                    SizedBox(height: 1.h),
+                    SizedBox(height: 3.h),
+                  ] else if (item.isEnd) ...[
+                    Text(
+                      'End',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: labelColor,
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
+                  ] else if (item.durationDisplay.isNotEmpty) ...[
+                    Text(
+                      item.durationDisplay,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? const Color(0xFFA855F7) : const Color(0xFF6C5CE7),
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
                   ],
 
-                  // Address subtitle
+                  // Address
                   Text(
                     item.address,
                     style: GoogleFonts.inter(
-                      fontSize: 11.8.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF6B7280),
-                      height: 1.3,
+                      color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
+                      height: 1.35,
                     ),
                   ),
                 ],
@@ -280,21 +307,20 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
 
 class _DottedVerticalLinePainter extends CustomPainter {
   final Color color;
-
   _DottedVerticalLinePainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
+    const dashHeight = 4.0;
+    const dashSpace = 3.0;
+    double startY = 6.0;
+
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
 
-    const dashHeight = 3.0;
-    const dashSpace = 3.0;
-    double startY = 3.0;
-
-    while (startY < size.height - 2.0) {
+    while (startY < size.height - 2) {
       canvas.drawLine(
         Offset(size.width / 2, startY),
         Offset(size.width / 2, startY + dashHeight),
@@ -305,5 +331,6 @@ class _DottedVerticalLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DottedVerticalLinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

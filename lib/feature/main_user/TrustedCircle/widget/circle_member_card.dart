@@ -19,16 +19,21 @@ class CircleMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF3F4F6), width: 1),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF3F4F6),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -57,7 +62,7 @@ class CircleMemberCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 15.5.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 SizedBox(height: 3.h),
@@ -66,7 +71,7 @@ class CircleMemberCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF6B7280),
                   ),
                 ),
               ],
@@ -78,7 +83,7 @@ class CircleMemberCard extends StatelessWidget {
             onPressed: onEdit,
             icon: Icon(
               Icons.edit_rounded,
-              color: const Color(0xFF7C3AED),
+              color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
               size: 20.sp,
             ),
             visualDensity: VisualDensity.compact,
@@ -94,8 +99,8 @@ class CircleMemberCard extends StatelessWidget {
             child: Container(
               width: 36.r,
               height: 36.r,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFEE2E2),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF3B1D28) : const Color(0xFFFEE2E2),
                 shape: BoxShape.circle,
               ),
               child: Center(

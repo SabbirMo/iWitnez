@@ -42,10 +42,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
     }
   }
 
-  void _onNotificationTap(
-    BuildContext context,
-    NotificationModel notif,
-  ) {
+  void _onNotificationTap(BuildContext context, NotificationModel notif) {
     if (notif.isUnread) {
       ref.read(notificationControllerProvider.notifier).markAsRead(notif.id);
     }
@@ -95,22 +92,26 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(notificationControllerProvider);
     final notifier = ref.read(notificationControllerProvider.notifier);
 
-    final hasUnread = state.unreadCount > 0 ||
+    final hasUnread =
+        state.unreadCount > 0 ||
         state.notifications.any((notif) => notif.isUnread);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: isDark
+          ? const Color(0xFF0D0E15)
+          : const Color(0xFFF9F9F9),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: const Color(0xFF101828),
+            color: isDark ? Colors.white : const Color(0xFF101828),
             size: 20.sp,
           ),
           onPressed: () {
@@ -122,7 +123,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
         title: Text(
           'Notifications',
           style: GoogleFonts.inter(
-            color: const Color(0xFF101828),
+            color: isDark ? Colors.white : const Color(0xFF101828),
             fontWeight: FontWeight.w700,
             fontSize: 18.sp,
           ),
@@ -150,8 +151,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
                     height: 16.r,
                     child: const CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Color(0xFF6941C6)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF6941C6),
+                      ),
                     ),
                   )
                 : Text(
@@ -160,8 +162,12 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: hasUnread
-                          ? const Color(0xFF6941C6)
-                          : const Color(0xFF98A2B3),
+                          ? (isDark
+                                ? const Color(0xFFA855F7)
+                                : const Color(0xFF6941C6))
+                          : (isDark
+                                ? const Color(0xFF667085)
+                                : const Color(0xFF98A2B3)),
                     ),
                   ),
           ),
@@ -178,86 +184,94 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
                 ),
               )
             : state.notifications.isEmpty
-                ? ListView(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                children: [
+                  SizedBox(height: 140.h),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 64.r,
+                          height: 64.r,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF2B1D45)
+                                : const Color(0xFFF4EBFF),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.notifications_none_rounded,
+                            color: isDark
+                                ? const Color(0xFFA855F7)
+                                : const Color(0xFF6941C6),
+                            size: 32.sp,
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'No notifications yet',
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF101828),
+                          ),
+                        ),
+                        SizedBox(height: 6.h),
+                        Text(
+                          "We'll notify you when something arrives.",
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            color: isDark
+                                ? const Color(0xFF98A2B3)
+                                : const Color(0xFF667085),
+                          ),
+                        ),
+                      ],
                     ),
-                    children: [
-                      SizedBox(height: 140.h),
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 64.r,
-                              height: 64.r,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF4EBFF),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.notifications_none_rounded,
-                                color: const Color(0xFF6941C6),
-                                size: 32.sp,
-                              ),
-                            ),
-                            SizedBox(height: 16.h),
-                            Text(
-                              'No notifications yet',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF101828),
-                              ),
-                            ),
-                            SizedBox(height: 6.h),
-                            Text(
-                              "We'll notify you when something arrives.",
-                              style: GoogleFonts.inter(
-                                fontSize: 13.sp,
-                                color: const Color(0xFF667085),
-                              ),
-                            ),
-                          ],
+                  ),
+                ],
+              )
+            : ListView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+                children: [
+                  for (final entry in state.sections.entries)
+                    if (entry.value.isNotEmpty) ...[
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: 8.h,
+                          bottom: 10.h,
+                          left: 4.w,
+                        ),
+                        child: Text(
+                          entry.key,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF101828),
+                          ),
                         ),
                       ),
+                      for (final notif in entry.value)
+                        NotificationCard(
+                          notification: notif,
+                          onTap: () => _onNotificationTap(context, notif),
+                        ),
+                      SizedBox(height: 8.h),
                     ],
-                  )
-                : ListView(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
-                    children: [
-                      for (final entry in state.sections.entries)
-                        if (entry.value.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 8.h,
-                              bottom: 10.h,
-                              left: 4.w,
-                            ),
-                            child: Text(
-                              entry.key,
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF101828),
-                              ),
-                            ),
-                          ),
-                          for (final notif in entry.value)
-                            NotificationCard(
-                              notification: notif,
-                              onTap: () =>
-                                  _onNotificationTap(context, notif),
-                            ),
-                          SizedBox(height: 8.h),
-                        ],
-                      SizedBox(height: 24.h),
-                    ],
-                  ),
+                  SizedBox(height: 24.h),
+                ],
+              ),
       ),
     );
   }

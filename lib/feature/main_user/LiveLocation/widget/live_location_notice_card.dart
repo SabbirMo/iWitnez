@@ -19,14 +19,19 @@ class LiveLocationNoticeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262938) : Colors.transparent,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -44,7 +49,7 @@ class LiveLocationNoticeCard extends StatelessWidget {
               text: TextSpan(
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
-                  color: AppColors.textDark,
+                  color: isDark ? Colors.white : AppColors.textDark,
                   height: 1.3,
                 ),
                 children: [
@@ -53,7 +58,7 @@ class LiveLocationNoticeCard extends StatelessWidget {
                         ? 'Your location is being shared \n'
                         : 'Location sharing is paused \n',
                     style: CustomTextStyle.semiBold14(
-                      AppColors.textDark,
+                      isDark ? Colors.white : AppColors.textDark,
                     ).copyWith(fontSize: 12.sp),
                   ),
                   TextSpan(
@@ -63,7 +68,7 @@ class LiveLocationNoticeCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 11.sp,
-                      color: AppColors.onboardingDesc,
+                      color: isDark ? const Color(0xFF98A2B3) : AppColors.onboardingDesc,
                     ),
                   ),
                 ],
@@ -86,13 +91,13 @@ class LiveLocationNoticeCard extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 12.5.sp,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.homeSosStart,
+                      color: isDark ? const Color(0xFFA855F7) : AppColors.homeSosStart,
                     ),
                   ),
                   Icon(
                     Icons.chevron_right_rounded,
                     size: 16.sp,
-                    color: AppColors.homeSosStart,
+                    color: isDark ? const Color(0xFFA855F7) : AppColors.homeSosStart,
                   ),
                 ],
               ),

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/monitored_live_location_model.dart';
@@ -108,17 +109,19 @@ class _TrustedLiveLocationScreenState
       _updateMarkers(monitoredUser, location);
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0E15) : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.chevron_left_rounded,
             size: 32.sp,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
@@ -132,7 +135,7 @@ class _TrustedLiveLocationScreenState
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
         ),
         actions: [
@@ -140,7 +143,7 @@ class _TrustedLiveLocationScreenState
             icon: Icon(
               Icons.refresh_rounded,
               size: 22.sp,
-              color: const Color(0xFF4B5563),
+              color: isDark ? Colors.white : const Color(0xFF4B5563),
             ),
             onPressed: () => ref
                 .read(monitoredLiveLocationProvider.notifier)
@@ -200,11 +203,12 @@ class _TrustedLiveLocationScreenState
                 // 1. Real Google Map Background
                 Positioned.fill(
                   child: GoogleMap(
-                    key: ValueKey('${location.latitude}_${location.longitude}'),
+                    key: ValueKey('${location.latitude}_${location.longitude}_$isDark'),
                     initialCameraPosition: CameraPosition(
                       target: LatLng(location.latitude, location.longitude),
                       zoom: 15.0,
                     ),
+                    style: isDark ? darkMapStyleJson : null,
                     mapType: _mapType,
                     markers: _markers,
                     zoomControlsEnabled: false,
@@ -216,6 +220,9 @@ class _TrustedLiveLocationScreenState
                     tiltGesturesEnabled: true,
                     onMapCreated: (controller) {
                       _mapController = controller;
+                      if (isDark) {
+                        controller.setMapStyle(darkMapStyleJson);
+                      }
                     },
                   ),
                 ),
@@ -228,6 +235,7 @@ class _TrustedLiveLocationScreenState
                     children: [
                       _buildCircleMapButton(
                         icon: Icons.my_location_rounded,
+                        isDark: isDark,
                         onTap: () {
                           if (_mapController != null) {
                             _mapController!.animateCamera(
@@ -241,17 +249,21 @@ class _TrustedLiveLocationScreenState
                       SizedBox(height: 10.h),
                       _buildCircleMapButton(
                         icon: Icons.layers_rounded,
+                        isDark: isDark,
                         onTap: _toggleMapType,
                       ),
                       SizedBox(height: 10.h),
                       Container(
                         width: 38.r,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1F2232) : Colors.white,
                           borderRadius: BorderRadius.circular(19.r),
+                          border: isDark
+                              ? Border.all(color: const Color(0xFF2C3044))
+                              : null,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
+                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -270,15 +282,15 @@ class _TrustedLiveLocationScreenState
                                   child: Icon(
                                     Icons.add,
                                     size: 19.sp,
-                                    color: const Color(0xFF4B5563),
+                                    color: isDark ? Colors.white : const Color(0xFF4B5563),
                                   ),
                                 ),
                               ),
                             ),
-                            const Divider(
+                            Divider(
                               height: 1,
                               thickness: 0.8,
-                              color: Color(0xFFE5E7EB),
+                              color: isDark ? const Color(0xFF2C3044) : const Color(0xFFE5E7EB),
                             ),
                             InkWell(
                               onTap: _zoomOut,
@@ -291,7 +303,7 @@ class _TrustedLiveLocationScreenState
                                   child: Icon(
                                     Icons.remove,
                                     size: 19.sp,
-                                    color: const Color(0xFF4B5563),
+                                    color: isDark ? Colors.white : const Color(0xFF4B5563),
                                   ),
                                 ),
                               ),
@@ -315,15 +327,19 @@ class _TrustedLiveLocationScreenState
                         vertical: 12.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF181A26) : Colors.white,
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
                           width: 1.w,
-                          color: const Color(0xFFF2F4F7),
+                          color: isDark
+                              ? const Color(0xFF262938)
+                              : const Color(0xFFF2F4F7),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.06),
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.3 : 0.06,
+                            ),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -379,7 +395,9 @@ class _TrustedLiveLocationScreenState
                                         : const Color(0xFF9CA3AF),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white,
+                                      color: isDark
+                                          ? const Color(0xFF181A26)
+                                          : Colors.white,
                                       width: 1.8.w,
                                     ),
                                   ),
@@ -400,7 +418,9 @@ class _TrustedLiveLocationScreenState
                                   style: GoogleFonts.inter(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF111827),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF111827),
                                   ),
                                 ),
                                 SizedBox(height: 2.h),
@@ -428,7 +448,9 @@ class _TrustedLiveLocationScreenState
                                     style: GoogleFonts.inter(
                                       fontSize: 11.5.sp,
                                       fontWeight: FontWeight.w400,
-                                      color: const Color(0xFF667085),
+                                      color: isDark
+                                          ? const Color(0xFF98A2B3)
+                                          : const Color(0xFF667085),
                                     ),
                                   ),
                                 ],
@@ -443,7 +465,9 @@ class _TrustedLiveLocationScreenState
                               Icon(
                                 _getBatteryIcon(monitoredUser.batteryLevel),
                                 size: 20.sp,
-                                color: const Color(0xFF344054),
+                                color: isDark
+                                    ? const Color(0xFFD0D5DD)
+                                    : const Color(0xFF344054),
                               ),
                               SizedBox(width: 3.w),
                               Text(
@@ -451,7 +475,9 @@ class _TrustedLiveLocationScreenState
                                 style: GoogleFonts.inter(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF344054),
+                                  color: isDark
+                                      ? const Color(0xFFD0D5DD)
+                                      : const Color(0xFF344054),
                                 ),
                               ),
                             ],
@@ -477,6 +503,7 @@ class _TrustedLiveLocationScreenState
                           if (location.address.isNotEmpty)
                             _buildCurrentLocationCard(
                               context,
+                              isDark,
                               location,
                               monitoredUser,
                               safePlaces,
@@ -486,6 +513,7 @@ class _TrustedLiveLocationScreenState
                             // Card B: Safe Places ETA
                             _buildSafePlacesEtaCard(
                               context,
+                              isDark,
                               safePlaces,
                               location,
                               monitoredUser,
@@ -521,6 +549,7 @@ class _TrustedLiveLocationScreenState
 
   Widget _buildCircleMapButton({
     required IconData icon,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return InkWell(
@@ -530,23 +559,29 @@ class _TrustedLiveLocationScreenState
         width: 38.r,
         height: 38.r,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1F2232) : Colors.white,
           shape: BoxShape.circle,
+          border: isDark ? Border.all(color: const Color(0xFF2C3044)) : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Icon(icon, color: const Color(0xFF4B5563), size: 19.sp),
+        child: Icon(
+          icon,
+          color: isDark ? Colors.white : const Color(0xFF4B5563),
+          size: 19.sp,
+        ),
       ),
     );
   }
 
   Widget _buildCurrentLocationCard(
     BuildContext context,
+    bool isDark,
     MonitoredLocationData location,
     MonitoredUserLiveLocation? user,
     List<SafePlaceEtaItem> safePlaces,
@@ -558,12 +593,15 @@ class _TrustedLiveLocationScreenState
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(width: 1.w, color: const Color(0xFFF2F4F7)),
+        border: Border.all(
+          width: 1.w,
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -577,12 +615,12 @@ class _TrustedLiveLocationScreenState
             width: 42.r,
             height: 42.r,
             decoration: BoxDecoration(
-              color: const Color(0xFFF4F3FF),
+              color: isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
               Icons.location_on,
-              color: const Color(0xFF8B2CF5),
+              color: isDark ? const Color(0xFFD6BBFB) : const Color(0xFF8B2CF5),
               size: 22.sp,
             ),
           ),
@@ -601,7 +639,7 @@ class _TrustedLiveLocationScreenState
                   style: GoogleFonts.inter(
                     fontSize: 14.5.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 if (line2.isNotEmpty) ...[
@@ -613,7 +651,9 @@ class _TrustedLiveLocationScreenState
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF667085),
+                      color: isDark
+                          ? const Color(0xFF98A2B3)
+                          : const Color(0xFF667085),
                     ),
                   ),
                 ],
@@ -657,10 +697,12 @@ class _TrustedLiveLocationScreenState
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1F2232) : Colors.white,
                 borderRadius: BorderRadius.circular(100.r),
                 border: Border.all(
-                  color: const Color(0xFF8B2CF5),
+                  color: isDark
+                      ? const Color(0xFF9E77ED)
+                      : const Color(0xFF8B2CF5),
                   width: 1.2.w,
                 ),
               ),
@@ -670,7 +712,9 @@ class _TrustedLiveLocationScreenState
                   Icon(
                     Icons.near_me_outlined,
                     size: 16.sp,
-                    color: const Color(0xFF8B2CF5),
+                    color: isDark
+                        ? const Color(0xFFD6BBFB)
+                        : const Color(0xFF8B2CF5),
                   ),
                   SizedBox(width: 5.w),
                   Text(
@@ -678,7 +722,9 @@ class _TrustedLiveLocationScreenState
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF8B2CF5),
+                      color: isDark
+                          ? const Color(0xFFD6BBFB)
+                          : const Color(0xFF8B2CF5),
                     ),
                   ),
                 ],
@@ -692,6 +738,7 @@ class _TrustedLiveLocationScreenState
 
   Widget _buildSafePlacesEtaCard(
     BuildContext context,
+    bool isDark,
     List<SafePlaceEtaItem> safePlaces,
     MonitoredLocationData location,
     MonitoredUserLiveLocation? user,
@@ -699,12 +746,15 @@ class _TrustedLiveLocationScreenState
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF181A26) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(width: 1.w, color: const Color(0xFFF2F4F7)),
+        border: Border.all(
+          width: 1.w,
+          color: isDark ? const Color(0xFF262938) : const Color(0xFFF2F4F7),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -735,7 +785,7 @@ class _TrustedLiveLocationScreenState
                   ),
                 );
               },
-              child: _buildSafePlaceRow(safePlaces[i]),
+              child: _buildSafePlaceRow(safePlaces[i], isDark),
             ),
           ],
         ],
@@ -769,7 +819,7 @@ class _TrustedLiveLocationScreenState
     );
   }
 
-  Widget _buildSafePlaceRow(SafePlaceEtaItem place) {
+  Widget _buildSafePlaceRow(SafePlaceEtaItem place, bool isDark) {
     final isHome = place.icon.toLowerCase() == 'home';
     final isWork = place.icon.toLowerCase() == 'work';
 
@@ -782,24 +832,24 @@ class _TrustedLiveLocationScreenState
 
     switch (place.badgeColor.toLowerCase()) {
       case 'green':
-        badgeBg = const Color(0xFFECFDF3);
-        badgeTextColor = const Color(0xFF12B76A);
+        badgeBg = isDark ? const Color(0xFF132B1D) : const Color(0xFFECFDF3);
+        badgeTextColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF12B76A);
         break;
       case 'purple':
-        badgeBg = const Color(0xFFF4F3FF);
-        badgeTextColor = const Color(0xFF7F56D9);
+        badgeBg = isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF);
+        badgeTextColor = isDark ? const Color(0xFFD6BBFB) : const Color(0xFF7F56D9);
         break;
       case 'blue':
-        badgeBg = const Color(0xFFEFF8FF);
-        badgeTextColor = const Color(0xFF007AFF);
+        badgeBg = isDark ? const Color(0xFF102847) : const Color(0xFFEFF8FF);
+        badgeTextColor = isDark ? const Color(0xFF60A5FA) : const Color(0xFF007AFF);
         break;
       case 'red':
-        badgeBg = const Color(0xFFFFE4E6);
-        badgeTextColor = const Color(0xFFE11D48);
+        badgeBg = isDark ? const Color(0xFF35161E) : const Color(0xFFFFE4E6);
+        badgeTextColor = isDark ? const Color(0xFFFB7185) : const Color(0xFFE11D48);
         break;
       default:
-        badgeBg = const Color(0xFFF4F3FF);
-        badgeTextColor = const Color(0xFF7F56D9);
+        badgeBg = isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF);
+        badgeTextColor = isDark ? const Color(0xFFD6BBFB) : const Color(0xFF7F56D9);
     }
 
     return Row(
@@ -808,11 +858,15 @@ class _TrustedLiveLocationScreenState
         Container(
           width: 42.r,
           height: 42.r,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF4F3FF),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF),
             shape: BoxShape.circle,
           ),
-          child: Icon(iconData, color: const Color(0xFF7F56D9), size: 22.sp),
+          child: Icon(
+            iconData,
+            color: isDark ? const Color(0xFFD6BBFB) : const Color(0xFF7F56D9),
+            size: 22.sp,
+          ),
         ),
         SizedBox(width: 14.w),
         Expanded(
@@ -825,7 +879,7 @@ class _TrustedLiveLocationScreenState
                 style: GoogleFonts.inter(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF111827),
+                  color: isDark ? Colors.white : const Color(0xFF111827),
                 ),
               ),
               if (place.timeDisplay.isNotEmpty) ...[
@@ -835,7 +889,9 @@ class _TrustedLiveLocationScreenState
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF667085),
+                    color: isDark
+                        ? const Color(0xFF98A2B3)
+                        : const Color(0xFF667085),
                   ),
                 ),
               ],

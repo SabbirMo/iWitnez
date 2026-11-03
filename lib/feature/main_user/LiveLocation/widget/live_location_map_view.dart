@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/model/live_sharing_model.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/provider/live_location_screen_provider.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
@@ -119,11 +120,12 @@ class _LiveLocationMapViewState extends ConsumerState<LiveLocationMapView> {
     });
 
     final state = ref.watch(liveLocationScreenProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasCoords = state.userLatitude != null && state.userLongitude != null;
 
     if (!hasCoords) {
       return Container(
-        color: const Color(0xFFF8FAFC),
+        color: isDark ? const Color(0xFF0D0E15) : const Color(0xFFF8FAFC),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -145,7 +147,7 @@ class _LiveLocationMapViewState extends ConsumerState<LiveLocationMapView> {
                     ? 'Loading live location...'
                     : 'Location coordinates not available',
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF64748B),
+                  color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF64748B),
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
                 ),
@@ -159,6 +161,8 @@ class _LiveLocationMapViewState extends ConsumerState<LiveLocationMapView> {
     final userLatLng = LatLng(state.userLatitude!, state.userLongitude!);
 
     return GoogleMap(
+      key: ValueKey('live_map_${state.userLatitude}_${state.userLongitude}_$isDark'),
+      style: isDark ? darkMapStyleJson : null,
       initialCameraPosition: CameraPosition(target: userLatLng, zoom: 15.0),
       mapType: widget.mapType,
       padding: EdgeInsets.only(bottom: 110.h),
