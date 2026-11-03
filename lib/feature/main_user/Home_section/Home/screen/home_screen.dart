@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/controller/home_controller.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/model/home_model.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/provider/home_provider.dart';
@@ -16,6 +17,9 @@ class HomeScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final asyncHome = ref.watch(homeProvider);
     final state = asyncHome.value ?? HomeState.initial();
+    final isInitialLoading =
+        (asyncHome.isLoading && asyncHome.value == null) ||
+        (state.isLoading && state.userProfile == null);
     final bottomClearance =
         68.h + MediaQuery.of(context).padding.bottom + 10.h;
 
@@ -23,7 +27,9 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
       body: SafeArea(
         bottom: false,
-        child: RefreshIndicator(
+        child: isInitialLoading
+            ? const HomeDashboardShimmer()
+            : RefreshIndicator(
                 onRefresh: () =>
                     ref.read(homeProvider.notifier).fetchHomeData(),
                 child: SingleChildScrollView(

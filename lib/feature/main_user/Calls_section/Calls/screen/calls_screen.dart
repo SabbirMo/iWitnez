@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/call/controller/call_flow_controller.dart';
 import 'package:iwitnez/feature/main_user/Calls_section/Calls/controller/calls_controller.dart';
 import 'package:iwitnez/feature/main_user/Calls_section/Calls/provider/calls_provider.dart';
@@ -112,7 +113,7 @@ class _CallsScreenState extends State<CallsScreen> {
                   listenable: _provider,
                   builder: (context, _) {
                     if (_provider.isLoading && _provider.calls.isEmpty) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const CallsListShimmer();
                     }
                     final calls = _provider.calls;
                     if (calls.isEmpty) {

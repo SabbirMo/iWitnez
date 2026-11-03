@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/widget/map_marker_helper.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/directions_model.dart';
 import 'package:iwitnez/feature/trusted_contact/LiveLocation/model/monitored_live_location_model.dart';
@@ -152,9 +153,7 @@ class _TrustedLiveLocationScreenState
         ],
       ),
       body: state.isLoading && data == null
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF8B2CF5)),
-            )
+          ? const LiveLocationMapShimmer()
           : state.errorMessage != null && data == null
           ? Center(
               child: Padding(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/provider/alerts_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/widget/alert_history_card.dart';
 import 'package:provider/provider.dart';
@@ -197,7 +198,7 @@ class AlertHistoryView extends StatelessWidget {
 
         // 2. Alert History Cards List / Loading / Error / Empty States
         if (isLoading && history.isEmpty)
-          _buildLoadingState(isDark)
+          const AlertsListShimmer(count: 3)
         else if (error != null && history.isEmpty)
           _buildErrorState(context, provider, error, isDark)
         else if (history.isEmpty)

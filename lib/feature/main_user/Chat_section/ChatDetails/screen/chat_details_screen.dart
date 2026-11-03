@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/controller/chat_details_controller.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/model/chat_message_model.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/ChatDetails/provider/chat_details_provider.dart';
@@ -128,8 +129,7 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen>
         children: [
           Expanded(
             child: chatAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const ChatDetailsShimmer(),
               error: (err, stack) => Center(
                 child: Text(
                   'Failed to load messages',

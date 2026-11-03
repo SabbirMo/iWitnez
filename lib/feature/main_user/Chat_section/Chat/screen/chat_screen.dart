@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iwitnez/core/constants/app_string/app_string.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/controller/chat_controller.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/provider/chat_provider.dart';
 import 'package:iwitnez/feature/main_user/Chat_section/Chat/widget/chat_widget.dart';
@@ -78,7 +79,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 listenable: _provider,
                 builder: (context, _) {
                   if (_provider.isLoading && _provider.chats.isEmpty) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const ChatListShimmer();
                   }
                   if (_provider.chats.isEmpty) {
                     return RefreshIndicator(

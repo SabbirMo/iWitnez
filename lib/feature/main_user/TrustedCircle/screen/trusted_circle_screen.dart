@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/model/trusted_circle_model.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/provider/trusted_circle_provider.dart';
 import 'package:iwitnez/feature/main_user/TrustedCircle/widget/circle_safety_banner.dart';
@@ -105,15 +106,18 @@ class _TrustedCircleScreenState extends ConsumerState<TrustedCircleScreen> {
                   height: 1.4,
                 ),
               ),
-              SizedBox(height: 20.h),
-              ...circles.map(
-                (circle) => TrustedCircleCard(
-                  circle: circle,
-                  onTap: () => _onCircleTap(context, circle),
+              if (circles.isEmpty)
+                const TrustedCirclesListShimmer()
+              else ...[
+                ...circles.map(
+                  (circle) => TrustedCircleCard(
+                    circle: circle,
+                    onTap: () => _onCircleTap(context, circle),
+                  ),
                 ),
-              ),
-              SizedBox(height: 8.h),
-              const CircleSafetyBanner(),
+                SizedBox(height: 8.h),
+                const CircleSafetyBanner(),
+              ],
               SizedBox(height: 24.h),
             ],
           ),

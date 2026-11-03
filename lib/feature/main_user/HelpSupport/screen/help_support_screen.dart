@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 import '../controller/help_support_controller.dart';
 import '../provider/help_support_provider.dart';
@@ -120,11 +121,7 @@ class HelpSupportScreen extends ConsumerWidget {
     HelpSupportController controller,
   ) {
     if (state.isLoadingFaqs && state.faqs.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF8B5CF6),
-        ),
-      );
+      return const HelpSupportShimmer();
     }
 
     if (state.faqs.isEmpty) {

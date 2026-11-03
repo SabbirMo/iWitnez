@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/controller/home_controller.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/provider/home_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/widget/home_widget.dart';
@@ -33,11 +34,7 @@ class HomeScreen extends ConsumerWidget {
               .read(trustedHomeProvider.notifier)
               .fetchDashboard(forceRefresh: true),
           child: state.isLoading && state.monitoredUser == null
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF8B2CF5),
-                  ),
-                )
+              ? const TrustedDashboardShimmer()
               : state.errorMessage != null && state.monitoredUser == null
                   ? Center(
                       child: Padding(

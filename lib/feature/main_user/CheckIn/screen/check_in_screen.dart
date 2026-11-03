@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/provider/check_in_provider.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/widget/check_in_complete_banner_card.dart';
 import 'package:iwitnez/feature/main_user/CheckIn/widget/check_in_completed_location_card.dart';
@@ -58,11 +59,7 @@ class CheckInScreen extends ConsumerWidget {
       body: SafeArea(
         child: state.isLoadingPage &&
                 state.pageData.yourLocation.address.isEmpty
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF8B5CF6),
-                ),
-              )
+            ? const CheckInDashboardShimmer()
             : RefreshIndicator(
                 onRefresh: notifier.loadCheckInPage,
                 color: const Color(0xFF8B5CF6),

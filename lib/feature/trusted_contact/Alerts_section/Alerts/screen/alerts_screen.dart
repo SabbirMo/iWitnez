@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/provider/alerts_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/widget/alert_audio_recording_card.dart';
 import 'package:iwitnez/feature/trusted_contact/Alerts_section/Alerts/widget/alert_history_view.dart';
@@ -46,14 +47,7 @@ class _AlertsScreenViewState extends State<_AlertsScreenView> {
 
   Widget _buildActiveTab(AlertsProvider provider, bool isDark) {
     if (provider.isActiveAlertLoading && provider.activeAlert == null) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40.h),
-          child: const CircularProgressIndicator(
-            color: Color(0xFF7F56D9),
-          ),
-        ),
-      );
+      return const AlertsListShimmer(count: 1);
     }
 
     if (provider.activeAlertError != null && provider.activeAlert == null) {

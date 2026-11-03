@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/user_role/user_role.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 import '../model/notification_model.dart';
 import '../provider/notification_provider.dart';
@@ -178,11 +179,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen>
         color: const Color(0xFF6941C6),
         onRefresh: () => notifier.fetchNotifications(),
         child: state.isLoading && state.notifications.isEmpty
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6941C6)),
-                ),
-              )
+            ? const NotificationsShimmer()
             : state.notifications.isEmpty
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwitnez/core/constants/theme/dark_map_style.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/safe_place_model.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/provider/safety_tracking_provider.dart';
 import 'package:iwitnez/router/app_route_names.dart';
@@ -220,11 +221,7 @@ class _SafePlaceDetailsScreenState
       ),
       body: SafeArea(
         child: _isLoading && place == null
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
-                ),
-              )
+            ? const SafePlaceDetailsShimmer()
             : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),

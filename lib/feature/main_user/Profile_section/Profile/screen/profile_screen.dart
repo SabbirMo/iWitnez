@@ -7,6 +7,7 @@ import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/core/services/fcm_service.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/controller/profile_controller.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/model/profile_model.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/provider/profile_provider.dart';
@@ -197,9 +198,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           listenable: _provider,
           builder: (context, _) {
             if (_provider.isLoading && _provider.profile.name.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF9023FF)),
-              );
+              return const ProfileScreenShimmer();
             }
             return RefreshIndicator(
               onRefresh: () async {

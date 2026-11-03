@@ -9,6 +9,7 @@ import 'package:iwitnez/core/constants/theme/theme_mode_provider.dart';
 import 'package:iwitnez/core/network/base_url/api_base_url.dart';
 import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/widgets/custom_snackbar.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import '../provider/personal_info_provider.dart';
 import '../widget/custom_text_field.dart';
 
@@ -464,9 +465,7 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
       ),
       body: SafeArea(
         child: state.isLoading && user.fullName.isEmpty
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
-              )
+            ? const PersonalInfoShimmer()
             : RefreshIndicator(
                 onRefresh: () async {
                   await ref

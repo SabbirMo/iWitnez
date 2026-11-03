@@ -39,7 +39,7 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     // Start background fetching without blocking initial render
     Future.microtask(() => fetchHomeData());
 
-    return HomeState.initial();
+    return HomeState.initial().copyWith(isLoading: true);
   }
 
   Future<void> _startLocationTracking() async {
@@ -138,6 +138,7 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
 
       state = AsyncValue.data(
         current.copyWith(
+          isLoading: false,
           isProtected: userData?.isProtected ?? current.isProtected,
           userProfile: userData ?? current.userProfile,
           liveLocation: liveLoc ?? current.liveLocation,
@@ -153,6 +154,7 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
       );
     } catch (_) {
       // Keep existing data on error
+      state = AsyncValue.data(current.copyWith(isLoading: false));
     }
   }
 

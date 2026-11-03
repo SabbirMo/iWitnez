@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/model/manage_sharing_model.dart';
 import 'package:iwitnez/feature/main_user/LiveLocation/provider/manage_sharing_provider.dart';
 
@@ -105,15 +106,7 @@ class ManageSharingScreen extends ConsumerWidget {
 
                 // Loading State
                 if (state.isLoading)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40.h),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.liveLocationPurple,
-                        strokeWidth: 2.5,
-                      ),
-                    ),
-                  )
+                  const ManageSharingShimmer()
                 // Empty Contacts
                 else if (state.contacts.isEmpty)
                   Padding(

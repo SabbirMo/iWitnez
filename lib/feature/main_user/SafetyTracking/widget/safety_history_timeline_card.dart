@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/main_user/SafetyTracking/model/location_history_model.dart';
 
 class SafetyHistoryTimelineCard extends StatelessWidget {
@@ -44,10 +45,32 @@ class SafetyHistoryTimelineCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isLoading)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 36.h),
-              child: const Center(
-                child: CupertinoActivityIndicator(radius: 12),
+            ShimmerEffect(
+              child: Column(
+                children: List.generate(
+                  3,
+                  (index) => Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShimmerCircle(size: 14.r),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ShimmerBox(width: 140.w, height: 13.h, borderRadius: 4),
+                              SizedBox(height: 5.h),
+                              ShimmerBox(width: 90.w, height: 10.h, borderRadius: 4),
+                            ],
+                          ),
+                        ),
+                        ShimmerBox(width: 50.w, height: 11.h, borderRadius: 4),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             )
           else if (items.isEmpty)

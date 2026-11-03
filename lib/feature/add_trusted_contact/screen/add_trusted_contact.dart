@@ -7,6 +7,7 @@ import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/image_assets/image_assets.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/feature/add_trusted_contact/provider/add_trusted_contact_provider.dart';
 import 'package:iwitnez/feature/add_trusted_contact/widget/add_contact_widget.dart';
@@ -97,13 +98,8 @@ class _AddTrustedContactScreenState
 
               // If loading initial contacts
               if (contacts.isLoading && contacts.isEmpty) ...[
-                SizedBox(height: 40.h),
-                const Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.buttonGradientStart,
-                  ),
-                ),
-                SizedBox(height: 40.h),
+                const ContactsListShimmer(count: 3),
+                SizedBox(height: 16.h),
               ] else if (contacts.isEmpty) ...[
                 _animations.buttonTransition(
                   child: AddContactWidget(

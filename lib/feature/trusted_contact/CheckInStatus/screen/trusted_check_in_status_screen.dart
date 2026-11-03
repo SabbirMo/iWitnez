@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iwitnez/core/widgets/shimmer_loading.dart';
 import '../provider/check_in_status_provider.dart';
 import '../widget/check_in_location_card.dart';
 import '../widget/check_in_missed_card.dart';
@@ -56,11 +57,7 @@ class TrustedCheckInStatusScreen extends ConsumerWidget {
           builder: (context) {
             // 1. Initial Loading State
             if (statusState.isLoading && statusState.data == null) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF6C48F5),
-                ),
-              );
+              return const CheckInStatusShimmer();
             }
 
             // 2. Error State
