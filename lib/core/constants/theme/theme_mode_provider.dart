@@ -5,7 +5,7 @@ import 'package:iwitnez/core/utils/theme_storage.dart';
 class ThemeModeProvider extends Notifier<ThemeMode> {
   final ThemeMode initialTheme;
 
-  ThemeModeProvider({this.initialTheme = ThemeMode.dark});
+  ThemeModeProvider({this.initialTheme = ThemeMode.light});
 
   @override
   ThemeMode build() => initialTheme;

@@ -374,41 +374,38 @@ class _SosVideoStoppedScreenState extends ConsumerState<SosVideoStoppedScreen> {
                 ),
               ),
 
+              // ── 7. Go To Home Button (Scrolls naturally with content) ──
+              SizedBox(height: 24.h),
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.go(AppRouteNames.mainUserHome);
+                  },
+                  icon: Icon(Icons.home_rounded, color: Colors.white, size: 20.sp),
+                  label: Text(
+                    'Go To Home',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00C853),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                    elevation: 4,
+                    shadowColor: const Color(0xFF00C853).withValues(alpha: 0.35),
+                  ),
+                ),
+              ),
+
               SizedBox(height: 24.h),
             ],
-          ),
-        ),
-      ),
-      // ── 7. Bottom Go To Home Button ──
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
-          child: SizedBox(
-            width: double.infinity,
-            height: 52.h,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                context.go(AppRouteNames.mainUserHome);
-              },
-              icon: Icon(Icons.home_rounded, color: Colors.white, size: 20.sp),
-              label: Text(
-                'Go To Home',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: 0.2,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00C853),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.r),
-                ),
-                elevation: 4,
-                shadowColor: const Color(0xFF00C853).withValues(alpha: 0.35),
-              ),
-            ),
           ),
         ),
       ),

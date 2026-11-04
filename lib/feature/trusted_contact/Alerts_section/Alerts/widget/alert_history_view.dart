@@ -68,8 +68,8 @@ class AlertHistoryView extends StatelessWidget {
                         color: isSelected
                             ? const Color(0xFF7F56D9)
                             : (isDark
-                                ? Colors.white70
-                                : const Color(0xFF344054)),
+                                  ? Colors.white70
+                                  : const Color(0xFF344054)),
                       ),
                     ),
                     trailing: isSelected
@@ -153,8 +153,8 @@ class AlertHistoryView extends StatelessWidget {
                   color: provider.selectedFilter != 'all'
                       ? const Color(0xFF7F56D9)
                       : (isDark
-                          ? const Color(0xFF261D42)
-                          : const Color(0xFFF4F3FF)),
+                            ? const Color(0xFF261D42)
+                            : const Color(0xFFF4F3FF)),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
                     color: isDark
@@ -171,8 +171,8 @@ class AlertHistoryView extends StatelessWidget {
                       color: provider.selectedFilter != 'all'
                           ? Colors.white
                           : (isDark
-                              ? const Color(0xFFD6BBFB)
-                              : const Color(0xFF7F56D9)),
+                                ? const Color(0xFFD6BBFB)
+                                : const Color(0xFF7F56D9)),
                       size: 14.sp,
                     ),
                     SizedBox(width: 4.w),
@@ -184,8 +184,8 @@ class AlertHistoryView extends StatelessWidget {
                         color: provider.selectedFilter != 'all'
                             ? Colors.white
                             : (isDark
-                                ? const Color(0xFFD6BBFB)
-                                : const Color(0xFF7F56D9)),
+                                  ? const Color(0xFFD6BBFB)
+                                  : const Color(0xFF7F56D9)),
                       ),
                     ),
                   ],
@@ -219,8 +219,9 @@ class AlertHistoryView extends StatelessWidget {
               if (isLoading)
                 Positioned.fill(
                   child: Container(
-                    color: (isDark ? Colors.black : Colors.white)
-                        .withValues(alpha: 0.4),
+                    color: (isDark ? Colors.black : Colors.white).withValues(
+                      alpha: 0.4,
+                    ),
                     child: const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF7F56D9),
@@ -319,16 +320,12 @@ class AlertHistoryView extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(12.r),
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF261D42)
-                  : const Color(0xFFF4F3FF),
+              color: isDark ? const Color(0xFF261D42) : const Color(0xFFF4F3FF),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.history_rounded,
-              color: isDark
-                  ? const Color(0xFFD6BBFB)
-                  : const Color(0xFF7F56D9),
+              color: isDark ? const Color(0xFFD6BBFB) : const Color(0xFF7F56D9),
               size: 32.sp,
             ),
           ),

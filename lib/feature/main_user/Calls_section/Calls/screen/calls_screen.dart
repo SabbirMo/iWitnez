@@ -140,7 +140,9 @@ class _CallsScreenState extends State<CallsScreen> {
                         separatorBuilder: (context, index) => Divider(
                           height: 1,
                           thickness: 0.5,
-                          color: Colors.grey.shade100,
+                          color: isDark
+                              ? AppColors.white.withValues(alpha: 0.35)
+                              : Colors.grey.shade100,
                         ),
                         itemBuilder: (context, index) {
                           final call = calls[index];

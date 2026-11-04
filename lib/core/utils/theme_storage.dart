@@ -18,13 +18,13 @@ class ThemeStorage {
   static Future<ThemeMode> getThemeMode() async {
     try {
       final value = await _storage.read(key: _themeModeKey);
-      if (value == 'light') {
-        return ThemeMode.light;
+      if (value == 'dark') {
+        return ThemeMode.dark;
       }
-      return ThemeMode.dark;
+      return ThemeMode.light;
     } catch (e) {
       debugPrint("ThemeStorage.getThemeMode error: $e");
-      return ThemeMode.dark;
+      return ThemeMode.light;
     }
   }
 }

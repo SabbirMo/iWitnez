@@ -55,7 +55,9 @@ class CheckInNoteCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
-                  color: isDark ? const Color(0xFF98A2B3) : const Color(0xFF9CA3AF),
+                  color: isDark
+                      ? const Color(0xFF98A2B3)
+                      : const Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -76,7 +78,9 @@ class CheckInNoteCard extends StatelessWidget {
               color: isDark ? const Color(0xFF1F2232) : Colors.white,
               borderRadius: BorderRadius.circular(14.r),
               border: Border.all(
-                color: isDark ? const Color(0xFF262938) : const Color(0xFFE5E7EB),
+                color: isDark
+                    ? const Color(0xFF262938)
+                    : const Color(0xFFE5E7EB),
               ),
             ),
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
@@ -90,12 +94,16 @@ class CheckInNoteCard extends StatelessWidget {
                       width: 32.r,
                       height: 32.r,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF),
+                        color: isDark
+                            ? const Color(0xFF2B1D45)
+                            : const Color(0xFFF3E8FF),
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Icon(
                         Icons.edit_note_rounded,
-                        color: isDark ? const Color(0xFFA855F7) : const Color(0xFF8B5CF6),
+                        color: isDark
+                            ? const Color(0xFFA855F7)
+                            : const Color(0xFF8B5CF6),
                         size: 20.sp,
                       ),
                     ),
@@ -109,16 +117,22 @@ class CheckInNoteCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 13.5.sp,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : const Color(0xFF111827),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF111827),
                         ),
                         decoration: InputDecoration(
                           hintText: "e.g. Walking home, meeting someone",
                           hintStyle: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w400,
-                            color: isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
+                            color: isDark
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFF9CA3AF),
                           ),
                           focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
                           border: InputBorder.none,
                           isDense: true,
                           counterText: '',
@@ -138,7 +152,9 @@ class CheckInNoteCard extends StatelessWidget {
                         '${value.text.length}/100',
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
-                          color: isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF),
+                          color: isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF9CA3AF),
                         ),
                       );
                     },
@@ -170,13 +186,21 @@ class CheckInNoteCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? (isDark ? const Color(0xFF2B1D45) : const Color(0xFFF3E8FF))
-                                : (isDark ? const Color(0xFF1F2232) : Colors.white),
+                                ? (isDark
+                                      ? const Color(0xFF2B1D45)
+                                      : const Color(0xFFF3E8FF))
+                                : (isDark
+                                      ? const Color(0xFF1F2232)
+                                      : Colors.white),
                             borderRadius: BorderRadius.circular(20.r),
                             border: Border.all(
                               color: isSelected
-                                  ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF8B5CF6))
-                                  : (isDark ? const Color(0xFF262938) : const Color(0xFFE5E7EB)),
+                                  ? (isDark
+                                        ? const Color(0xFFA855F7)
+                                        : const Color(0xFF8B5CF6))
+                                  : (isDark
+                                        ? const Color(0xFF262938)
+                                        : const Color(0xFFE5E7EB)),
                             ),
                           ),
                           child: Text(
@@ -187,8 +211,12 @@ class CheckInNoteCard extends StatelessWidget {
                                   ? FontWeight.w600
                                   : FontWeight.w500,
                               color: isSelected
-                                  ? (isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED))
-                                  : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF4B5563)),
+                                  ? (isDark
+                                        ? const Color(0xFFA855F7)
+                                        : const Color(0xFF7C3AED))
+                                  : (isDark
+                                        ? const Color(0xFFCBD5E1)
+                                        : const Color(0xFF4B5563)),
                             ),
                           ),
                         ),

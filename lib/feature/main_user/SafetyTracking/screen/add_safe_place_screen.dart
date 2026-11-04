@@ -539,11 +539,13 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
     final cameraLng = homeLoc?.longitude ?? 90.4125;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
+      backgroundColor: isDark
+          ? const Color(0xFF0D0E15)
+          : const Color(0xFFFAFAFC),
       appBar: AppBar(
-        backgroundColor:
-            isDark ? const Color(0xFF0D0E15) : const Color(0xFFFAFAFC),
+        backgroundColor: isDark
+            ? const Color(0xFF0D0E15)
+            : const Color(0xFFFAFAFC),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -695,6 +697,8 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                       : const Color(0xFF9CA3AF),
                                 ),
                                 focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: EdgeInsets.symmetric(
@@ -736,7 +740,7 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                     width: _showSuggestions ? 1.4.w : 1.w,
                   ),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 child: Row(
                   children: [
                     Container(
@@ -780,6 +784,8 @@ class _AddSafePlaceScreenState extends ConsumerState<AddSafePlaceScreen> {
                                 : const Color(0xFF6B7280),
                           ),
                           focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
                           border: InputBorder.none,
                           isDense: true,
                         ),
