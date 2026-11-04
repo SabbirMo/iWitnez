@@ -12,6 +12,9 @@ import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/feature/add_trusted_contact/provider/add_trusted_contact_provider.dart';
 import 'package:iwitnez/feature/add_trusted_contact/widget/add_contact_widget.dart';
 import 'package:iwitnez/router/app_route_names.dart';
+import 'package:iwitnez/core/constants/user_role/user_role.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
+import 'package:iwitnez/core/utils/token_storage.dart';
 
 class AddTrustedContactScreen extends ConsumerStatefulWidget {
   const AddTrustedContactScreen({super.key});
@@ -44,6 +47,27 @@ class _AddTrustedContactScreenState
   void dispose() {
     _animations.dispose();
     super.dispose();
+  }
+
+  Future<void> _navigateToHome() async {
+    final savedRole = await TokenStorage.getUserRole();
+    if (!mounted) return;
+
+    final currentRole = ref.read(userRoleProvider);
+    final isTrusted = (savedRole == 'trusted_contact') ||
+        (currentRole == UserRole.trustedContact);
+
+    final targetRole =
+        isTrusted ? UserRole.trustedContact : UserRole.mainUser;
+    ref.read(userRoleProvider.notifier).set(targetRole);
+
+    FcmService.instance.syncDeviceTokenIfPermitted();
+
+    if (isTrusted) {
+      context.go(AppRouteNames.trustedHome);
+    } else {
+      context.go(AppRouteNames.mainUserHome);
+    }
   }
 
   @override
@@ -122,7 +146,7 @@ class _AddTrustedContactScreenState
                 _animations.taglineTransition(
                   child: TextButton(
                     onPressed: () {
-                      context.go(AppRouteNames.mainUserHome);
+                      _navigateToHome();
                     },
                     child: Text(
                       "Skip For Now",

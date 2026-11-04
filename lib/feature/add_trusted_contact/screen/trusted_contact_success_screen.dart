@@ -1,23 +1,27 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iwitnez/core/constants/colors/app_colors.dart';
 import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
+import 'package:iwitnez/core/constants/user_role/user_role.dart';
+import 'package:iwitnez/core/services/fcm_service.dart';
+import 'package:iwitnez/core/utils/token_storage.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
-class TrustedContactSuccessScreen extends StatefulWidget {
+class TrustedContactSuccessScreen extends ConsumerStatefulWidget {
   final String? contactName;
 
   const TrustedContactSuccessScreen({super.key, this.contactName});
 
   @override
-  State<TrustedContactSuccessScreen> createState() =>
+  ConsumerState<TrustedContactSuccessScreen> createState() =>
       _TrustedContactSuccessScreenState();
 }
 
 class _TrustedContactSuccessScreenState
-    extends State<TrustedContactSuccessScreen>
+    extends ConsumerState<TrustedContactSuccessScreen>
     with TickerProviderStateMixin {
   late final AnimationController _orbitController;
   late final AnimationController _entranceController;
@@ -90,10 +94,28 @@ class _TrustedContactSuccessScreenState
     _navigationTimer = Timer(const Duration(seconds: 5), _navigateToNextPage);
   }
 
-  void _navigateToNextPage() {
-    if (!mounted) return;
+  Future<void> _navigateToNextPage() async {
     _navigationTimer?.cancel();
-    context.go(AppRouteNames.mainUserHome);
+    if (!mounted) return;
+
+    final savedRole = await TokenStorage.getUserRole();
+    if (!mounted) return;
+
+    final currentRole = ref.read(userRoleProvider);
+    final isTrusted = (savedRole == 'trusted_contact') ||
+        (currentRole == UserRole.trustedContact);
+
+    final targetRole =
+        isTrusted ? UserRole.trustedContact : UserRole.mainUser;
+    ref.read(userRoleProvider.notifier).set(targetRole);
+
+    FcmService.instance.syncDeviceTokenIfPermitted();
+
+    if (isTrusted) {
+      context.go(AppRouteNames.trustedHome);
+    } else {
+      context.go(AppRouteNames.mainUserHome);
+    }
   }
 
   @override
@@ -113,76 +135,82 @@ class _TrustedContactSuccessScreenState
         : 'Sarah ahmed';
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _navigateToNextPage, // Allow tap to skip
-        child: SafeArea(
-          child: SizedBox.expand(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _navigateToNextPage();
+      },
+      child: Scaffold(
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _navigateToNextPage, // Allow tap to skip
+          child: SafeArea(
+            child: SizedBox.expand(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
 
-                // Animated Shield Badge
-                ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _pulseAnimation.value,
-                        child: child,
-                      );
-                    },
-                    child: _ShieldBadgeWidget(
-                      orbitController: _orbitController,
+                  // Animated Shield Badge
+                  ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _pulseAnimation.value,
+                          child: child,
+                        );
+                      },
+                      child: _ShieldBadgeWidget(
+                        orbitController: _orbitController,
+                      ),
                     ),
                   ),
-                ),
 
-                SizedBox(height: 36.h),
+                  SizedBox(height: 36.h),
 
-                // Text details with slide + fade
-                FadeTransition(
-                  opacity: _textFadeAnimation,
-                  child: SlideTransition(
-                    position: _textSlideAnimation,
-                    child: Column(
-                      children: [
-                        Text(
-                          "Trusted Contact Added!",
-                          textAlign: TextAlign.center,
-                          style:
-                              CustomTextStyle.ibold28(
-                                isDark ? AppColors.white : AppColors.black,
-                              ).copyWith(
-                                fontSize: 26.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.3,
-                              ),
-                        ),
-                        SizedBox(height: 10.h),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 40.w),
-                          child: Text(
-                            "$displayName has been added to your\ntrusted contacts.",
+                  // Text details with slide + fade
+                  FadeTransition(
+                    opacity: _textFadeAnimation,
+                    child: SlideTransition(
+                      position: _textSlideAnimation,
+                      child: Column(
+                        children: [
+                          Text(
+                            "Trusted Contact Added!",
                             textAlign: TextAlign.center,
-                            style: CustomTextStyle.regular14(
-                              isDark
-                                  ? AppColors.white.withValues(alpha: 0.65)
-                                  : AppColors.onboardingDesc,
-                            ).copyWith(height: 1.45),
+                            style:
+                                CustomTextStyle.ibold28(
+                                  isDark ? AppColors.white : AppColors.black,
+                                ).copyWith(
+                                  fontSize: 26.sp,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 10.h),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 40.w),
+                            child: Text(
+                              "$displayName has been added to your\ntrusted contacts.",
+                              textAlign: TextAlign.center,
+                              style: CustomTextStyle.regular14(
+                                isDark
+                                    ? AppColors.white.withValues(alpha: 0.65)
+                                    : AppColors.onboardingDesc,
+                              ).copyWith(height: 1.45),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const Spacer(flex: 3),
-              ],
+                  const Spacer(flex: 3),
+                ],
+              ),
             ),
           ),
         ),

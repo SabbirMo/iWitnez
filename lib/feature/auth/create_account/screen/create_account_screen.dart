@@ -11,6 +11,7 @@ import 'package:iwitnez/core/constants/text_style/custom_text_style.dart';
 import 'package:iwitnez/core/constants/user_role/user_role.dart';
 import 'package:iwitnez/core/network/error/api_error_handler.dart';
 import 'package:iwitnez/core/utils/app_validator.dart';
+import 'package:iwitnez/core/utils/token_storage.dart';
 import 'package:iwitnez/core/widgets/custom_button.dart';
 import 'package:iwitnez/core/widgets/custom_snackbar.dart';
 import 'package:iwitnez/core/widgets/role_selector.dart';
@@ -98,6 +99,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     if (!mounted) return;
 
     if (success) {
+      await TokenStorage.saveUserRole(roleStr);
       ref.read(userRoleProvider.notifier).set(provider.role);
       context.push(
         AppRouteNames.verificationScreen,

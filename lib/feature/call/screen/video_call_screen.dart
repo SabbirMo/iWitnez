@@ -201,55 +201,61 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
         // Bottom WhatsApp Controls Bar
         Positioned(
-          bottom: 36.h,
           left: 20.w,
           right: 20.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(36.r),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-                width: 1,
+          bottom: 0,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 20.h),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(36.r),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CallActionButton(
+                      icon: _provider.isMuted
+                          ? Icons.mic_off_rounded
+                          : Icons.mic_none_rounded,
+                      label: 'Mute',
+                      isActive: _provider.isMuted,
+                      onTap: _provider.toggleMute,
+                    ),
+                    CallActionButton(
+                      icon: _provider.isVideoEnabled
+                          ? Icons.videocam_rounded
+                          : Icons.videocam_off_rounded,
+                      label: 'Video',
+                      isActive: !_provider.isVideoEnabled,
+                      onTap: _provider.toggleVideo,
+                    ),
+                    CallActionButton(
+                      icon: Icons.flip_camera_ios_rounded,
+                      label: 'Flip',
+                      onTap: _provider.switchCamera,
+                    ),
+                    CallActionButton(
+                      icon: Icons.call_end_rounded,
+                      label: 'End',
+                      backgroundColor: const Color(0xFFEF4444),
+                      iconColor: Colors.white,
+                      onTap: () {
+                        RingtoneService.instance.stopRingtone();
+                        _provider.endCall();
+                        CallFlowController.endCall(context);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CallActionButton(
-                  icon: _provider.isMuted
-                      ? Icons.mic_off_rounded
-                      : Icons.mic_none_rounded,
-                  label: 'Mute',
-                  isActive: _provider.isMuted,
-                  onTap: _provider.toggleMute,
-                ),
-                CallActionButton(
-                  icon: _provider.isVideoEnabled
-                      ? Icons.videocam_rounded
-                      : Icons.videocam_off_rounded,
-                  label: 'Video',
-                  isActive: !_provider.isVideoEnabled,
-                  onTap: _provider.toggleVideo,
-                ),
-                CallActionButton(
-                  icon: Icons.flip_camera_ios_rounded,
-                  label: 'Flip',
-                  onTap: _provider.switchCamera,
-                ),
-                CallActionButton(
-                  icon: Icons.call_end_rounded,
-                  label: 'End',
-                  backgroundColor: const Color(0xFFEF4444),
-                  iconColor: Colors.white,
-                  onTap: () {
-                    RingtoneService.instance.stopRingtone();
-                    _provider.endCall();
-                    CallFlowController.endCall(context);
-                  },
-                ),
-              ],
             ),
           ),
         ),
@@ -658,54 +664,60 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
         // Bottom Controls Bar
         Positioned(
-          bottom: 36.h,
           left: 20.w,
           right: 20.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.55),
-              borderRadius: BorderRadius.circular(36.r),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-                width: 1,
+          bottom: 0,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 20.h),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(36.r),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CallActionButton(
+                      icon: _provider.isMuted
+                          ? Icons.mic_off_rounded
+                          : Icons.mic_none_rounded,
+                      label: 'Mute',
+                      isActive: _provider.isMuted,
+                      onTap: _provider.toggleMute,
+                    ),
+                    CallActionButton(
+                      icon: _provider.isVideoEnabled
+                          ? Icons.videocam_rounded
+                          : Icons.videocam_off_rounded,
+                      label: 'Video',
+                      isActive: !_provider.isVideoEnabled,
+                      onTap: _provider.toggleVideo,
+                    ),
+                    CallActionButton(
+                      icon: Icons.flip_camera_ios_rounded,
+                      label: 'Flip',
+                      onTap: _provider.switchCamera,
+                    ),
+                    CallActionButton(
+                      icon: Icons.call_end_rounded,
+                      label: 'End',
+                      backgroundColor: const Color(0xFFEF4444),
+                      iconColor: Colors.white,
+                      onTap: () {
+                        _provider.endCall();
+                        CallFlowController.endCall(context);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CallActionButton(
-                  icon: _provider.isMuted
-                      ? Icons.mic_off_rounded
-                      : Icons.mic_none_rounded,
-                  label: 'Mute',
-                  isActive: _provider.isMuted,
-                  onTap: _provider.toggleMute,
-                ),
-                CallActionButton(
-                  icon: _provider.isVideoEnabled
-                      ? Icons.videocam_rounded
-                      : Icons.videocam_off_rounded,
-                  label: 'Video',
-                  isActive: !_provider.isVideoEnabled,
-                  onTap: _provider.toggleVideo,
-                ),
-                CallActionButton(
-                  icon: Icons.flip_camera_ios_rounded,
-                  label: 'Flip',
-                  onTap: _provider.switchCamera,
-                ),
-                CallActionButton(
-                  icon: Icons.call_end_rounded,
-                  label: 'End',
-                  backgroundColor: const Color(0xFFEF4444),
-                  iconColor: Colors.white,
-                  onTap: () {
-                    _provider.endCall();
-                    CallFlowController.endCall(context);
-                  },
-                ),
-              ],
             ),
           ),
         ),
