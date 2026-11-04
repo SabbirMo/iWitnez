@@ -37,26 +37,32 @@ class TrustedHomeNotifier extends Notifier<TrustedContactHomeState> {
     });
 
     // Fetch live dashboard data on initialization
-    Future.microtask(() => fetchDashboard());
+    Future.microtask(() => fetchDashboard(forceRefresh: true));
 
     return TrustedContactHomeState.initial();
   }
 
+  void reset() {
+    state = TrustedContactHomeState.initial();
+  }
+
   Future<void> fetchDashboard({bool forceRefresh = false}) async {
     if (forceRefresh || state.monitoredUser == null) {
-      state = state.copyWith(isLoading: true, errorMessage: null);
+      state = (forceRefresh ? TrustedContactHomeState.initial() : state)
+          .copyWith(isLoading: true, errorMessage: null);
     }
 
     try {
       // Resolve user's avatar from profile cache or endpoint
       String? userAvatar =
-          state.userAvatarUrl.isNotEmpty ? state.userAvatarUrl : null;
+          (!forceRefresh && state.userAvatarUrl.isNotEmpty) ? state.userAvatarUrl : null;
       final cachedProfile = ProfileRepository().cachedProfile;
-      if (cachedProfile != null &&
+      if (!forceRefresh &&
+          cachedProfile != null &&
           cachedProfile.profile?.avatarUrl.isNotEmpty == true) {
         userAvatar = cachedProfile.profile!.avatarUrl;
       } else {
-        ProfileRepository().getProfile().then((profile) {
+        ProfileRepository().getProfile(forceRefresh: forceRefresh).then((profile) {
           if (!_disposed &&
               profile?.profile?.avatarUrl.isNotEmpty == true) {
             state = state.copyWith(userAvatarUrl: profile!.profile!.avatarUrl);

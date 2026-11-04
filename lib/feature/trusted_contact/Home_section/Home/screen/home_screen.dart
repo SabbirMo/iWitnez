@@ -8,13 +8,26 @@ import 'package:iwitnez/feature/trusted_contact/Home_section/Home/controller/hom
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/provider/home_provider.dart';
 import 'package:iwitnez/feature/trusted_contact/Home_section/Home/widget/home_widget.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   static const TrustedHomeController _controller = TrustedHomeController();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(trustedHomeProvider.notifier).fetchDashboard(forceRefresh: true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(trustedHomeProvider);
     final themeMode = ref.watch(themeModeProvider);
     final isDark = themeMode == ThemeMode.dark ||

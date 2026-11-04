@@ -3,6 +3,7 @@ import 'package:iwitnez/core/network/api_endpoint/api_end_point.dart';
 import 'package:iwitnez/core/network/service/api_services.dart';
 import 'package:iwitnez/core/services/fcm_service.dart';
 import 'package:iwitnez/core/utils/token_storage.dart';
+import 'package:iwitnez/feature/main_user/Profile_section/Profile/repository/profile_repository.dart';
 import 'package:iwitnez/feature/auth/login/model/login_request_model.dart';
 
 class LoginRepository {
@@ -30,6 +31,8 @@ class LoginRepository {
       await TokenStorage.saveUserRole(role);
     }
 
+    ProfileRepository().clearCache();
+
     return role;
   }
 
@@ -52,6 +55,7 @@ class LoginRepository {
       // Even if API fails (e.g. offline), local tokens must still be cleared
     } finally {
       await TokenStorage.clearTokens();
+      ProfileRepository().clearCache();
     }
   }
 }

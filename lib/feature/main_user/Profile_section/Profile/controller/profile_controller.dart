@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iwitnez/core/network/service/api_services.dart';
+import 'package:iwitnez/core/utils/session_manager.dart';
 import 'package:iwitnez/feature/auth/login/repository/login_repository.dart';
 import 'package:iwitnez/feature/main_user/Profile_section/Profile/model/profile_model.dart';
+import 'package:iwitnez/feature/main_user/Profile_section/Profile/repository/profile_repository.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
 class ProfileController {
@@ -10,8 +13,9 @@ class ProfileController {
 
   Future<void> handleMenuTap(
     BuildContext context,
-    ProfileMenuAction action,
-  ) async {
+    ProfileMenuAction action, {
+    WidgetRef? ref,
+  }) async {
     switch (action) {
       case ProfileMenuAction.personalInformation:
         await context.push(AppRouteNames.personalInfoScreen);
@@ -38,12 +42,12 @@ class ProfileController {
         context.push(AppRouteNames.aboutUsScreen);
         break;
       case ProfileMenuAction.logOut:
-        _confirmLogOut(context);
+        _confirmLogOut(context, ref: ref);
         break;
     }
   }
 
-  void _confirmLogOut(BuildContext context) {
+  void _confirmLogOut(BuildContext context, {WidgetRef? ref}) {
     bool isLoggingOut = false;
     showDialog(
       context: context,
@@ -68,6 +72,11 @@ class ProfileController {
                     onPressed: () async {
                       setDialogState(() => isLoggingOut = true);
                       await LoginRepository(ApiServices()).logout();
+                      if (ref != null) {
+                        AppSessionManager.resetSession(ref);
+                      } else {
+                        ProfileRepository().clearCache();
+                      }
                       if (dialogContext.mounted) {
                         Navigator.of(dialogContext).pop();
                       }

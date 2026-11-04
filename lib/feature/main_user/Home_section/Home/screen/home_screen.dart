@@ -7,13 +7,26 @@ import 'package:iwitnez/feature/main_user/Home_section/Home/model/home_model.dar
 import 'package:iwitnez/feature/main_user/Home_section/Home/provider/home_provider.dart';
 import 'package:iwitnez/feature/main_user/Home_section/Home/widget/home_widget.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   static final HomeController _controller = HomeController();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(homeProvider.notifier).fetchHomeData(forceFresh: true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final asyncHome = ref.watch(homeProvider);
     final state = asyncHome.value ?? HomeState.initial();

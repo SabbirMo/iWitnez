@@ -74,7 +74,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _provider.fetchProfile();
+    _provider.fetchProfile(forceRefresh: true);
     _checkNotificationStatus();
   }
 
@@ -275,11 +275,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                 await _controller.handleMenuTap(
                                   context,
                                   item.action,
+                                  ref: ref,
                                 );
                                 if (item.action ==
                                         ProfileMenuAction.personalInformation &&
                                     mounted) {
-                                  _provider.fetchProfile();
+                                  _provider.fetchProfile(forceRefresh: true);
                                 }
                               };
                             }
@@ -303,6 +304,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           onTap: () => _controller.handleMenuTap(
                             context,
                             _aboutItem.action,
+                            ref: ref,
                           ),
                         ),
                       ],
@@ -316,6 +318,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           onTap: () => _controller.handleMenuTap(
                             context,
                             _logOutItem.action,
+                            ref: ref,
                           ),
                         ),
                       ],

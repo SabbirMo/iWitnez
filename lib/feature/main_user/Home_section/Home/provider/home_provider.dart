@@ -37,8 +37,8 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
       } catch (_) {}
     });
 
-    // Start background fetching without blocking initial render
-    Future.microtask(() => fetchHomeData());
+    // Start background fetching with forceFresh to load current user data immediately
+    Future.microtask(() => fetchHomeData(forceFresh: true));
 
     return HomeState.initial().copyWith(isLoading: true);
   }
@@ -84,9 +84,19 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     ref.read(liveLocationTrackingProvider.notifier).stopTracking();
   }
 
-  Future<void> fetchHomeData() async {
+  void reset() {
+    _stopLocationTracking();
+    state = AsyncValue.data(HomeState.initial().copyWith(isLoading: true));
+  }
+
+  Future<void> fetchHomeData({bool forceFresh = false}) async {
     final repository = ref.read(homeRepositoryProvider);
-    final current = state.value ?? HomeState.initial();
+    final base = forceFresh
+        ? HomeState.initial()
+        : (state.value ?? HomeState.initial());
+    if (forceFresh) {
+      state = AsyncValue.data(base.copyWith(isLoading: true));
+    }
 
     // Ensure FCM token is synced with backend if user previously permitted
     FcmService.instance.syncDeviceTokenIfPermitted();
@@ -119,24 +129,30 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
       }
 
       state = AsyncValue.data(
-        current.copyWith(
+        base.copyWith(
           isLoading: false,
-          isProtected: userData?.isProtected ?? current.isProtected,
-          userProfile: userData ?? current.userProfile,
-          liveLocation: liveLoc ?? current.liveLocation,
-          trustedCircles: circles?.toSummaries() ?? current.trustedCircles,
-          greeting: current.greeting.copyWith(
-            userName: userData?.fullName ?? current.greeting.userName,
+          isProtected: userData?.isProtected ?? false,
+          userProfile: userData,
+          liveLocation: liveLoc,
+          trustedCircles:
+              circles?.toSummaries() ??
+              (forceFresh ? const [] : base.trustedCircles),
+          greeting: base.greeting.copyWith(
+            userName:
+                userData?.fullName ??
+                (forceFresh ? 'User' : base.greeting.userName),
             subtitle: 'Stay Safe, Stay Connected',
-            avatarUrl: userData?.avatarUrl ?? current.greeting.avatarUrl,
+            avatarUrl:
+                userData?.avatarUrl ??
+                (forceFresh ? '' : base.greeting.avatarUrl),
             hasUnreadNotification: unreadCount > 0,
             unreadCount: unreadCount,
           ),
         ),
       );
     } catch (_) {
-      // Keep existing data on error
-      state = AsyncValue.data(current.copyWith(isLoading: false));
+      // Keep base data on error
+      state = AsyncValue.data(base.copyWith(isLoading: false));
     }
   }
 

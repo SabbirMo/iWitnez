@@ -17,6 +17,7 @@ import 'package:iwitnez/core/widgets/textfield_hint_text.dart';
 import 'package:iwitnez/feature/auth/login/provider/login_notifier.dart';
 import 'package:iwitnez/feature/auth/login/provider/login_provider.dart';
 import 'package:iwitnez/core/services/fcm_service.dart';
+import 'package:iwitnez/core/utils/session_manager.dart';
 import 'package:iwitnez/feature/onboarding/controller/start_animations.dart';
 import 'package:iwitnez/router/app_route_names.dart';
 
@@ -73,6 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     if (!mounted) return;
 
     if (userRole != null) {
+      AppSessionManager.resetSession(ref);
       final isTrusted = userRole == 'trusted_contact';
       final role = isTrusted ? UserRole.trustedContact : UserRole.mainUser;
 
